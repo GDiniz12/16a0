@@ -1,0 +1,77 @@
+export type PositionCode =
+  | "GOL" | "LD" | "ZAG" | "LE"
+  | "VOL" | "MC" | "MEI"
+  | "ME" | "MD"
+  | "PE" | "PD" | "CA";
+
+export type FormationType = "4-3-3" | "4-4-2" | "3-4-3";
+
+export interface Player {
+  name: string;
+  overall: number;
+  positions: PositionCode[];
+  teamName: string;
+  teamKey: string;
+}
+
+export interface FormationSlot {
+  id: number;
+  position: PositionCode;
+  label: string;
+  x: number;
+  y: number;
+  player?: Player;
+}
+
+export interface TeamData {
+  key: string;
+  name: string;
+  players: Player[];
+  continent: "american" | "european";
+}
+
+export interface MatchResult {
+  homeTeam: string;
+  awayTeam: string;
+  homeGoals: number;
+  awayGoals: number;
+}
+
+export interface LeagueTeam {
+  name: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+  isUser: boolean;
+  avgOverall: number;
+}
+
+export interface KnockoutRound {
+  round: string;
+  userOpponent: string;
+  leg1: MatchResult;
+  leg2?: MatchResult;
+  winner: string;
+  userAdvanced: boolean;
+}
+
+export interface GameStats {
+  wins: number;
+  losses: number;
+  draws: number;
+  goalsScored: number;
+  goalsConceded: number;
+}
+
+export type GamePhase =
+  | "home"
+  | "formation"
+  | "draft"
+  | "league"
+  | "knockout"
+  | "result";

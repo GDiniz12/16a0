@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #00183F;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improve contrast on dark background: force lighter text for common gray classes */
+.text-gray-800,
+.text-gray-700,
+.text-gray-600,
+.text-gray-500,
+.text-gray-400,
+.text-gray-300,
+.text-gray-200 {
+  color: #FFFFFF !important;
+}
+
+/* Restore normal colors for elements inside white backgrounds (cards, modals) */
+[class*="bg-white"] .text-gray-800,
+[class*="bg-white"] .text-gray-700,
+[class*="bg-white"] .text-gray-600,
+[class*="bg-white"] .text-gray-500,
+[class*="bg-white"] .text-gray-400,
+[class*="bg-white"] .text-gray-300,
+[class*="bg-white"] .text-gray-200,
+/* Also restore when the element itself has bg-white + text-gray-* */
+.bg-white.text-gray-800,
+.bg-white.text-gray-700,
+.bg-white.text-gray-600,
+.bg-white.text-gray-500,
+.bg-white.text-gray-400,
+.bg-white.text-gray-300,
+.bg-white.text-gray-200 {
+  color: inherit !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a18093;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8a6b7e;
+}
+
+/* Utility for hiding scrollbar but keeping scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
