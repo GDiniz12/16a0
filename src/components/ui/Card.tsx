@@ -17,8 +17,8 @@ export default function Card({
   return (
     <motion.div
       className={`
-        bg-white/90 backdrop-blur-sm rounded-2xl
-        shadow-sm border border-gray-100
+        bg-white border-4 border-[#00183F] rounded-none
+        shadow-[6px_6px_0_0_rgba(0,0,0,0.7)]
         p-6
         ${hover ? 'cursor-pointer' : ''}
         ${className}
@@ -26,12 +26,13 @@ export default function Card({
       whileHover={
         hover
           ? {
-              scale: 1.02,
-              boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+              translateY: -4,
+              translateX: -4,
+              boxShadow: '10px 10px 0 0 rgba(0,0,0,0.8)',
             }
           : {}
       }
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.1 }}
     >
       {children}
     </motion.div>

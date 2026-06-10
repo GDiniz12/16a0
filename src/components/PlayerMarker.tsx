@@ -34,46 +34,46 @@ export default function PlayerMarker({
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.4, type: "spring", stiffness: 200 }}
     >
-      <div
+      <motion.div
         onClick={onClick}
+        whileHover={onClick && !hasPlayer ? { scale: 1.1 } : hasPlayer ? { scale: 1.05 } : {}}
         className={`
-          relative flex flex-col items-center justify-center
-          w-11 h-11 md:w-12 md:h-12 rounded-full
-          text-center
-          transition-all duration-300
+          relative flex flex-col justify-between
+          w-[72px] h-[85px] border-2 border-[#00183F] text-center
+          transition-all duration-200 rounded-none
+          shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]
           ${
             hasPlayer
-              ? "bg-plum text-white shadow-lg cursor-default"
-              : "bg-white/10 border-2 border-dashed border-white/50 text-white/80"
+              ? "bg-white text-[#00183F]"
+              : "bg-white/10 border-dashed border-white/60 text-white/90"
           }
-          ${isHighlighted ? "ring-2 ring-yellow-300 ring-offset-1 ring-offset-transparent animate-pulse-soft" : ""}
+          ${isHighlighted ? "ring-4 ring-yellow-400 border-solid animate-pulse-soft" : ""}
           ${onClick && !hasPlayer ? "cursor-pointer hover:bg-white/20" : ""}
         `}
       >
-        {hasPlayer ? (
-          <>
-            <span className="text-[8px] md:text-[9px] font-bold leading-tight truncate max-w-[40px]">
-              {slot.player!.overall}
-            </span>
-            <span className="text-[7px] md:text-[8px] leading-tight truncate max-w-[40px]">
-              {slot.player!.name.split(" ").slice(-1)[0]}
-            </span>
-          </>
-        ) : (
-          <span className="text-[9px] md:text-[10px] font-semibold">
-            {POSITION_LABELS_MAP[lang][slot.position]}
-          </span>
-        )}
-      </div>
-
-      {/* Position label below marker when filled */}
-      {hasPlayer && (
-        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <span className="text-[7px] md:text-[8px] bg-black/40 text-white px-1.5 py-0.5 rounded-full font-medium">
-            {POSITION_LABELS_MAP[lang][slot.position]}
-          </span>
+        {/* Posição no topo do card */}
+        <div className={`text-[9px] font-black py-0.5 border-b border-[#00183F] ${hasPlayer ? "bg-[#00183F] text-white" : "bg-black/40 text-white"}`}>
+          {POSITION_LABELS_MAP[lang][slot.position]}
         </div>
-      )}
+
+        {/* Informações centrais */}
+        <div className="flex-1 flex flex-col items-center justify-center p-0.5">
+          {hasPlayer ? (
+            <>
+              <span className={`text-xl font-black leading-none ${slot.player!.overall >= 95 ? "text-amber-600" : "text-[#00183F]"}`}>
+                {slot.player!.overall}
+              </span>
+              <span className="text-[9px] font-bold mt-1 truncate w-full px-0.5">
+                {slot.player!.name.split(" ").slice(-1)[0]}
+              </span>
+            </>
+          ) : (
+            <span className="text-[12px] font-black tracking-tighter opacity-60">
+              +
+            </span>
+          )}
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -16,75 +16,42 @@ export default function FootballPitch({
   highlightedSlots = [],
 }: FootballPitchProps) {
   return (
-    <div className="w-full max-w-[420px] mx-auto">
+    <div className="w-full max-w-[440px] mx-auto">
       <div
-        className="relative w-full rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg"
+        className="relative w-full rounded-none border-4 border-white shadow-[12px_12px_0_0_rgba(0,0,0,0.7)] p-6"
         style={{
-          paddingBottom: "147%",
-          background:
-            "linear-gradient(180deg, #3d6b50 0%, #4a7c5f 30%, #4a7c5f 70%, #3d6b50 100%)",
+          paddingBottom: "145%",
+          background: "#1A3B2B",
         }}
       >
-        {/* Field markings */}
-        {/* Center line */}
-        <div className="absolute top-1/2 left-[5%] right-[5%] h-[1px] bg-white/25" />
+        {/* Linha de Meio Campo */}
+        <div className="absolute top-1/2 left-0 w-full h-1 bg-white/30 -translate-y-1/2 pointer-events-none" />
+        
+        {/* Losango Central Brutalista */}
+        <div className="absolute top-1/2 left-1/2 w-28 h-28 border-4 border-white/30 -translate-x-1/2 -translate-y-1/2 rounded-none transform rotate-45 pointer-events-none" />
 
-        {/* Center circle */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[25%] rounded-full border border-white/25"
-          style={{ paddingBottom: "25%" }}
-        />
+        {/* Área Superior */}
+        <div className="absolute top-0 left-1/2 w-[55%] h-[18%] border-b-4 border-l-4 border-r-4 border-white/30 -translate-x-1/2 pointer-events-none" />
+        <div className="absolute top-0 left-1/2 w-[30%] h-[7%] border-b-4 border-l-4 border-r-4 border-white/30 -translate-x-1/2 pointer-events-none" />
 
-        {/* Center dot */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/30" />
+        {/* Área Inferior */}
+        <div className="absolute bottom-0 left-1/2 w-[55%] h-[18%] border-t-4 border-l-4 border-r-4 border-white/30 -translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/2 w-[30%] h-[7%] border-t-4 border-l-4 border-r-4 border-white/30 -translate-x-1/2 pointer-events-none" />
 
-        {/* Top penalty area */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[55%] h-[18%] border-b border-l border-r border-white/25 rounded-b-sm" />
-
-        {/* Top goal area */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[30%] h-[8%] border-b border-l border-r border-white/25 rounded-b-sm" />
-
-        {/* Top penalty arc */}
-        <div
-          className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[18%] rounded-full border-b border-white/20"
-          style={{ paddingBottom: "9%" }}
-        />
-
-        {/* Bottom penalty area */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[55%] h-[18%] border-t border-l border-r border-white/25 rounded-t-sm" />
-
-        {/* Bottom goal area */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[30%] h-[8%] border-t border-l border-r border-white/25 rounded-t-sm" />
-
-        {/* Bottom penalty arc */}
-        <div
-          className="absolute bottom-[15%] left-1/2 -translate-x-1/2 w-[18%] rounded-full border-t border-white/20"
-          style={{ paddingBottom: "9%" }}
-        />
-
-        {/* Corner arcs */}
-        <div className="absolute top-0 left-0 w-[4%] h-[3%] border-b-2 border-r-2 border-white/15 rounded-br-full" />
-        <div className="absolute top-0 right-0 w-[4%] h-[3%] border-b-2 border-l-2 border-white/15 rounded-bl-full" />
-        <div className="absolute bottom-0 left-0 w-[4%] h-[3%] border-t-2 border-r-2 border-white/15 rounded-tr-full" />
-        <div className="absolute bottom-0 right-0 w-[4%] h-[3%] border-t-2 border-l-2 border-white/15 rounded-tl-full" />
-
-        {/* Subtle horizontal stripes for grass effect */}
-        {[...Array(12)].map((_, i) => (
+        {/* Estilização das Listras do Gramado */}
+        {[...Array(10)].map((_, i) => (
           <div
             key={i}
             className="absolute left-0 right-0 pointer-events-none"
             style={{
-              top: `${(i * 100) / 12}%`,
-              height: `${100 / 12}%`,
-              background:
-                i % 2 === 0
-                  ? "rgba(255,255,255,0.02)"
-                  : "rgba(0,0,0,0.02)",
+              top: `${(i * 100) / 10}%`,
+              height: `${100 / 10}%`,
+              background: i % 2 === 0 ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.02)",
             }}
           />
         ))}
 
-        {/* Player markers */}
+        {/* Renderização das Cartas de Jogadores */}
         {slots.map((slot) => (
           <PlayerMarker
             key={slot.id}
