@@ -4,175 +4,144 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useGame } from "@/context/GameContext";
+import { useLanguage } from "@/context/LanguageContext";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { useLanguage } from "@/context/LanguageContext";
-import { TRANSLATIONS } from "@/lib/constants";
+import FootballPitch from "@/components/FootballPitch";
 
 export default function ResultPage() {
   const router = useRouter();
   const { lang } = useLanguage();
-  const { isChampion, stats, resetGame } = useGame();
+  
+  // Lendo as propriedades reais expostas pelo seu GameContext
+  const { slots, stats, isChampion, resetGame, userTeamName } = useGame();
 
-  const handlePlayAgain = () => {
-    resetGame();
-    router.push("/");
-  };
+  const hasTeam = slots && slots.length > 0 && slots.some((s) => s.player);
+
+  const t = {
+    pt: {
+      title: "SUPER MUNDIAL DE CLUBES",
+      subtitle: "Relatório de Desempenho Final",
+      squadError: "Nenhum elenco selecionado.",
+      backBtn: "Montar Novo Time",
+      winLossLabel: "VITÓRIAS - DERROTAS",
+      goalsScored: "Gols Pró",
+      goalsConceded: "Gols Sofridos",
+      draws: "Empates",
+      totalMatches: "Partidas Jogadas",
+      teamTitle: "Elenco Utilizado no Torneio",
+      championBadge: "🏆 CAMPEÃO DO MUNDO!",
+      eliminatedBadge: "CAMPANHA ENCERRADA",
+    },
+    en: {
+      title: "SUPER CLUB WORLD CUP",
+      subtitle: "Final Performance Report",
+      squadError: "No squad selected.",
+      backBtn: "Build New Squad",
+      winLossLabel: "WINS - LOSSES",
+      goalsScored: "Goals For",
+      goalsConceded: "Goals Against",
+      draws: "Draws",
+      totalMatches: "Matches Played",
+      teamTitle: "Squad Used in Tournament",
+      championBadge: "🏆 WORLD CHAMPION!",
+      eliminatedBadge: "CAMPAIGN CONCLUDED",
+    },
+  }[lang];
+
+  if (!hasTeam) {
+    return (
+      <div className="min-h-screen bg-[#00183F] flex flex-col items-center justify-center p-6 text-white font-sans">
+        <div className="border-4 border-white bg-white p-8 text-center max-w-md shadow-[8px_8px_0_0_rgba(0,0,0,0.5)]">
+          <h2 className="text-2xl font-black text-[#00183F] uppercase mb-4">{t.squadError}</h2>
+          <Button variant="primary" onClick={() => router.push("/")}>{t.backBtn}</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const totalGames = stats.wins + stats.draws + stats.losses;
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
-      {/* Background decorations */}
-      {isChampion && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Confetti-like dots */}
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                backgroundColor: [
-                  "#ccded2",
-                  "#fffbd4",
-                  "#f5ddbb",
-                  "#e3b8b2",
-                  "#a18093",
-                  "#f59e0b",
-                  "#fbbf24",
-                ][i % 7],
-              }}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{
-                opacity: [0, 1, 0],
-                scale: [0, 1.5, 0],
-                y: [0, -80],
-              }}
-              transition={{
-                duration: 2.5,
-                delay: i * 0.1,
-                repeat: Infinity,
-                repeatDelay: 1,
-              }}
-            />
-          ))}
-          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-amber-200/30 blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-amber-100/40 blur-3xl" />
+    <div className="min-h-screen bg-[#00183F] p-4 md:p-12 font-sans text-white">
+      <div className="max-w-3xl mx-auto flex flex-col gap-8">
+        
+        {/* Cabeçalho */}
+        <div className="border-4 border-white bg-[#D9D9D9] p-6 shadow-[8px_8px_0_0_#0033A0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[#00183F]">
+              {t.title}
+            </h1>
+            <p className="text-[#0033A0] font-black uppercase tracking-widest text-xs mt-1 border-l-4 border-[#0033A0] pl-2">
+              {t.subtitle}
+            </p>
+          </div>
+          <Button variant="secondary" onClick={() => { resetGame(); router.push("/"); }}>
+            {t.backBtn}
+          </Button>
         </div>
-      )}
 
-      {!isChampion && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sand/30 blur-3xl" />
-          <div className="absolute -bottom-20 right-1/4 w-80 h-80 rounded-full bg-rose/20 blur-3xl" />
+        {/* Status Final da Campanha */}
+        <div className={`border-4 border-white text-center py-4 font-black uppercase text-xl md:text-2xl tracking-widest shadow-[6px_6px_0_0_rgba(0,0,0,0.8)] ${isChampion ? "bg-amber-400 text-[#00183F]" : "bg-rose-600 text-white"}`}>
+          {isChampion ? t.championBadge : t.eliminatedBadge}
         </div>
-      )}
 
-      <motion.div
-        className="relative z-10 text-center max-w-lg w-full"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-      >
-        {/* Icon */}
+        {/* CARD PRINCIPAL: VITÓRIAS - DERROTAS */}
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
-          className="mb-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 100 }}
         >
-          <span className={`text-7xl ${isChampion ? "" : "opacity-80"}`}>
-            {isChampion ? "🏆" : "⚽"}
-          </span>
-        </motion.div>
+          <Card className="p-8 border-4 border-[#00183F] bg-white text-[#00183F] shadow-[12px_12px_0_0_#0033A0] text-center">
+            <span className="block text-xs md:text-sm font-black uppercase text-gray-500 tracking-widest mb-1">
+              {t.winLossLabel}
+            </span>
+            
+            {/* Placar Principal Massivo */}
+            <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-[#00183F] my-4 drop-shadow-[4px_4px_0_#D9D9D9]">
+              {stats.wins}-{stats.losses}
+            </h2>
 
-        {/* Title */}
-        <motion.h1
-          className={`text-5xl md:text-6xl font-black mb-3 ${
-            isChampion
-              ? "text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-700"
-              : "text-gray-600"
-          }`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          {isChampion ? TRANSLATIONS[lang].champion_label : TRANSLATIONS[lang].eliminated_label}
-        </motion.h1>
-
-        {/* Subtitle */}
-        <motion.p
-          className="text-gray-500 mb-8 text-lg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-        >
-          {isChampion
-            ? TRANSLATIONS[lang].result_champion_text
-            : TRANSLATIONS[lang].result_eliminated_text}
-        </motion.p>
-
-        {/* Stats card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-        >
-          <Card className="mb-8">
-            {/* Record */}
-            <div className="mb-5">
-              <p className="text-xs text-gray-500 uppercase font-semibold mb-2 tracking-wider">
-                {TRANSLATIONS[lang].record_label}
-              </p>
-              <p className="text-4xl font-black text-gray-800">
-                <span className="text-sage-dark">{stats.wins}</span>
-                <span className="text-gray-300 mx-1">-</span>
-                <span className="text-sand">{stats.draws}</span>
-                <span className="text-gray-300 mx-1">-</span>
-                <span className="text-rose">{stats.losses}</span>
-              </p>
-            </div>
-
-            <div className="h-px bg-gray-100 my-4" />
-
-            {/* Goals */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-semibold mb-1 tracking-wider">
-                  {TRANSLATIONS[lang].goals_scored}
-                </p>
-                <p className="text-3xl font-black text-plum">
-                  {stats.goalsScored}
-                </p>
+            {/* Sub-estatísticas Inferiores */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t-4 border-dashed border-[#00183F]/20">
+              <div className="bg-[#D9D9D9]/40 border-2 border-[#00183F] p-3 text-center">
+                <span className="block text-[10px] font-black uppercase text-gray-400 mb-0.5">{t.draws}</span>
+                <span className="text-xl font-black">{stats.draws}</span>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-semibold mb-1 tracking-wider">
-                  {TRANSLATIONS[lang].goals_conceded}
-                </p>
-                <p className="text-3xl font-black text-gray-600">
-                  {stats.goalsConceded}
-                </p>
+              <div className="bg-[#D9D9D9]/40 border-2 border-[#00183F] p-3 text-center">
+                <span className="block text-[10px] font-black uppercase text-gray-400 mb-0.5">{t.totalMatches}</span>
+                <span className="text-xl font-black">{totalGames}</span>
+              </div>
+              <div className="bg-emerald-50 border-2 border-[#00183F] p-3 text-center">
+                <span className="block text-[10px] font-black uppercase text-emerald-700 mb-0.5">{t.goalsScored}</span>
+                <span className="text-xl font-black text-emerald-600">{stats.goalsScored}</span>
+              </div>
+              <div className="bg-rose-50 border-2 border-[#00183F] p-3 text-center">
+                <span className="block text-[10px] font-black uppercase text-rose-700 mb-0.5">{t.goalsConceded}</span>
+                <span className="text-xl font-black text-rose-600">{stats.goalsConceded}</span>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Play Again */}
+        {/* CARD DO TIME: Exibição estruturada do campo tático */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.0 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, type: "spring" }}
         >
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handlePlayAgain}
-            className="min-w-[200px]"
-          >
-            {TRANSLATIONS[lang].play_again}
-          </Button>
+          <Card className="p-6 border-4 border-[#00183F] bg-[#1E293B] shadow-[12px_12px_0_0_rgba(0,0,0,0.6)]">
+            <h2 className="text-xl md:text-2xl font-black uppercase text-white tracking-wider mb-6 border-l-8 border-amber-400 pl-4">
+              {t.teamTitle} ({userTeamName})
+            </h2>
+            
+            <div className="bg-black/20 p-4 border-2 border-white/10">
+              <FootballPitch slots={slots} />
+            </div>
+          </Card>
         </motion.div>
-      </motion.div>
+
+      </div>
     </div>
   );
 }

@@ -9,22 +9,20 @@ interface LeagueTableProps {
 
 export default function LeagueTable({ table }: LeagueTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-plum text-white sticky top-0 z-10">
-            <th className="py-3 px-3 text-left font-semibold w-10">#</th>
-            <th className="py-3 px-3 text-left font-semibold min-w-[160px]">
-              Team
-            </th>
-            <th className="py-3 px-2 text-center font-semibold w-8">P</th>
-            <th className="py-3 px-2 text-center font-semibold w-8">W</th>
-            <th className="py-3 px-2 text-center font-semibold w-8">D</th>
-            <th className="py-3 px-2 text-center font-semibold w-8">L</th>
-            <th className="py-3 px-2 text-center font-semibold w-8">GF</th>
-            <th className="py-3 px-2 text-center font-semibold w-8">GA</th>
-            <th className="py-3 px-2 text-center font-semibold w-10">GD</th>
-            <th className="py-3 px-3 text-center font-bold w-10">Pts</th>
+    <div className="overflow-x-auto border-4 border-[#00183F] bg-white shadow-[8px_8px_0_0_#00183F] rounded-none">
+      <table className="w-full text-sm font-bold text-[#00183F]">
+        <thead className="bg-[#00183F] text-white border-b-4 border-[#00183F] uppercase tracking-wider text-xs md:text-sm">
+          <tr>
+            <th className="py-3 px-3 text-left font-black w-10">#</th>
+            <th className="py-3 px-3 text-left font-black min-w-[160px]">Time</th>
+            <th className="py-3 px-2 text-center font-black w-8">J</th>
+            <th className="py-3 px-2 text-center font-black w-8">V</th>
+            <th className="py-3 px-2 text-center font-black w-8">E</th>
+            <th className="py-3 px-2 text-center font-black w-8">D</th>
+            <th className="py-3 px-2 text-center font-black w-8">GP</th>
+            <th className="py-3 px-2 text-center font-black w-8">GC</th>
+            <th className="py-3 px-2 text-center font-black w-10">SG</th>
+            <th className="py-3 px-3 text-center font-black text-amber-400 w-10">Pts</th>
           </tr>
         </thead>
         <tbody>
@@ -36,51 +34,37 @@ export default function LeagueTable({ table }: LeagueTableProps) {
               <tr
                 key={team.name}
                 className={`
-                  border-b border-gray-50 transition-colors
-                  ${team.isUser ? "bg-plum/10 font-semibold" : idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
+                  border-b-2 border-[#00183F]/20 transition-colors
+                  ${team.isUser ? "bg-[#0033A0]/20 border-b-[#0033A0] border-b-4" : idx % 2 === 0 ? "bg-white" : "bg-[#D9D9D9]/30"}
                 `}
               >
-                <td className="py-2.5 px-3">
-                  <div className="flex items-center gap-1">
+                <td className="py-3 px-3 border-r-2 border-[#00183F]/10">
+                  <div className="flex items-center gap-2">
                     <div
-                      className={`w-1 h-5 rounded-full ${
+                      className={`w-2 h-6 border-2 border-[#00183F] ${
                         team.isUser
-                          ? "bg-plum"
+                          ? "bg-[#0033A0]"
                           : isQualified
-                          ? "bg-sage-dark"
-                          : "bg-rose"
+                          ? "bg-emerald-500"
+                          : "bg-rose-500"
                       }`}
                     />
-                    <span className="text-xs text-gray-500">{pos}</span>
+                    <span className="text-xs md:text-sm">{pos}</span>
                   </div>
                 </td>
-                <td className={`py-2.5 px-3 ${team.isUser ? "text-plum font-bold" : "text-gray-800"}`}>
+                <td className={`py-3 px-3 uppercase tracking-tight ${team.isUser ? "text-[#0033A0] font-black" : ""}`}>
                   {team.name}
                 </td>
-                <td className="py-2.5 px-2 text-center text-gray-600">
-                  {team.played}
+                <td className="py-3 px-2 text-center text-gray-500">{team.played}</td>
+                <td className="py-3 px-2 text-center">{team.won}</td>
+                <td className="py-3 px-2 text-center">{team.drawn}</td>
+                <td className="py-3 px-2 text-center">{team.lost}</td>
+                <td className="py-3 px-2 text-center">{team.goalsFor}</td>
+                <td className="py-3 px-2 text-center">{team.goalsAgainst}</td>
+                <td className="py-3 px-2 text-center font-black">
+                  {team.goalDifference > 0 ? `+${team.goalDifference}` : team.goalDifference}
                 </td>
-                <td className="py-2.5 px-2 text-center text-gray-600">
-                  {team.won}
-                </td>
-                <td className="py-2.5 px-2 text-center text-gray-600">
-                  {team.drawn}
-                </td>
-                <td className="py-2.5 px-2 text-center text-gray-600">
-                  {team.lost}
-                </td>
-                <td className="py-2.5 px-2 text-center text-gray-600">
-                  {team.goalsFor}
-                </td>
-                <td className="py-2.5 px-2 text-center text-gray-600">
-                  {team.goalsAgainst}
-                </td>
-                <td className="py-2.5 px-2 text-center font-medium text-gray-700">
-                  {team.goalDifference > 0
-                    ? `+${team.goalDifference}`
-                    : team.goalDifference}
-                </td>
-                <td className="py-2.5 px-3 text-center font-bold text-gray-800">
+                <td className="py-3 px-3 text-center font-black text-lg">
                   {team.points}
                 </td>
               </tr>
