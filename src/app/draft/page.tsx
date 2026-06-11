@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "@/context/GameContext";
-import { Player, FormationSlot } from "@/types";
-import { getAvailablePositions } from "@/utils/helpers";
+import { Player, FormationSlot, TeamData } from "@/types";
+import { getAvailablePositions, getAllTeams } from "@/utils/helpers";
+import { americans, europeans } from "@/data/data";
 import FootballPitch from "@/components/FootballPitch";
 import TeamCard from "@/components/TeamCard";
 import SquadDisplay from "@/components/SquadDisplay";
@@ -29,6 +30,11 @@ export default function DraftPage() {
   const [showPositionPicker, setShowPositionPicker] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<FormationSlot[]>([]);
   
+  // Estados para a Animação da Roleta
+  const allTeams = useMemo(() => getAllTeams(americans, europeans), []);
+  const [isRolling, setIsRolling] = useState(false);
+  const [rollingTeam, setRollingTeam] = useState<TeamData | null>(null);
+
   // Limita as chances de acordo com o modo
   const maxRerolls = gameMode === "hardcore" ? 1 : 3;
   const [rerollsLeft, setRerollsLeft] = useState(maxRerolls);
@@ -45,6 +51,25 @@ export default function DraftPage() {
     }
   }, [currentDraftTeam, draftRound, drawNextTeam]);
 
+  // Efeito da Roleta sempre que um novo time for sorteado
+  useEffect(() => {
+    if (currentDraftTeam) {
+      setIsRolling(true);
+      let ticks = 0;
+      // Troca os times a cada 100ms para dar efeito de roleta super rápida
+      const interval = setInterval(() => {
+        setRollingTeam(allTeams[Math.floor(Math.random() * allTeams.length)]);
+        ticks++;
+        if (ticks >= 15) { // 15 * 100ms = 1500ms (1.5s de roleta)
+          clearInterval(interval);
+          setIsRolling(false);
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [currentDraftTeam, allTeams]);
+
   const hasSelectablePlayers = currentDraftTeam?.players.some(
     (p) => {
       const isAlreadyDrafted = slots.some((s) => s.player?.name === p.name);
@@ -53,6 +78,7 @@ export default function DraftPage() {
   ) ?? true;
 
   const handleReroll = () => {
+    if (isRolling) return; // Impede reroll enquanto a roleta roda
     if (!hasSelectablePlayers) {
       drawNextTeam();
     } else if (rerollsLeft > 0) {
@@ -62,6 +88,7 @@ export default function DraftPage() {
   };
 
   const handlePlayerSelect = (player: Player) => {
+    if (isRolling) return; // Impede selecionar na roleta
     const isAlreadyDrafted = slots.some((s) => s.player?.name === player.name);
     if (isAlreadyDrafted) return;
 
@@ -108,7 +135,8 @@ export default function DraftPage() {
       reroll: "Refazer Sorteio",
       freeReroll: "Sorteio Grátis",
       ready: "Elenco pronto para a Glória!",
-      simulateBtn: "Simular Agora"
+      simulateBtn: "Simular Agora",
+      rolling: "Sorteando..."
     },
     en: {
       title: "Draft Options",
@@ -117,11 +145,13 @@ export default function DraftPage() {
       reroll: "Re-roll Draft",
       freeReroll: "Free Re-roll",
       ready: "Squad ready for Glory!",
-      simulateBtn: "Simulate Now"
+      simulateBtn: "Simulate Now",
+      rolling: "Drawing..."
     }
   }[lang];
 
   const isDraftComplete = draftRound >= 11;
+  const teamToDisplay = isRolling ? (rollingTeam || currentDraftTeam) : currentDraftTeam;
 
   return (
     <div className="min-h-screen bg-[#00183F] px-4 py-8 md:py-12 max-w-7xl mx-auto font-sans text-white">
@@ -198,11 +228,13 @@ export default function DraftPage() {
 
                 <button
                   onClick={handleReroll}
-                  disabled={rerollsLeft === 0 && hasSelectablePlayers}
+                  disabled={isRolling || (rerollsLeft === 0 && hasSelectablePlayers)}
                   className={`
                     px-4 md:px-6 py-2 md:py-3 font-black uppercase text-sm md:text-base tracking-widest border-4 border-[#00183F] transition-all duration-75 w-full sm:w-auto
                     ${
-                      !hasSelectablePlayers
+                      isRolling
+                        ? "bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed shadow-none"
+                        : !hasSelectablePlayers
                         ? "bg-emerald-400 text-[#00183F] shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0_0_#00183F]"
                         : rerollsLeft > 0
                         ? "bg-amber-400 text-[#00183F] shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0_0_#00183F]"
@@ -210,20 +242,22 @@ export default function DraftPage() {
                     }
                   `}
                 >
-                  {!hasSelectablePlayers ? tDraft.freeReroll : `${tDraft.reroll} (${rerollsLeft})`}
+                  {isRolling 
+                    ? tDraft.rolling 
+                    : (!hasSelectablePlayers ? tDraft.freeReroll : `${tDraft.reroll} (${rerollsLeft})`)}
                 </button>
               </div>
 
               <AnimatePresence mode="wait">
-                {currentDraftTeam && (
+                {teamToDisplay && (
                   <TeamCard
-                    key={currentDraftTeam.key + "-" + draftRound}
-                    team={currentDraftTeam}
+                    key={currentDraftTeam?.key + "-" + draftRound}
+                    team={teamToDisplay}
                     slots={slots}
-                    onPlayerSelect={handlePlayerSelect}
+                    onPlayerSelect={isRolling ? () => {} : handlePlayerSelect}
                     selectedPlayer={selectedPlayer}
-                    // Informando à carta se deve ou não esconder os overalls
-                    hideOverall={gameMode === "hardcore"}
+                    // Força ocultar os overall durante a roleta para efeito dramático
+                    hideOverall={gameMode === "hardcore" || isRolling}
                   />
                 )}
               </AnimatePresence>
