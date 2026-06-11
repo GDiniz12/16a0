@@ -21,6 +21,12 @@ export const americans: RawTeamData = {
     ["Gerson", 87, ["MC", "VOL"], "🇧🇷"], ["Everton Ribeiro", 88, ["MEI", "MD"], "🇧🇷"], ["De Arrascaeta", 90, ["MEI", "ME"], "🇺🇾"],
     ["Bruno Henrique", 91, ["PE", "CA"], "🇧🇷"], ["Gabigol", 90, ["CA"], "🇧🇷"],
   ],
+  "flamengo-1981": [
+    ["Raul Plassmann", 89, ["GOL"], "🇧🇷"], ["Nei Dias", 82, ["LD"], "🇧🇷"], ["Marinho", 86, ["ZAG"], "🇧🇷"],
+    ["Mozer", 88, ["ZAG"], "🇧🇷"], ["Júnior", 91, ["LE", "MC"], "🇧🇷"], ["Andrade", 88, ["VOL", "MC"], "🇧🇷"],
+    ["Leandro", 90, ["LD", "MC"], "🇧🇷"], ["Adílio", 89, ["MC", "MEI"], "🇧🇷"], ["Tita", 88, ["PD", "MEI"], "🇧🇷"],
+    ["Zico", 96, ["MEI", "CA"], "🇧🇷"], ["Nunes", 89, ["CA"], "🇧🇷"],
+  ],
   "river-plate-2015": [
     ["Barovero", 85, ["GOL"], "🇦🇷"], ["Mercado", 83, ["LD", "ZAG"], "🇦🇷"], ["Maidana", 84, ["ZAG"], "🇦🇷"],
     ["Funes Mori", 84, ["ZAG"], "🇦🇷"], ["Vangioni", 83, ["LE", "ME"], "🇦🇷"], ["Kranevitter", 84, ["VOL"], "🇦🇷"],
@@ -75,6 +81,24 @@ export const americans: RawTeamData = {
     ["Nasa", 82, ["VOL"], "🇧🇷"], ["Juninho", 88, ["MC", "MEI"], "🇧🇷"], ["Pedrinho", 86, ["MEI", "PD"], "🇧🇷"],
     ["Luizão", 87, ["CA"], "🇧🇷"], ["Donizete", 86, ["CA"], "🇧🇷"],
   ],
+  "cruzeiro-1997": [
+    ["Dida", 89, ["GOL"], "🇧🇷"], ["Vítor", 82, ["LD"], "🇧🇷"], ["Gélson", 82, ["ZAG"], "🇧🇷"],
+    ["Gottardo", 84, ["ZAG"], "🇧🇷"], ["Nonato", 82, ["LE"], "🇧🇷"], ["Fabinho", 82, ["VOL"], "🇧🇷"],
+    ["Ricardinho", 84, ["MC", "MEI"], "🇧🇷"], ["Donizete", 81, ["VOL", "MC"], "🇧🇷"], ["Palhinha", 85, ["MEI", "MC"], "🇧🇷"],
+    ["Marcelo Ramos", 84, ["CA"], "🇧🇷"], ["Elivélton", 84, ["PE", "PD"], "🇧🇷"],
+  ],
+  "cruzeiro-1976": [
+    ["Raul Plassmann", 89, ["GOL"], "🇧🇷"], ["Nelinho", 89, ["LD", "MD"], "🇧🇷"], ["Morais", 84, ["ZAG"], "🇧🇷"],
+    ["Darci Menezes", 84, ["ZAG"], "🇧🇷"], ["Vanderlei", 83, ["LE"], "🇧🇷"], ["Wilson Piazza", 88, ["VOL", "ZAG"], "🇧🇷"],
+    ["Zé Carlos", 85, ["MC", "VOL"], "🇧🇷"], ["Eduardo Amorim", 85, ["MC", "MEI"], "🇧🇷"], ["Ronaldo Drummond", 84, ["MD", "MEI"], "🇧🇷"],
+    ["Palhinha", 90, ["MEI", "CA"], "🇧🇷"], ["Joãozinho", 89, ["PE", "ME"], "🇧🇷"],
+  ],
+  "gremio-1995": [
+    ["Danrlei", 87, ["GOL"], "🇧🇷"], ["Arce", 86, ["LD"], "🇵🇾"], ["Rivarola", 84, ["ZAG"], "🇵🇾"],
+    ["Adílson", 84, ["ZAG"], "🇧🇷"], ["Roger", 83, ["LE"], "🇧🇷"], ["Dinho", 85, ["VOL"], "🇧🇷"],
+    ["Goiano", 83, ["VOL", "MC"], "🇧🇷"], ["Arílson", 84, ["MEI", "MC"], "🇧🇷"], ["Carlos Miguel", 84, ["MEI", "MC"], "🇧🇷"],
+    ["Paulo Nunes", 86, ["CA", "PD"], "🇧🇷"], ["Jardel", 88, ["CA"], "🇧🇷"],
+  ],
   "sao-paulo-1992": [
     ["Zetti", 88, ["GOL"], "🇧🇷"], ["Cafu", 90, ["LD", "MD"], "🇧🇷"], ["Antônio Carlos", 86, ["ZAG"], "🇧🇷"],
     ["Ronaldão", 85, ["ZAG"], "🇧🇷"], ["Iván", 82, ["LE"], "🇧🇷"], ["Adílson", 82, ["VOL"], "🇧🇷"],
@@ -87,23 +111,29 @@ export const americans: RawTeamData = {
     ["Raimondo", 82, ["MC"], "🇦🇷"], ["Semenewicz", 83, ["ME", "MC"], "🇦🇷"], ["Bochini", 91, ["MEI"], "🇦🇷"],
     ["Balbuena", 84, ["CA", "PD"], "🇦🇷"], ["Bertoni", 88, ["PD", "CA"], "🇦🇷"],
   ],
+  "estudiantes-1970": [
+    ["Néstor Errea", 86, ["GOL"], "🇦🇷"], ["Rubén Pagnanini", 84, ["LD", "ZAG"], "🇦🇷"], ["Hugo Spadaro", 84, ["ZAG"], "🇦🇷"],
+    ["Néstor Togneri", 86, ["ZAG", "VOL"], "🇦🇷"], ["José Medina", 83, ["LE", "ZAG"], "🇦🇷"], ["Carlos Pachamé", 86, ["VOL", "MC"], "🇦🇷"],
+    ["Carlos Bilardo", 87, ["MC", "VOL"], "🇦🇷"], ["Jorge Solari", 86, ["MC", "MEI"], "🇦🇷"], ["Juan Echecopar", 84, ["PD", "MEI"], "🇦🇷"],
+    ["Marcos Conigliaro", 86, ["CA"], "🇦🇷"], ["Juan Ramón Verón", 90, ["PE", "MEI"], "🇦🇷"],
+  ],
+  "racing-1967": [
+    ["Agustín Cejas", 88, ["GOL"], "🇦🇷"], ["Oscar Martín", 85, ["LD", "ZAG"], "🇦🇷"], ["Roberto Perfumo", 90, ["ZAG"], "🇦🇷"],
+    ["Alfio Basile", 87, ["ZAG", "VOL"], "🇦🇷"], ["Rubén Díaz", 84, ["LE", "ZAG"], "🇦🇷"], ["Miguel Mori", 85, ["MC", "VOL"], "🇦🇷"],
+    ["Juan Rulli", 85, ["MC"], "🇦🇷"], ["Humberto Maschio", 90, ["MEI", "MC"], "🇦🇷"], ["João Cardoso", 86, ["PD", "MEI"], "🇧🇷"],
+    ["Norberto Raffo", 88, ["CA"], "🇦🇷"], ["Juan Carlos Cárdenas", 88, ["PE", "CA"], "🇦🇷"],
+  ],
   "santos-1962": [
     ["Gilmar", 91, ["GOL"], "🇧🇷"], ["Lima", 86, ["LD", "ZAG"], "🇧🇷"], ["Mauro Ramos", 90, ["ZAG"], "🇧🇷"],
     ["Dalmo", 85, ["LE", "ZAG"], "🇧🇷"], ["Calvet", 84, ["VOL", "ZAG"], "🇧🇷"], ["Zito", 89, ["VOL", "MC"], "🇧🇷"],
     ["Dorval", 88, ["PD"], "🇧🇷"], ["Mengálvio", 87, ["MC", "MEI"], "🇧🇷"], ["Coutinho", 91, ["CA"], "🇧🇷"],
     ["Pelé", 99, ["MEI", "CA"], "🇧🇷"], ["Pepe", 90, ["PE"], "🇧🇷"],
   ],
-  "cruzeiro-1997": [
-    ["Dida", 89, ["GOL"], "🇧🇷"], ["Vítor", 82, ["LD"], "🇧🇷"], ["Gélson", 82, ["ZAG"], "🇧🇷"],
-    ["Gottardo", 84, ["ZAG"], "🇧🇷"], ["Nonato", 82, ["LE"], "🇧🇷"], ["Fabinho", 82, ["VOL"], "🇧🇷"],
-    ["Ricardinho", 84, ["MC", "MEI"], "🇧🇷"], ["Donizete", 81, ["VOL", "MC"], "🇧🇷"], ["Palhinha", 85, ["MEI", "MC"], "🇧🇷"],
-    ["Marcelo Ramos", 84, ["CA"], "🇧🇷"], ["Elivélton", 84, ["PE", "PD"], "🇧🇷"],
-  ],
-  "gremio-1995": [
-    ["Danrlei", 87, ["GOL"], "🇧🇷"], ["Arce", 86, ["LD"], "🇵🇾"], ["Rivarola", 84, ["ZAG"], "🇵🇾"],
-    ["Adílson", 84, ["ZAG"], "🇧🇷"], ["Roger", 83, ["LE"], "🇧🇷"], ["Dinho", 85, ["VOL"], "🇧🇷"],
-    ["Goiano", 83, ["VOL", "MC"], "🇧🇷"], ["Arílson", 84, ["MEI", "MC"], "🇧🇷"], ["Carlos Miguel", 84, ["MEI", "MC"], "🇧🇷"],
-    ["Paulo Nunes", 86, ["CA", "PD"], "🇧🇷"], ["Jardel", 88, ["CA"], "🇧🇷"],
+  "penarol-1960": [
+    ["Luis Maidana", 88, ["GOL"], "🇺🇾"], ["Roberto Matosas", 86, ["LD", "ZAG"], "🇺🇾"], ["William Martínez", 88, ["ZAG"], "🇺🇾"],
+    ["Santiago Pino", 84, ["ZAG"], "🇺🇾"], ["Salvador", 84, ["LE", "ZAG"], "🇧🇷"], ["Néstor Gonçalves", 88, ["VOL", "MC"], "🇺🇾"],
+    ["Walter Aguerre", 84, ["MC", "VOL"], "🇺🇾"], ["Luis Cubilla", 89, ["PD", "CA"], "🇺🇾"], ["Júpiter Crescio", 85, ["MEI", "PD"], "🇺🇾"],
+    ["Carlos Borges", 87, ["PE", "CA"], "🇺🇾"], ["Alberto Spencer", 92, ["CA"], "🇪🇨"],
   ],
 };
 
@@ -246,11 +276,29 @@ export const europeans: RawTeamData = {
     ["Ancelotti", 88, ["MC", "VOL"], "🇮🇹"], ["Rijkaard", 92, ["VOL", "MC"], "🇳🇱"], ["Donadoni", 88, ["MD", "MEI"], "🇮🇹"],
     ["Gullit", 93, ["MEI", "CA"], "🇳🇱"], ["Van Basten", 94, ["CA"], "🇳🇱"],
   ],
+  "psv-1987": [
+    ["Van Breukelen", 90, ["GOL"], "🇳🇱"], ["Eric Gerets", 88, ["LD", "ZAG"], "🇧🇪"], ["Ivan Nielsen", 85, ["ZAG"], "🇩🇰"],
+    ["Ronald Koeman", 90, ["ZAG", "VOL"], "🇳🇱"], ["Jan Heintze", 85, ["LE", "ME"], "🇩🇰"], ["Søren Lerby", 88, ["MC", "VOL"], "🇩🇰"],
+    ["Berry van Aerle", 85, ["VOL", "LD"], "🇳🇱"], ["Gerald Vanenburg", 88, ["MD", "MEI"], "🇳🇱"], ["Edward Linskens", 83, ["MC", "VOL"], "🇳🇱"],
+    ["Hans Gillhaus", 84, ["CA", "PE"], "🇳🇱"], ["Wim Kieft", 87, ["CA"], "🇳🇱"],
+  ],
+  "aston-villa-1981": [
+    ["Jimmy Rimmer", 85, ["GOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Kenny Swain", 85, ["LD", "ZAG"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Allan Evans", 86, ["ZAG"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"],
+    ["Ken McNaught", 86, ["ZAG"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"], ["Gary Williams", 83, ["LE"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Des Bremner", 85, ["VOL", "MC"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"],
+    ["Dennis Mortimer", 88, ["MC", "VOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Gordon Cowans", 88, ["MC", "MEI"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Tony Morley", 88, ["PE", "ME"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["Gary Shaw", 87, ["CA", "PE"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Peter Withe", 88, ["CA"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+  ],
   "nottingham-forest-1979": [
     ["Shilton", 91, ["GOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Viv Anderson", 86, ["LD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Larry Lloyd", 86, ["ZAG"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
     ["Kenny Burns", 86, ["ZAG"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"], ["Frank Clark", 84, ["LE"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["John McGovern", 86, ["MC", "VOL"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"],
     ["Ian Bowyer", 84, ["MC", "VOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["John Robertson", 89, ["ME", "PE"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"], ["Trevor Francis", 87, ["MD", "PD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
     ["Tony Woodcock", 86, ["CA", "MEI"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Garry Birtles", 85, ["CA"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+  ],
+  "liverpool-1976": [
+    ["Ray Clemence", 90, ["GOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Phil Neal", 87, ["LD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Tommy Smith", 88, ["ZAG", "LD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["Emlyn Hughes", 90, ["ZAG", "VOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Joey Jones", 84, ["LE"], "🏴󠁧󠁢󠁷󠁬󠁳󠁿"], ["Jimmy Case", 86, ["MC", "MD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["Ian Callaghan", 88, ["MC", "MD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Terry McDermott", 88, ["MC", "MEI"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Ray Kennedy", 87, ["ME", "MC"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["Steve Heighway", 88, ["PE", "ME"], "🇮🇪"], ["Kevin Keegan", 92, ["CA", "MEI"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
   ],
   "bayern-munich-1974": [
     ["Sepp Maier", 91, ["GOL"], "🇩🇪"], ["Johnny Hansen", 84, ["LD"], "🇩🇰"], ["Schwarzenbeck", 87, ["ZAG"], "🇩🇪"],
@@ -263,6 +311,18 @@ export const europeans: RawTeamData = {
     ["Vasović", 89, ["ZAG", "VOL"], "🇷🇸"], ["Neeskens", 88, ["MC", "VOL"], "🇳🇱"], ["Rijnders", 84, ["VOL", "MC"], "🇳🇱"],
     ["Gerrie Mühren", 87, ["MC", "MEI"], "🇳🇱"], ["Sjaak Swart", 86, ["PD", "MD"], "🇳🇱"], ["Cruyff", 95, ["MEI", "CA"], "🇳🇱"],
     ["Piet Keizer", 90, ["PE", "ME"], "🇳🇱"], ["Dick van Dijk", 86, ["CA"], "🇳🇱"],
+  ],
+  "feyenoord-1969": [
+    ["Pieters Graafland", 87, ["GOL"], "🇳🇱"], ["Piet Romeijn", 84, ["LD"], "🇳🇱"], ["Rinus Israel", 89, ["ZAG"], "🇳🇱"],
+    ["Theo Laseroms", 86, ["ZAG"], "🇳🇱"], ["Van Duivenbode", 84, ["LE"], "🇳🇱"], ["Franz Hasil", 85, ["MC", "VOL"], "🇦🇹"],
+    ["Wim Jansen", 88, ["VOL", "MC"], "🇳🇱"], ["Van Hanegem", 91, ["MC", "MEI"], "🇳🇱"], ["Henk Wery", 85, ["PD", "CA"], "🇳🇱"],
+    ["Ove Kindvall", 89, ["CA"], "🇸🇪"], ["Coen Moulijn", 89, ["PE", "ME"], "🇳🇱"],
+  ],
+  "manchester-united-1967": [
+    ["Alex Stepney", 88, ["GOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Shay Brennan", 85, ["LD"], "🇮🇪"], ["Bill Foulkes", 87, ["ZAG"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["David Sadler", 85, ["ZAG", "VOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Tony Dunne", 85, ["LE"], "🇮🇪"], ["Nobby Stiles", 88, ["VOL"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["Pat Crerand", 87, ["MC", "VOL"], "🏴󠁧󠁢󠁳󠁣󠁴󠁿"], ["Bobby Charlton", 94, ["MEI", "MC"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["George Best", 94, ["PD", "MEI"], "🇬🇧"],
+    ["Brian Kidd", 87, ["CA"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["John Aston Jr.", 88, ["PE", "ME"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
   ],
   "benfica-1962": [
     ["Costa Pereira", 88, ["GOL"], "🇵🇹"], ["Mário João", 84, ["LD", "ZAG"], "🇵🇹"], ["Germano", 86, ["ZAG"], "🇵🇹"],
@@ -292,6 +352,10 @@ export const clubLogos: Record<string, string> = {
   "independiente": "https://upload.wikimedia.org/wikipedia/commons/d/db/Escudo_del_Club_Atl%C3%A9tico_Independiente.svg",
   "cruzeiro": "https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo%29.svg",
   "gremio": "https://upload.wikimedia.org/wikipedia/commons/0/08/Gremio_logo.svg",
+  "penarol": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Escudo-penarol-2015.svg",
+  "racing": "https://upload.wikimedia.org/wikipedia/commons/5/56/Escudo_de_Racing_Club_%282014%29.svg",
+  "estudiantes": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Estudiantes_de_la_Plata_crest_%282025%29.svg",
+  
   "psg": "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg",
   "real-madrid": "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
   "manchester-city": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
@@ -309,4 +373,7 @@ export const clubLogos: Record<string, string> = {
   "marseille": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Olympique_Marseille_logo.svg",
   "nottingham-forest": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg",
   "benfica": "https://upload.wikimedia.org/wikipedia/en/a/a2/SL_Benfica_logo.svg",
+  "feyenoord": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Feyenoord_logo_since_2009.svg",
+  "aston-villa": "https://upload.wikimedia.org/wikipedia/pt/1/15/Aston_Villa.svg",
+  "psv": "https://upload.wikimedia.org/wikipedia/en/0/05/PSV_Eindhoven.svg",
 };
