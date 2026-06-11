@@ -11,16 +11,22 @@ export function getAllTeams(americans: any, europeans: any): TeamData[] {
     Object.keys(data).forEach(key => {
       teams.push({
         key,
-        name: key.split('-').slice(0, -1).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+        // Removido o corte (slice) para que o ano permaneça no nome do time!
+        name: key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         continent,
         players: data[key].map((p: any) => ({
-          name: p[0], overall: p[1], positions: p[2], nationality: p[3], 
-          teamName: key.split('-').slice(0, -1).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), teamKey: key
+          name: p[0], 
+          overall: p[1], 
+          positions: p[2], 
+          nationality: p[3], 
+          teamName: key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), 
+          teamKey: key
         }))
       });
     });
   };
-  process(americans, "american"); process(europeans, "european");
+  process(americans, "american"); 
+  process(europeans, "european");
   return teams;
 }
 

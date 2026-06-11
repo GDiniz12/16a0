@@ -1,5 +1,5 @@
 import { LeagueTeam, MatchResult, KnockoutRound, TacticType, DifficultyType } from "@/types";
-import { simulateMatch } from "./simulation";
+import { simulateMatch } from "./simulation"; // Certo! Caminho corrigido para a mesma pasta
 
 interface TeamEntry {
   name: string;
@@ -11,7 +11,8 @@ export function generateLeaguePhase(
   userStrength: number,
   allTeams: TeamEntry[],
   userTactic: TacticType = "balanced",
-  difficulty: DifficultyType = "medium"
+  difficulty: DifficultyType = "medium",
+  userChemistry: number = 100
 ): { userMatches: MatchResult[]; table: LeagueTeam[] } {
   const teams = [...allTeams];
   const standings: Record<string, any> = {};
@@ -43,6 +44,9 @@ export function generateLeaguePhase(
       
       const hTactic = isHomeUser ? userTactic : "balanced";
       const aTactic = isAwayUser ? userTactic : "balanced";
+      
+      const hChem = isHomeUser ? userChemistry : 100;
+      const aChem = isAwayUser ? userChemistry : 100;
 
       const { homeGoals, awayGoals } = simulateMatch(
         actualHome.strength,
@@ -51,7 +55,9 @@ export function generateLeaguePhase(
         aTactic,
         isHomeUser,
         isAwayUser,
-        difficulty
+        difficulty,
+        hChem,
+        aChem
       );
 
       const match: MatchResult = { homeTeam: actualHome.name, awayTeam: actualAway.name, homeGoals, awayGoals };
@@ -102,7 +108,8 @@ export function generateKnockoutRounds(
   userTeamName: string,
   userStrength: number,
   userTactic: TacticType = "balanced",
-  difficulty: DifficultyType = "medium"
+  difficulty: DifficultyType = "medium",
+  userChemistry: number = 100
 ): KnockoutRound[] {
   const rounds: KnockoutRound[] = [];
   const roundNames = ["Round of 16", "Quarter-finals", "Semi-finals", "Final"];
@@ -116,7 +123,6 @@ export function generateKnockoutRounds(
 
     const oppStrength = opponent.avgOverall;
 
-    // Calcular chance de pênaltis baseada na dificuldade e realismo
     const getPenaltyWinner = () => {
       let uStr = userStrength;
       if (difficulty === "easy") uStr += 5;
@@ -126,14 +132,14 @@ export function generateKnockoutRounds(
     };
 
     if (roundName === "Final") {
-      const { homeGoals, awayGoals } = simulateMatch(userStrength, oppStrength, userTactic, "balanced", true, false, difficulty);
+      const { homeGoals, awayGoals } = simulateMatch(userStrength, oppStrength, userTactic, "balanced", true, false, difficulty, userChemistry, 100);
       const leg1: MatchResult = { homeTeam: userTeamName, awayTeam: opponent.name, homeGoals, awayGoals };
       
       let winner = homeGoals > awayGoals ? userTeamName : awayGoals > homeGoals ? opponent.name : getPenaltyWinner();
       rounds.push({ round: roundName, userOpponent: opponent.name, leg1, winner, userAdvanced: winner === userTeamName });
     } else {
-      const leg1Result = simulateMatch(userStrength, oppStrength, userTactic, "balanced", true, false, difficulty);
-      const leg2Result = simulateMatch(oppStrength, userStrength, "balanced", userTactic, false, true, difficulty);
+      const leg1Result = simulateMatch(userStrength, oppStrength, userTactic, "balanced", true, false, difficulty, userChemistry, 100);
+      const leg2Result = simulateMatch(oppStrength, userStrength, "balanced", userTactic, false, true, difficulty, 100, userChemistry);
 
       const leg1: MatchResult = { homeTeam: userTeamName, awayTeam: opponent.name, homeGoals: leg1Result.homeGoals, awayGoals: leg1Result.awayGoals };
       const leg2: MatchResult = { homeTeam: opponent.name, awayTeam: userTeamName, homeGoals: leg2Result.homeGoals, awayGoals: leg2Result.awayGoals };
