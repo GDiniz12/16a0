@@ -93,8 +93,13 @@ export default function KnockoutPage() {
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   transition={{ type: "spring", stiffness: 100 }}
                 >
-                  {/* CORREÇÃO AQUI: De 'match={round}' para 'roundData={round}' */}
-                  <KnockoutMatch roundData={round} userTeamName={userTeamName} />
+                  {/* CORREÇÃO AQUI: Propriedades tick e startTick adicionadas */}
+                  <KnockoutMatch 
+                    roundData={round} 
+                    userTeamName={userTeamName} 
+                    tick={10}
+                    startTick={0}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
