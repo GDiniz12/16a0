@@ -14,6 +14,10 @@ export default function OnlinePage() {
   const [mode, setMode] = useState("tradicional");
   const [password, setPassword] = useState("");
   const [hasPassword, setHasPassword] = useState(false);
+  
+  // NOVO: Opções exclusivas do Modo Tradicional
+  const [draftMode, setDraftMode] = useState("classic");
+  const [difficulty, setDifficulty] = useState("medium");
 
   const [joinPassword, setJoinPassword] = useState("");
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -31,7 +35,6 @@ export default function OnlinePage() {
 
     socket.on("roomsList", onRoomsList);
 
-    // Garante que só peça a lista se a conexão já estiver pronta
     if (socket.connected) {
       refreshRooms();
     } else {
@@ -48,7 +51,8 @@ export default function OnlinePage() {
     e.preventDefault();
     if (!nickname) return alert("Digite um nickname no topo da página!");
     
-    socket?.emit("createRoom", { roomName, nickname, mode, password: hasPassword ? password : null }, (response: any) => {
+    // Enviando as novas opções
+    socket?.emit("createRoom", { roomName, nickname, mode, draftMode, difficulty, password: hasPassword ? password : null }, (response: any) => {
       if (response.success) {
         router.push(`/lobby/${response.roomId}`);
       }
@@ -166,6 +170,27 @@ export default function OnlinePage() {
                 <option value="guerra">Guerra (Chaveamento Direto PvP - Requer N° Par)</option>
               </select>
             </div>
+
+            {/* SE FOR TRADICIONAL, MOSTRA AS CONFIGURAÇÕES */}
+            {mode === "tradicional" && (
+              <div className="flex flex-col sm:flex-row gap-4 mt-4 bg-gray-100 p-4 border-2 border-dashed border-[#00183F]">
+                <div className="flex-1">
+                  <label className="block font-black uppercase mb-1 text-sm">Modo de Draft</label>
+                  <select className="w-full border-4 border-[#00183F] p-2 font-bold bg-white uppercase" value={draftMode} onChange={e => setDraftMode(e.target.value)}>
+                    <option value="classic">Clássico (3 Rerolls)</option>
+                    <option value="hardcore">Hardcore (1 Reroll, Sem Força)</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block font-black uppercase mb-1 text-sm">Dificuldade dos Bots</label>
+                  <select className="w-full border-4 border-[#00183F] p-2 font-bold bg-white uppercase" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                    <option value="easy">Fácil</option>
+                    <option value="medium">Médio</option>
+                    <option value="impossible">Impossível</option>
+                  </select>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center gap-2 mt-4">
               <input type="checkbox" id="hasPassword" checked={hasPassword} onChange={(e) => setHasPassword(e.target.checked)} className="w-5 h-5" />

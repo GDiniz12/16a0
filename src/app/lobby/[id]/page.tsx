@@ -12,6 +12,7 @@ export default function LobbyPage() {
   const { socket, currentRoom, setCurrentRoom, nickname, setNickname } = useSocket();
   const [errorMsg, setErrorMsg] = useState("");
   
+  // Estados para o acesso via Link Direto
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [roomHasPassword, setRoomHasPassword] = useState(false);
   const [joinNickname, setJoinNickname] = useState("");
@@ -107,6 +108,7 @@ export default function LobbyPage() {
     });
   };
 
+  // TELA 1: Se o Socket não conectou ainda
   if (!socket) {
     return (
       <div className="min-h-screen bg-[#00183F] flex flex-col justify-center items-center text-white text-3xl font-black gap-4">
@@ -115,6 +117,7 @@ export default function LobbyPage() {
     );
   }
 
+  // TELA 2: Se o usuário acessou por um Link Direto e precisa colocar o Nickname
   if (showJoinForm) {
     return (
       <div className="min-h-screen bg-[#00183F] flex justify-center items-center p-6 text-[#00183F] font-sans">
@@ -156,6 +159,7 @@ export default function LobbyPage() {
     );
   }
 
+  // TELA 3: Carregamento se o servidor demorar a responder a sala
   if (!currentRoom) {
     return (
       <div className="min-h-screen bg-[#00183F] flex flex-col justify-center items-center text-white text-3xl font-black gap-4">
@@ -164,12 +168,14 @@ export default function LobbyPage() {
     );
   }
 
+  // TELA 4: O LOBBY COMPLETO
   const isHost = currentRoom.host === socket.id;
 
   return (
     <div className="min-h-screen bg-[#00183F] p-6 text-white font-sans flex flex-col items-center">
       <div className="w-full max-w-4xl bg-[#D9D9D9] p-8 border-4 border-[#00183F] shadow-[10px_10px_0_0_#0033A0]">
         
+        {/* Cabeçalho da Sala */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b-4 border-[#00183F] pb-4 gap-4">
           <h1 className="text-4xl font-black uppercase text-[#00183F]">{currentRoom.name}</h1>
           <div className="flex flex-wrap gap-2">
@@ -185,11 +191,25 @@ export default function LobbyPage() {
           </div>
         </div>
 
-        <div className="flex justify-between mb-8 bg-white p-4 border-2 border-[#00183F]">
+        {/* Informações Globais da Sala (Dinâmico para Tradicional x Guerra) */}
+        <div className="flex flex-wrap justify-between items-center mb-8 bg-white p-4 border-2 border-[#00183F] gap-4">
           <p className="text-[#00183F] font-bold uppercase">Modo: <span className="font-black text-amber-500">{currentRoom.mode}</span></p>
+          
+          {currentRoom.mode === 'tradicional' && (
+            <>
+              <p className="text-[#00183F] font-bold uppercase text-xs md:text-base">
+                Draft: <span className="font-black text-rose-600">{currentRoom.draftMode === 'hardcore' ? 'Hardcore' : 'Clássico'}</span>
+              </p>
+              <p className="text-[#00183F] font-bold uppercase text-xs md:text-base">
+                Dif: <span className="font-black text-blue-600">{currentRoom.difficulty === 'impossible' ? 'Impossível' : currentRoom.difficulty === 'easy' ? 'Fácil' : 'Médio'}</span>
+              </p>
+            </>
+          )}
+
           <p className="text-[#00183F] font-bold uppercase">Jogadores: <span className="font-black">{currentRoom.players.length}/8</span></p>
         </div>
 
+        {/* Lista de Jogadores */}
         <h2 className="text-2xl font-black uppercase text-[#00183F] mb-4">Jogadores na Sala</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {currentRoom.players.map((player: any) => (
@@ -200,8 +220,10 @@ export default function LobbyPage() {
           ))}
         </div>
 
+        {/* Mensagens de Erro */}
         {errorMsg && <div className="bg-rose-500 text-white p-4 font-bold uppercase text-center mb-6 border-4 border-[#00183F]">{errorMsg}</div>}
 
+        {/* Botões de Ação */}
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
           {isHost ? (
             <>

@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useGame } from "@/context/GameContext";
-import { useSocket } from "@/context/SocketContext"; // <--- NOVO
+import { useSocket } from "@/context/SocketContext"; 
 import { FormationType } from "@/types";
 import FootballPitch from "@/components/FootballPitch";
 import Button from "@/components/ui/Button";
@@ -16,7 +16,7 @@ const formations: FormationType[] = ["4-3-3", "4-4-2", "3-4-3", "3-5-2", "5-4-1"
 export default function FormationPage() {
   const router = useRouter();
   const { lang } = useLanguage();
-  const { currentRoom } = useSocket(); // <--- NOVO
+  const { currentRoom } = useSocket(); 
   const { 
     formation, setFormation, 
     gameMode, setGameMode, 
@@ -24,6 +24,14 @@ export default function FormationPage() {
     difficulty, setDifficulty,
     slots, drawNextTeam, setPhase 
   } = useGame();
+
+  // NOVO: Sincroniza as regras da sala criadas pelo host para a máquina local do jogador
+  useEffect(() => {
+    if (currentRoom && currentRoom.mode === 'tradicional') {
+      setGameMode(currentRoom.draftMode || "classic");
+      setDifficulty(currentRoom.difficulty || "medium");
+    }
+  }, [currentRoom, setGameMode, setDifficulty]);
 
   const handleBegin = () => {
     if (!formation) return;
@@ -34,6 +42,17 @@ export default function FormationPage() {
 
   const t = TRANSLATIONS[lang];
   const isPt = lang === "pt";
+
+  // Gera o texto superior para informar o jogador de forma explícita
+  const getSubtitle = () => {
+    if (!currentRoom) return t.choose_formation_sub;
+    if (currentRoom.mode === 'guerra') return "Online: GUERRA (Mata-Mata Direto)";
+    
+    const translatedMode = currentRoom.draftMode === 'hardcore' ? 'Hardcore' : 'Clássico';
+    const translatedDiff = currentRoom.difficulty === 'impossible' ? 'Impossível' : currentRoom.difficulty === 'easy' ? 'Fácil' : 'Médio';
+    
+    return `Online: Tradicional | Draft: ${translatedMode} | Dif: ${translatedDiff}`;
+  };
 
   return (
     <div className="min-h-screen bg-[#00183F] px-4 py-12 flex flex-col items-center font-sans text-white">
@@ -48,13 +67,12 @@ export default function FormationPage() {
             {t.choose_formation_title}
           </h1>
           <p className="text-[#0033A0] font-black uppercase tracking-widest text-xs md:text-sm border-l-4 border-[#0033A0] pl-2 inline-block mt-2">
-            {currentRoom ? (isPt ? "Modo e Dificuldade definidos pelo Host" : "Mode and Difficulty set by Host") : t.choose_formation_sub}
+            {getSubtitle()}
           </p>
         </div>
 
         <div className={`grid grid-cols-1 gap-8 mb-10 w-full items-start ${currentRoom ? "lg:grid-cols-1 max-w-sm mx-auto" : "lg:grid-cols-3"}`}>
           
-          {/* MODO DE JOGO E DIFICULDADE ESCONDIDOS NO MODO ONLINE */}
           {!currentRoom && (
             <>
               <div className="flex flex-col items-center w-full">
@@ -90,7 +108,7 @@ export default function FormationPage() {
             </>
           )}
 
-          {/* TÁTICA FICA PARA TODOS */}
+          {/* TÁTICA FICA PARA TODOS (Inclusive no online) */}
           <div className="flex flex-col items-center w-full">
             <h2 className="text-sm font-black text-white uppercase tracking-widest border-b-4 border-white/20 pb-2 mb-4 w-full text-center">
               {isPt ? "Sua Tática" : "Your Tactics"}

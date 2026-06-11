@@ -1,15 +1,22 @@
+require('dotenv').config(); // <-- CARREGA O .ENV
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// Pega a URL do .env ou libera para todos (*) caso não encontre
+const frontendUrl = process.env.FRONTEND_URL || "*";
+
+app.use(cors({
+  origin: frontendUrl
+}));
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", 
+    origin: frontendUrl, // <-- PROTEGE A CONEXÃO DO SOCKET
     methods: ["GET", "POST"]
   }
 });
@@ -41,6 +48,8 @@ io.on('connection', (socket) => {
       name: data.roomName || `Sala de ${data.nickname}`,
       host: socket.id,
       mode: data.mode,
+      draftMode: data.mode === 'tradicional' ? (data.draftMode || 'classic') : 'classic',
+      difficulty: data.mode === 'tradicional' ? (data.difficulty || 'medium') : 'medium',
       hasPassword: !!data.password,
       password: data.password || null,
       maxPlayers: 8,
@@ -50,7 +59,7 @@ io.on('connection', (socket) => {
         nickname: data.nickname,
         isReady: false,
         draftFinished: false,
-        teamData: null // <-- Adicionado para guardar os atributos da equipe
+        teamData: null
       }]
     };
 
@@ -72,7 +81,7 @@ io.on('connection', (socket) => {
       nickname: data.nickname,
       isReady: false,
       draftFinished: false,
-      teamData: null // <-- Adicionado
+      teamData: null
     });
 
     socket.join(room.id);
@@ -129,7 +138,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // NOVO: Coleta os dados dos times e gerencia o fim do Draft para o Host simular
   socket.on('playerDraftComplete', (roomId, teamData) => {
     const room = rooms[roomId];
     if (!room) return;
@@ -137,7 +145,7 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => p.id === socket.id);
     if (player) {
       player.draftFinished = true;
-      player.teamData = teamData; // Salva a Força, Tática, Entrosamento
+      player.teamData = teamData;
     }
 
     const finishedCount = room.players.filter(p => p.draftFinished).length;
@@ -147,13 +155,11 @@ io.on('connection', (socket) => {
 
     if (finishedCount === totalPlayers) {
       room.status = 'playing';
-      // Manda o sinal EXCLUSIVO para o Host da sala simular
       const playersData = room.players.map(p => p.teamData);
-      io.to(room.host).emit('hostStartSimulation', playersData);
+      io.to(roomId).emit('hostStartSimulation', { playersData, hostId: room.host });
     }
   });
 
-  // NOVO: O Host simulou e enviou o Gabarito, repassa pra sala!
   socket.on('onlineTournamentData', (roomId, data) => {
     io.to(roomId).emit('onlineTournamentReady', data);
   });

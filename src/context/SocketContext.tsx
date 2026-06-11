@@ -25,10 +25,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [nickname, setNickname] = useState<string>("");
 
   useEffect(() => {
-    // Pegar o hostname dinâmico resolve o problema de testar no celular via IP local!
-    const backendUrl = typeof window !== "undefined" 
-      ? `http://${window.location.hostname}:3001` 
-      : "http://localhost:3001";
+    // Busca a variável de ambiente, com fallback de segurança pro localhost
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
     const newSocket = io(backendUrl);
     setSocket(newSocket);
