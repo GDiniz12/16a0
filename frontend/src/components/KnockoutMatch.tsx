@@ -104,15 +104,27 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
   const userLogo = getLogoUrl(userTeamName);
   const oppLogo = getLogoUrl(roundData.userOpponent);
 
+  const isFinal = roundData.round === 'Final' || roundData.round === 'Finals' || roundData.round === 'FINAL';
+  const containerClass = isFinal
+    ? "bg-gradient-to-br from-[#1E293B] to-[#0f172a] border-4 border-yellow-400 p-3 sm:p-4 md:p-6 shadow-[10px_10px_0_0_#b45309] mb-8 relative overflow-hidden"
+    : "bg-[#1E293B] border-4 border-white p-3 sm:p-4 md:p-6 shadow-[10px_10px_0_0_rgba(0,0,0,0.6)] mb-8";
+
+  const titleClass = isFinal
+    ? "text-xl sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-600 uppercase tracking-widest drop-shadow-[2px_2px_0_rgba(0,0,0,1)]"
+    : "text-xl sm:text-2xl md:text-3xl font-black text-amber-400 uppercase tracking-widest drop-shadow-[2px_2px_0_#00183F]";
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-[#1E293B] border-4 border-white p-3 sm:p-4 md:p-6 shadow-[10px_10px_0_0_rgba(0,0,0,0.6)] mb-8"
+      className={containerClass}
     >
+      {isFinal && (
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(250,204,21,0.5) 10px, rgba(250,204,21,0.5) 20px)" }} />
+      )}
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b-4 border-white/20 gap-4">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-amber-400 uppercase tracking-widest drop-shadow-[2px_2px_0_#00183F]">
+      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b-4 border-white/20 gap-4">
+        <h2 className={titleClass}>
           {roundData.round}
         </h2>
         
@@ -126,7 +138,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
         )}
       </div>
 
-      <div className="space-y-4 mb-6">
+      <div className="relative z-10 space-y-4 mb-6">
         {showLeg1 && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <MatchResultCard 
@@ -153,7 +165,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
       {showAgg && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-white text-[#00183F] border-4 border-[#00183F] p-4 md:p-8 text-center shadow-[4px_4px_0_0_#00183F]"
+          className="relative z-10 bg-white text-[#00183F] border-4 border-[#00183F] p-4 md:p-8 text-center shadow-[4px_4px_0_0_#00183F]"
         >
           <span className="block text-[10px] md:text-xs font-black uppercase text-gray-500 tracking-widest mb-4">
             {lang === "pt" ? "Placar Agregado" : "Aggregate Score"}

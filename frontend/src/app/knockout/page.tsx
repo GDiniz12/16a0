@@ -195,7 +195,7 @@ export default function KnockoutPage() {
                 <Button variant="primary" onClick={() => setSimulationMode('automatic')} className="w-full sm:w-auto">
                   SIMULAÇÃO AUTOMÁTICA
                 </Button>
-                <Button variant="outline" onClick={() => setSimulationMode('accompanied')} className="w-full sm:w-auto border-[#00183F] bg-amber-400 text-[#00183F] hover:bg-amber-500 font-black">
+                <Button variant="outline" onClick={() => setSimulationMode('accompanied')} className="w-full sm:w-auto border-[#00183F] !bg-amber-400 !text-[#00183F] hover:!bg-amber-500 font-black">
                   SIMULAÇÃO ACOMPANHADA
                 </Button>
               </div>
@@ -254,29 +254,43 @@ export default function KnockoutPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: "spring" }}
             >
-              <Card className="text-center mb-10 border-4 border-white bg-white p-8">
-                {isChampion ? (
-                  <>
-                    <div className="text-6xl mb-4 drop-shadow-[4px_4px_0_#0033A0]">🏆</div>
-                    <h2 className="text-4xl font-black text-amber-500 uppercase tracking-tighter">
+              {isChampion ? (
+                <Card className="text-center mb-10 border-8 border-yellow-400 bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 p-8 md:p-14 shadow-[12px_12px_0_0_#b45309] relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.4) 20px, rgba(255,255,255,0.4) 40px)" }} />
+                  <div className="relative z-10 flex flex-col items-center">
+                    <motion.div 
+                      initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", bounce: 0.5 }}
+                      className="text-8xl md:text-9xl mb-6 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
+                    >
+                      🏆
+                    </motion.div>
+                    <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter drop-shadow-[4px_4px_0_#00183F] mb-4">
                       {TRANSLATIONS[lang].champion_title}
                     </h2>
-                    <p className="text-[#00183F] font-bold uppercase mt-2">
+                    <p className="text-[#00183F] font-black uppercase text-xl md:text-2xl bg-white/60 inline-block px-6 py-3 border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F]">
                       {TRANSLATIONS[lang].champion_desc}
                     </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-6xl mb-4 drop-shadow-[4px_4px_0_#9f1239]">❌</div>
-                    <h2 className="text-4xl font-black text-rose-600 uppercase tracking-tighter">
+                  </div>
+                </Card>
+              ) : (
+                <Card className="text-center mb-10 border-8 border-rose-950 bg-gradient-to-br from-rose-800 via-red-900 to-black p-8 md:p-14 shadow-[12px_12px_0_0_#000000] relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 2px, transparent 2px)", backgroundSize: "30px 30px" }} />
+                  <div className="relative z-10 flex flex-col items-center">
+                    <motion.div 
+                      initial={{ scale: 0, y: -50 }} animate={{ scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.6 }}
+                      className="text-8xl md:text-9xl mb-6 drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)] opacity-90"
+                    >
+                      ☠️
+                    </motion.div>
+                    <h2 className="text-5xl md:text-7xl font-black text-rose-500 uppercase tracking-tighter drop-shadow-[4px_4px_0_#000000] mb-4">
                       {TRANSLATIONS[lang].eliminated_title}
                     </h2>
-                    <p className="text-[#00183F] font-bold uppercase mt-2">
+                    <p className="text-rose-100 font-bold uppercase text-lg md:text-xl bg-black/50 inline-block px-6 py-3 border-4 border-rose-950 shadow-[4px_4px_0_0_#000000]">
                       {TRANSLATIONS[lang].eliminated_desc}
                     </p>
-                  </>
-                )}
-              </Card>
+                  </div>
+                </Card>
+              )}
 
               <div className="text-center">
                 <Button variant="primary" size="lg" onClick={handleContinue} className="w-full md:w-auto min-w-[300px]">
