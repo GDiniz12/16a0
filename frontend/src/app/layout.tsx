@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/context/LanguageContext";
 import { GameProvider } from "@/context/GameContext";
 import SupportButton from "@/components/SupportButton";
@@ -29,6 +30,7 @@ export default function RootLayout({
             </GameProvider>
           </LanguageProvider>
         </SocketProvider>
+        <Analytics />
       </body>
     </html>
   );
