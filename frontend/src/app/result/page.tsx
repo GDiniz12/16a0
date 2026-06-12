@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useGame } from "@/context/GameContext";
+import { useSocket } from "@/context/SocketContext";
 import { useLanguage } from "@/context/LanguageContext";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -12,9 +13,20 @@ import FootballPitch from "@/components/FootballPitch";
 export default function ResultPage() {
   const router = useRouter();
   const { lang } = useLanguage();
+  const { socket, currentRoom, setCurrentRoom } = useSocket();
   
   // Lendo as propriedades reais expostas pelo seu GameContext
   const { slots, stats, isChampion, resetGame, userTeamName } = useGame();
+
+  const handleBackToHome = () => {
+    // Limpa a sala online (se houver) para não poluir o modo offline
+    if (currentRoom) {
+      socket?.emit("leaveRoom", currentRoom.id);
+      setCurrentRoom(null);
+    }
+    resetGame();
+    router.push("/");
+  };
 
   const hasTeam = slots && slots.length > 0 && slots.some((s) => s.player);
 
@@ -54,7 +66,7 @@ export default function ResultPage() {
       <div className="min-h-screen bg-[#00183F] flex flex-col items-center justify-center p-6 text-white font-sans">
         <div className="border-4 border-white bg-white p-8 text-center max-w-md shadow-[8px_8px_0_0_rgba(0,0,0,0.5)]">
           <h2 className="text-2xl font-black text-[#00183F] uppercase mb-4">{t.squadError}</h2>
-          <Button variant="primary" onClick={() => router.push("/")}>{t.backBtn}</Button>
+          <Button variant="primary" onClick={handleBackToHome}>{t.backBtn}</Button>
         </div>
       </div>
     );
@@ -76,7 +88,7 @@ export default function ResultPage() {
               {t.subtitle}
             </p>
           </div>
-          <Button variant="secondary" onClick={() => { resetGame(); router.push("/"); }}>
+          <Button variant="secondary" onClick={handleBackToHome}>
             {t.backBtn}
           </Button>
         </div>
