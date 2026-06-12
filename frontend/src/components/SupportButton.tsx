@@ -34,13 +34,21 @@ export default function SupportButton() {
 
   return (
     <>
-      {/* Botão Flutuante Fixo (Agora com a cor do Ko-fi) */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-40 bg-[#FF5E5B] text-white px-4 py-3 font-black uppercase tracking-widest text-sm md:text-base border-4 border-[#00183F] shadow-[6px_6px_0_0_#00183F] transition-transform hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[8px_8px_0_0_#00183F]"
-      >
-        {t.btnSupport}
-      </button>
+      {/* Rodapé de Apoio (Footer) */}
+      <footer className="w-full mt-16 pb-8 px-4 flex flex-col items-center">
+        <div className="w-full max-w-4xl border-t-4 border-dashed border-[#00183F]/20 mb-6" />
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
+          <p className="text-[#00183F]/70 font-black text-sm md:text-base uppercase">
+            {lang === 'pt' ? 'Ajude a manter o 16a0, sua ajuda vale muito!' : 'Help maintain 16a0, your support means a lot!'}
+          </p>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="bg-[#FF5E5B] text-white px-6 py-3 font-black uppercase tracking-widest text-sm md:text-base border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F] transition-transform hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0_0_#00183F]"
+          >
+            {t.btnSupport}
+          </button>
+        </div>
+      </footer>
 
       {/* Modal de Apoio */}
       {isOpen && (

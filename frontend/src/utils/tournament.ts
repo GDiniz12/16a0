@@ -121,7 +121,10 @@ export function simulateMatch(
       const minute = Math.floor(Math.random() * 90) + 1;
       let playerStr = "Jogador";
       if (players && players.length > 0) {
-         const scorer = players[Math.floor(Math.random() * players.length)];
+         let validScorers = players.filter(p => p.name === "Rogério Ceni" || !(p.positions && p.positions.includes("GOL")));
+         if (validScorers.length === 0) validScorers = players; // Fallback se o time só tiver goleiro
+         
+         const scorer = validScorers[Math.floor(Math.random() * validScorers.length)];
          playerStr = scorer.name;
       }
       events.push({ minute, player: playerStr, team, type: "goal" });
