@@ -63,20 +63,21 @@ export function getLinkChemistry(p1?: Player, p2?: Player): number {
   const sameBaseTeam = baseTeam1 === baseTeam2;
   const sameCountry = p1.nationality === p2.nationality;
 
-  if (exactTeam) return 100;
-  if (sameBaseTeam && sameCountry) return 95;
-  if (sameBaseTeam) return 85;
-  if (sameCountry) return 80;
+  if (exactTeam && sameCountry) return 100;
+  if (exactTeam && !sameCountry) return 95; // Era 90
+  if (sameBaseTeam && sameCountry) return 90; // Era 85
+  if (sameCountry) return 85; // Era 75
+  if (sameBaseTeam) return 75; // Era 65
 
-  return 55; // Base maior para facilitar links normais
+  return 55; // Era 40
 }
 
 export function getLinkColor(chem: number): string {
-  if (chem >= 95) return "#22c55e"; // Verde
-  if (chem >= 85) return "#eab308";  // Amarelo
-  if (chem >= 75) return "#f97316";  // Laranja
-  if (chem >= 65) return "#3b82f6";  // Azul
-  if (chem >= 50) return "#ef4444";  // Vermelho
+  if (chem >= 100) return "#22c55e"; // Verde
+  if (chem >= 90) return "#eab308";  // Amarelo
+  if (chem >= 85) return "#f97316";  // Laranja
+  if (chem >= 75) return "#3b82f6";  // Azul
+  if (chem >= 65) return "#ef4444";  // Vermelho
   if (chem > 0) return "rgba(255, 255, 255, 0.4)"; // Branco
   return "rgba(255, 255, 255, 0.1)"; 
 }

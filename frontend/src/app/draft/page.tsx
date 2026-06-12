@@ -301,7 +301,14 @@ export default function DraftPage() {
                     onClick={() => assignManager(mgr)}
                     className="bg-white border-4 border-[#00183F] p-4 cursor-pointer hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0_0_#0033A0] transition-transform flex flex-col"
                   >
-                    <span className="font-black text-[#00183F] text-lg md:text-xl uppercase leading-none">{mgr.tecnico}</span>
+                    <div className="flex justify-between items-start">
+                      <span className="font-black text-[#00183F] text-lg md:text-xl uppercase leading-none">{mgr.tecnico}</span>
+                      {mgr.overall && (
+                        <span className="bg-[#0033A0] text-white px-2 py-1 text-sm font-black border-2 border-[#00183F]">
+                          OVR {mgr.overall}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs md:text-sm font-black text-[#0033A0] uppercase mt-2">
                       {mgr.clubeAno.replace(/-/g, " ")}
                     </span>
