@@ -36,9 +36,9 @@ export default function SupportButton() {
     <>
       {/* Rodapé de Apoio (Footer) */}
       <footer className="w-full mt-16 pb-8 px-4 flex flex-col items-center">
-        <div className="w-full max-w-4xl border-t-4 border-dashed border-[#00183F]/20 mb-6" />
+        <div className="w-full max-w-4xl border-t-4 border-dashed border-white/20 mb-6" />
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
-          <p className="text-[#00183F]/70 font-black text-sm md:text-base uppercase">
+          <p className="text-white/90 font-black text-sm md:text-base uppercase">
             {lang === 'pt' ? 'Ajude a manter o 16a0, sua ajuda vale muito!' : 'Help maintain 16a0, your support means a lot!'}
           </p>
           <button
