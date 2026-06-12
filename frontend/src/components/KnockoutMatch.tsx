@@ -100,10 +100,12 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
   }, [roundData, userTeamName, simulationMode, penaltyTick]);
 
   // Determine whether the penalty reveal is complete
-  const totalPenaltyEvents = userPenalties.length + oppPenalties.length;
+  const penMatchLocal = roundData.leg2 && roundData.leg2.isPenalties ? roundData.leg2 : roundData.leg1;
+  const actualTotalEvents = penMatchLocal?.penaltyEvents?.length || 0;
   const penaltiesFullyRevealed = !isTie || (
     simulationMode === 'automatic' || 
-    (simulationMode === 'accompanied' && penaltyTick !== undefined && penaltyTick > 0 && penaltyTick >= totalPenaltyEvents)
+    simulationMode === 'instant' ||
+    (simulationMode === 'accompanied' && penaltyTick !== undefined && penaltyTick >= actualTotalEvents && actualTotalEvents > 0)
   );
 
   // Hide penalty details in the leg cards until the aggregate penalty reveal is done

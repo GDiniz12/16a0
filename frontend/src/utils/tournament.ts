@@ -144,17 +144,29 @@ function simulatePenalties(homePlayers: any[], awayPlayers: any[]) {
   let awayPen = 0;
   let events: MatchEvent[] = [];
   
+  const isGK = (p: any) => p && p.positions && p.positions.includes("GOL");
+  const hPlayers = [...(homePlayers || [])].sort((a, b) => {
+    if (isGK(a) && !isGK(b)) return 1;
+    if (!isGK(a) && isGK(b)) return -1;
+    return 0;
+  });
+  const aPlayers = [...(awayPlayers || [])].sort((a, b) => {
+    if (isGK(a) && !isGK(b)) return 1;
+    if (!isGK(a) && isGK(b)) return -1;
+    return 0;
+  });
+  
   for(let i=0; i<5; i++){
      const hScore = Math.random() > 0.25;
      if(hScore) homePen++;
      let hpStr = "Jogador";
-     if(homePlayers && homePlayers.length > 0) hpStr = homePlayers[i % homePlayers.length].name;
+     if(hPlayers.length > 0) hpStr = hPlayers[i % hPlayers.length].name;
      events.push({ minute: 120 + i, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
 
      const aScore = Math.random() > 0.25;
      if(aScore) awayPen++;
      let apStr = "Jogador";
-     if(awayPlayers && awayPlayers.length > 0) apStr = awayPlayers[i % awayPlayers.length].name;
+     if(aPlayers.length > 0) apStr = aPlayers[i % aPlayers.length].name;
      events.push({ minute: 120 + i, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
   }
 
@@ -163,13 +175,13 @@ function simulatePenalties(homePlayers: any[], awayPlayers: any[]) {
      const hScore = Math.random() > 0.25;
      if(hScore) homePen++;
      let hpStr = "Jogador";
-     if(homePlayers && homePlayers.length > 0) hpStr = homePlayers[currentRound % homePlayers.length].name;
+     if(hPlayers.length > 0) hpStr = hPlayers[currentRound % hPlayers.length].name;
      events.push({ minute: 120 + currentRound, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
 
      const aScore = Math.random() > 0.25;
      if(aScore) awayPen++;
      let apStr = "Jogador";
-     if(awayPlayers && awayPlayers.length > 0) apStr = awayPlayers[currentRound % awayPlayers.length].name;
+     if(aPlayers.length > 0) apStr = aPlayers[currentRound % aPlayers.length].name;
      events.push({ minute: 120 + currentRound, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
      
      currentRound++;
