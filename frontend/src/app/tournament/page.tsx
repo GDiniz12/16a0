@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "@/context/GameContext";
-import { useSocket } from "@/context/SocketContext"; // <--- NOVO
+import { useSocket } from "@/context/SocketContext";
 import { checkQualification } from "@/utils/tournament";
 import LeagueTable from "@/components/LeagueTable";
 import MatchResultCard from "@/components/MatchResultCard";
@@ -16,7 +16,7 @@ import { TRANSLATIONS } from "@/lib/constants";
 export default function TournamentPage() {
   const router = useRouter();
   const { lang } = useLanguage();
-  const { currentRoom } = useSocket(); // <--- NOVO
+  const { currentRoom } = useSocket();
   const {
     leagueTable,
     userMatches,
@@ -26,7 +26,10 @@ export default function TournamentPage() {
     setPhase,
   } = useGame();
 
+  const [simulationMode, setSimulationMode] = useState<'idle' | 'automatic' | 'accompanied'>('idle');
+  const [currentMinute, setCurrentMinute] = useState(0);
   const [visibleMatches, setVisibleMatches] = useState(0);
+  const [showTable, setShowTable] = useState(false);
   const matchesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,21 +40,43 @@ export default function TournamentPage() {
   }, [leagueTable.length, startLeaguePhase, currentRoom]);
 
   useEffect(() => {
-    if (userMatches.length === 0) return;
-    
-    const interval = setInterval(() => {
-      setVisibleMatches((prev) => {
-        if (prev < userMatches.length) {
-          setTimeout(() => matchesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-          return prev + 1;
-        }
-        clearInterval(interval);
-        return prev;
-      });
-    }, 3000);
+    if (simulationMode === 'idle' || userMatches.length === 0) return;
 
-    return () => clearInterval(interval);
-  }, [userMatches]);
+    if (simulationMode === 'automatic') {
+      const interval = setInterval(() => {
+        setVisibleMatches((prev) => {
+          if (prev < userMatches.length) {
+            setTimeout(() => matchesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+            return prev + 1;
+          }
+          clearInterval(interval);
+          setTimeout(() => setShowTable(true), 3000);
+          return prev;
+        });
+      }, 1500);
+      return () => clearInterval(interval);
+    }
+
+    if (simulationMode === 'accompanied') {
+      if (visibleMatches < userMatches.length) {
+        if (currentMinute <= 90) {
+          const timer = setTimeout(() => {
+            setCurrentMinute(m => m + 1);
+          }, 20000 / 90); // 20s per match
+          return () => clearTimeout(timer);
+        } else {
+          const timer = setTimeout(() => {
+            setVisibleMatches(v => v + 1);
+            setCurrentMinute(0);
+            setTimeout(() => matchesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+          }, 2000);
+          return () => clearTimeout(timer);
+        }
+      } else {
+        setTimeout(() => setShowTable(true), 3000);
+      }
+    }
+  }, [simulationMode, userMatches.length, visibleMatches, currentMinute]);
 
   if (leagueTable.length === 0) {
     return (
@@ -64,11 +89,10 @@ export default function TournamentPage() {
   }
 
   const { qualified, position } = checkQualification(leagueTable, userTeamName);
-  const showRemainingContent = visibleMatches === userMatches.length;
 
   const handleContinue = () => {
     if (qualified) {
-      if (!currentRoom) startKnockoutPhase(); // Mata-mata já vem preenchido do backend se for Online!
+      if (!currentRoom) startKnockoutPhase();
       router.push("/knockout");
     } else {
       setPhase("result");
@@ -92,32 +116,70 @@ export default function TournamentPage() {
             </p>
           </div>
 
-          <div className="mb-10">
-            <h2 className="text-2xl font-black text-white uppercase tracking-wider mb-4 border-l-8 border-amber-400 pl-4">
-              {TRANSLATIONS[lang].your_matches}
-            </h2>
-            <div className="space-y-2">
-              <AnimatePresence>
-                {userMatches.slice(0, visibleMatches).map((match, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -30, scale: 0.95 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 100 }}
-                  >
-                    <MatchResultCard
-                      match={match}
-                      userTeamName={userTeamName}
-                      stage={`${lang === "pt" ? "Rodada" : "Round"} ${idx + 1}`}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              <div ref={matchesEndRef} />
-            </div>
-          </div>
+          {simulationMode === 'idle' && (
+            <Card className="text-center mb-10 border-4 border-white">
+              <h2 className="text-2xl font-black text-[#00183F] uppercase tracking-widest mb-6">
+                ESCOLHA O MODO DE SIMULAÇÃO
+              </h2>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Button variant="primary" onClick={() => setSimulationMode('automatic')} className="w-full sm:w-auto">
+                  SIMULAÇÃO AUTOMÁTICA
+                </Button>
+                <Button variant="outline" onClick={() => setSimulationMode('accompanied')} className="w-full sm:w-auto border-[#00183F] text-[#00183F] hover:bg-[#00183F] hover:text-white">
+                  SIMULAÇÃO ACOMPANHADA
+                </Button>
+              </div>
+            </Card>
+          )}
 
-          {showRemainingContent && (
+          {simulationMode !== 'idle' && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-black text-white uppercase tracking-wider mb-4 border-l-8 border-amber-400 pl-4">
+                {TRANSLATIONS[lang].your_matches}
+              </h2>
+
+              {simulationMode === 'accompanied' && visibleMatches < userMatches.length && (
+                <div className="mb-4 text-center">
+                  <div className="inline-block bg-white text-[#00183F] border-2 border-[#00183F] px-4 py-2 text-xl font-black font-mono">
+                    {currentMinute}'
+                  </div>
+                  <div className="w-full bg-gray-700 h-2 mt-2">
+                    <div className="bg-amber-400 h-2" style={{ width: `${(currentMinute / 90) * 100}%` }}></div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <AnimatePresence>
+                  {userMatches.slice(0, visibleMatches + 1).map((match, idx) => {
+                    // Only render up to visibleMatches completely, and the current match partially if accompanied
+                    if (idx > visibleMatches) return null;
+                    const isCurrent = idx === visibleMatches;
+                    if (isCurrent && simulationMode === 'automatic') return null; // Wait for interval to fully show
+
+                    return (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 100 }}
+                      >
+                        <MatchResultCard
+                          match={match}
+                          userTeamName={userTeamName}
+                          stage={`${lang === "pt" ? "Rodada" : "Round"} ${idx + 1}`}
+                          currentMinute={isCurrent && simulationMode === 'accompanied' ? currentMinute : undefined}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+                <div ref={matchesEndRef} />
+              </div>
+            </div>
+          )}
+
+          {showTable && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

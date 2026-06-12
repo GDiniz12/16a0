@@ -13,6 +13,10 @@ interface KnockoutMatchProps {
   userTeamName: string;
   tick: number;
   startTick: number;
+  currentMinute1?: number;
+  currentMinute2?: number;
+  penaltyTick?: number;
+  simulationMode?: string;
 }
 
 const getLogoUrl = (teamName: string) => {
@@ -26,31 +30,8 @@ const getLogoUrl = (teamName: string) => {
   return clubLogos[formatted] || "";
 };
 
-const getOpponentPlayers = (teamName: string) => {
-  const allTeams = { ...americans, ...europeans };
-  
-  const exactKey = teamName
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, "-");
-  
-  if (allTeams[exactKey]) {
-    return allTeams[exactKey].map((p: any) => p[0] as string);
-  }
-
-  const baseName = exactKey.replace(/-\d{4}$/, "");
-  const fallbackKey = Object.keys(allTeams).find((k) => k.startsWith(baseName));
-  if (fallbackKey) {
-    return allTeams[fallbackKey].map((p: any) => p[0] as string);
-  }
-  
-  return ["Jogador 1", "Jogador 2", "Jogador 3", "Jogador 4", "Jogador 5"];
-};
-
-export default function KnockoutMatch({ roundData, userTeamName, tick, startTick }: KnockoutMatchProps) {
+export default function KnockoutMatch({ roundData, userTeamName, tick, startTick, currentMinute1, currentMinute2, penaltyTick, simulationMode }: KnockoutMatchProps) {
   const { lang } = useLanguage();
-  const { slots } = useGame();
   
   const showHeader = tick >= startTick; 
   const showLeg1 = tick >= startTick; 
@@ -72,63 +53,43 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
     }
 
     const tie = uTotal === oTotal;
+    const hasPenalties = (roundData.leg1.isPenalties || (roundData.leg2 && roundData.leg2.isPenalties)) ? true : false;
+    const isPenTie = tie && hasPenalties;
 
-    let userPens: {name: string, scored: boolean}[] = [];
-    let oppPens: {name: string, scored: boolean}[] = [];
+    let userPens: {name: string, scored: boolean, missed: boolean, order: number}[] = [];
+    let oppPens: {name: string, scored: boolean, missed: boolean, order: number}[] = [];
     let uPenScore = 0;
     let oPenScore = 0;
 
-    if (tie) {
-      const seedString = `${userTeamName}-${roundData.userOpponent}-${roundData.round}-penalties`;
-      let seed = 0;
-      for (let i = 0; i < seedString.length; i++) {
-        seed = seedString.charCodeAt(i) + ((seed << 5) - seed);
-      }
+    if (isPenTie) {
+      const penMatch = roundData.leg2 && roundData.leg2.isPenalties ? roundData.leg2 : roundData.leg1;
+      const isHomePen = penMatch.homeTeam === userTeamName;
       
-      const random = () => {
-        let x = Math.sin(seed++) * 10000;
-        return x - Math.floor(x);
-      };
-
-      const shuffle = (array: any[]) => {
-        let currentIndex = array.length, randomIndex;
-        while (currentIndex !== 0) {
-          randomIndex = Math.floor(random() * currentIndex);
-          currentIndex--;
-          [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-        }
-        return array;
-      };
-
-      const userAdv = roundData.userAdvanced;
-      const scores = userAdv ? [[5,4], [5,3], [4,3], [4,2], [3,2]] : [[4,5], [3,5], [3,4], [2,4], [2,3]];
-      const chosenScore = scores[Math.floor(random() * scores.length)];
-      uPenScore = chosenScore[0];
-      oPenScore = chosenScore[1];
-
-      let uPlayers = slots && slots.length > 0 ? slots.filter(s => s.player).map(s => s.player!.name) : [];
-      if (uPlayers.length < 5) uPlayers = ["Goleiro", "Zagueiro", "Lateral", "Volante", "Atacante"]; 
+      const pEvents = penMatch.penaltyEvents || [];
       
-      let oPlayers = getOpponentPlayers(roundData.userOpponent);
-      
-      uPlayers = shuffle([...uPlayers]).slice(0, 5);
-      oPlayers = shuffle([...oPlayers]).slice(0, 5);
+      pEvents.forEach((ev, idx) => {
+         const isMiss = ev.type === "penalty_miss";
+         const isEvHome = ev.team === "home";
+         
+         const isUser = isEvHome ? isHomePen : !isHomePen;
+         
+         // Limitar pelos ticks em modo acompanhado
+         if (simulationMode === 'accompanied' && penaltyTick !== undefined) {
+            if (idx >= penaltyTick) return;
+         }
 
-      const createSeq = (goals: number) => {
-        let seq = Array(5).fill(false);
-        for(let i=0; i<goals; i++) seq[i] = true;
-        return shuffle(seq);
-      };
-
-      const uSeq = createSeq(uPenScore);
-      const oSeq = createSeq(oPenScore);
-
-      userPens = uPlayers.map((name, i) => ({ name, scored: uSeq[i] }));
-      oppPens = oPlayers.map((name, i) => ({ name, scored: oSeq[i] }));
+         if (isUser) {
+            userPens.push({ name: ev.player, scored: !isMiss, missed: isMiss, order: idx });
+            if (!isMiss) uPenScore++;
+         } else {
+            oppPens.push({ name: ev.player, scored: !isMiss, missed: isMiss, order: idx });
+            if (!isMiss) oPenScore++;
+         }
+      });
     }
 
     return { 
-      isTie: tie, 
+      isTie: isPenTie, 
       userTotal: uTotal, 
       oppTotal: oTotal,
       userPenalties: userPens,
@@ -136,7 +97,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
       userPenScore: uPenScore,
       oppPenScore: oPenScore
     };
-  }, [roundData, userTeamName, slots]);
+  }, [roundData, userTeamName, simulationMode, penaltyTick]);
 
   if (!showHeader) return null;
 
@@ -155,7 +116,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
           {roundData.round}
         </h2>
         
-        {showAgg && (
+        {showAgg && (!isTie || (isTie && (simulationMode === 'automatic' || (simulationMode === 'accompanied' && penaltyTick && penaltyTick >= (userPenalties.length + oppPenalties.length))))) && (
           <motion.div 
             initial={{ scale: 0 }} animate={{ scale: 1 }}
             className={`px-3 py-1.5 border-2 border-white font-black uppercase tracking-widest text-[10px] md:text-sm shadow-[3px_3px_0_0_#00183F] ${roundData.userAdvanced ? "bg-emerald-500 text-white" : "bg-rose-600 text-white"}`}
@@ -172,6 +133,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
               match={roundData.leg1} 
               userTeamName={userTeamName} 
               stage={lang === "pt" ? (roundData.leg2 ? "Jogo de Ida" : "Jogo Único") : (roundData.leg2 ? "1st Leg" : "Single Match")} 
+              currentMinute={currentMinute1}
             />
           </motion.div>
         )}
@@ -182,6 +144,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
               match={roundData.leg2} 
               userTeamName={userTeamName} 
               stage={lang === "pt" ? "Jogo de Volta" : "2nd Leg"} 
+              currentMinute={currentMinute2}
             />
           </motion.div>
         )}
@@ -237,14 +200,18 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
                     {userTeamName}
                   </span>
                   {userPenalties.map((pen, i) => (
-                    <div key={i} className="flex items-center gap-1.5 sm:gap-2 w-full">
+                    <motion.div 
+                      key={i} 
+                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-1.5 sm:gap-2 w-full"
+                    >
                       <span className="text-xs sm:text-sm md:text-base flex-shrink-0">
                         {pen.scored ? "✅" : "❌"}
                       </span>
                       <span className={`truncate ${pen.scored ? "text-[#00183F]" : "text-gray-400 line-through"}`}>
                         {pen.name}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
 
@@ -253,22 +220,28 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
                     {roundData.userOpponent}
                   </span>
                   {oppPenalties.map((pen, i) => (
-                    <div key={i} className="flex items-center gap-1.5 sm:gap-2 sm:flex-row-reverse w-full">
+                    <motion.div 
+                      key={i} 
+                      initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-1.5 sm:gap-2 sm:flex-row-reverse w-full"
+                    >
                       <span className="text-xs sm:text-sm md:text-base flex-shrink-0">
                         {pen.scored ? "✅" : "❌"}
                       </span>
                       <span className={`truncate sm:text-right ${pen.scored ? "text-[#00183F]" : "text-gray-400 line-through"}`}>
                         {pen.name}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
 
               </div>
               
-              <div className="mt-8 bg-[#00183F] p-3 text-center font-black text-white uppercase tracking-widest border-2 border-white shadow-[4px_4px_0_0_#D9D9D9] text-[10px] sm:text-xs md:text-sm">
-                {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className={roundData.userAdvanced ? "text-emerald-400" : "text-rose-400"}>{roundData.userAdvanced ? userTeamName : roundData.userOpponent}</span>
-              </div>
+              {(simulationMode === 'automatic' || (simulationMode === 'accompanied' && penaltyTick && penaltyTick >= (userPenalties.length + oppPenalties.length))) && (
+                <div className="mt-8 bg-[#00183F] p-3 text-center font-black text-white uppercase tracking-widest border-2 border-white shadow-[4px_4px_0_0_#D9D9D9] text-[10px] sm:text-xs md:text-sm">
+                  {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className={roundData.userAdvanced ? "text-emerald-400" : "text-rose-400"}>{roundData.userAdvanced ? userTeamName : roundData.userOpponent}</span>
+                </div>
+              )}
             </div>
           )}
 

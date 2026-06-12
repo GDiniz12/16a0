@@ -184,10 +184,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const userChemistry = calculateTeamChemistry(prev.slots, prev.formation, prev.manager);
 
       const allDataTeams = getAllTeams(americans, europeans);
-      const teamEntries = allDataTeams.map((t) => ({ name: t.name, strength: t.players.reduce((sum, p) => sum + p.overall, 0) / t.players.length }));
+      const teamEntries = allDataTeams.map((t) => ({ name: t.name, strength: t.players.reduce((sum, p) => sum + p.overall, 0) / t.players.length, players: t.players }));
 
       const shuffled = shuffleArray(teamEntries).slice(0, 35);
-      const allTeams = [{ name: userTeamName, strength: userStrength }, ...shuffled];
+      const allTeams = [{ name: userTeamName, strength: userStrength, players: userPlayers }, ...shuffled];
 
       const { userMatches, table } = generateLeaguePhase(userTeamName, userStrength, allTeams, prev.tactic, prev.difficulty, userChemistry);
 

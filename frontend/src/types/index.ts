@@ -41,11 +41,23 @@ export interface TeamData {
   continent: "american" | "european";
 }
 
+export interface MatchEvent {
+  minute: number;
+  player: string;
+  team: "home" | "away";
+  type: "goal" | "penalty_goal" | "penalty_miss";
+}
+
 export interface MatchResult {
   homeTeam: string;
   awayTeam: string;
   homeGoals: number;
   awayGoals: number;
+  events?: MatchEvent[];
+  isPenalties?: boolean;
+  homePenalties?: number;
+  awayPenalties?: number;
+  penaltyEvents?: MatchEvent[];
 }
 
 export interface LeagueTeam {
@@ -60,6 +72,7 @@ export interface LeagueTeam {
   points: number;
   isUser: boolean;
   avgOverall: number;
+  players?: any[];
 }
 
 export interface KnockoutRound {

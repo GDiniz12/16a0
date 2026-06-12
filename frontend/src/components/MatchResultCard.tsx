@@ -10,6 +10,7 @@ interface MatchResultCardProps {
   userTeamName: string;
   index?: number;
   stage?: string;
+  currentMinute?: number;
 }
 
 const getLogoUrl = (teamName: string) => {
@@ -45,63 +46,66 @@ const getOpponentPlayers = (teamName: string) => {
   return ["Atacante", "Meia", "Zagueiro", "Ponta", "Volante"];
 };
 
-export default function MatchResultCard({ match, userTeamName, index, stage }: MatchResultCardProps) {
+export default function MatchResultCard({ match, userTeamName, index, stage, currentMinute }: MatchResultCardProps) {
   const { slots } = useGame(); 
 
   const isHome = match.homeTeam === userTeamName;
-  const userGoals = isHome ? match.homeGoals : match.awayGoals;
-  const oppGoals = isHome ? match.awayGoals : match.homeGoals;
   const opponentName = isHome ? match.awayTeam : match.homeTeam;
-
-  const isUserWinner = userGoals > oppGoals;
-  const isDraw = userGoals === oppGoals;
 
   const userLogo = getLogoUrl(userTeamName);
   const oppLogo = getLogoUrl(opponentName);
 
-  const { userScorers, oppScorers } = useMemo(() => {
-    const seedString = `${match.homeTeam}-${match.awayTeam}-${match.homeGoals}-${match.awayGoals}-${stage || "group"}`;
-    let seed = 0;
-    for (let i = 0; i < seedString.length; i++) {
-      seed = seedString.charCodeAt(i) + ((seed << 5) - seed);
-    }
-    
-    const random = () => {
-      let x = Math.sin(seed++) * 10000;
-      return x - Math.floor(x);
-    };
+  const { userScorers, oppScorers, currentHomeGoals, currentAwayGoals } = useMemo(() => {
+    const uScorers: { name: string; minute?: number; isPenalty?: boolean; missed?: boolean }[] = [];
+    const oScorers: { name: string; minute?: number; isPenalty?: boolean; missed?: boolean }[] = [];
 
-    const generateForTeam = (teamName: string, goals: number) => {
-      if (goals === 0) return [];
-      let players: string[] = [];
-      
-      if (teamName === userTeamName && slots && slots.length > 0) {
-        players = slots.filter((s) => s.player).map((s) => s.player!.name);
-      } else {
-        players = getOpponentPlayers(teamName);
-      }
+    let hGoals = 0;
+    let aGoals = 0;
 
-      const scorers: string[] = [];
-      for (let i = 0; i < goals; i++) {
-        const isAttacker = random() > 0.3; 
-        let randIdx = 0;
+    if (match.events) {
+      match.events.forEach(e => {
+        if (currentMinute !== undefined && e.minute > currentMinute) return;
         
-        if (isAttacker && players.length > 5) {
-          randIdx = Math.floor(random() * 5) + (players.length - 5);
+        if (e.team === "home") hGoals++;
+        else aGoals++;
+
+        if (e.team === "home") {
+          if (isHome) uScorers.push({ name: e.player, minute: e.minute });
+          else oScorers.push({ name: e.player, minute: e.minute });
         } else {
-          randIdx = Math.floor(random() * players.length);
+          if (isHome) oScorers.push({ name: e.player, minute: e.minute });
+          else uScorers.push({ name: e.player, minute: e.minute });
         }
-        
-        scorers.push(players[randIdx] || "Jogador Anônimo");
-      }
-      return scorers;
-    };
+      });
+    } else {
+      // Fallback se não tiver events
+      hGoals = match.homeGoals;
+      aGoals = match.awayGoals;
+    }
 
-    return {
-      userScorers: generateForTeam(userTeamName, userGoals),
-      oppScorers: generateForTeam(opponentName, oppGoals),
-    };
-  }, [match.homeTeam, match.awayTeam, match.homeGoals, match.awayGoals, userTeamName, slots, stage]);
+    if (match.penaltyEvents) {
+      match.penaltyEvents.forEach(e => {
+        if (currentMinute !== undefined && e.minute > currentMinute) return;
+
+        const isMiss = e.type === "penalty_miss";
+        if (e.team === "home") {
+          if (isHome) uScorers.push({ name: e.player, isPenalty: true, missed: isMiss });
+          else oScorers.push({ name: e.player, isPenalty: true, missed: isMiss });
+        } else {
+          if (isHome) oScorers.push({ name: e.player, isPenalty: true, missed: isMiss });
+          else uScorers.push({ name: e.player, isPenalty: true, missed: isMiss });
+        }
+      });
+    }
+
+    return { userScorers: uScorers, oppScorers: oScorers, currentHomeGoals: hGoals, currentAwayGoals: aGoals };
+  }, [match, isHome, currentMinute]);
+
+  const userGoals = currentMinute !== undefined && match.events ? (isHome ? currentHomeGoals : currentAwayGoals) : (isHome ? match.homeGoals : match.awayGoals);
+  const oppGoals = currentMinute !== undefined && match.events ? (isHome ? currentAwayGoals : currentHomeGoals) : (isHome ? match.awayGoals : match.homeGoals);
+
+  const isUserWinner = userGoals > oppGoals;
+  const isDraw = userGoals === oppGoals;
 
   return (
     <div className="p-0 overflow-hidden bg-white text-[#00183F] border-4 border-[#00183F] shadow-[6px_6px_0_0_rgba(0,0,0,0.8)] flex flex-col mb-4 transition-transform hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_rgba(0,0,0,0.9)]">
@@ -132,10 +136,17 @@ export default function MatchResultCard({ match, userTeamName, index, stage }: M
             </div>
 
             {/* Placar Brutal */}
-            <div className="flex items-center gap-1.5 sm:gap-2 bg-[#D9D9D9] border-2 border-[#00183F] px-2 sm:px-4 py-1.5 sm:py-2 shadow-[3px_3px_0_0_rgba(0,0,0,0.2)] flex-shrink-0">
-              <span className="text-lg sm:text-xl md:text-3xl font-black">{userGoals}</span>
-              <span className="text-xs sm:text-sm md:text-lg font-black text-gray-400">X</span>
-              <span className="text-lg sm:text-xl md:text-3xl font-black">{oppGoals}</span>
+            <div className="flex flex-col items-center flex-shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-[#D9D9D9] border-2 border-[#00183F] px-2 sm:px-4 py-1.5 sm:py-2 shadow-[3px_3px_0_0_rgba(0,0,0,0.2)]">
+                <span className="text-lg sm:text-xl md:text-3xl font-black">{userGoals}</span>
+                <span className="text-xs sm:text-sm md:text-lg font-black text-gray-400">X</span>
+                <span className="text-lg sm:text-xl md:text-3xl font-black">{oppGoals}</span>
+              </div>
+              {match.isPenalties && (
+                <div className="text-[10px] md:text-xs font-black uppercase mt-1 bg-[#00183F] text-white px-2 py-0.5">
+                  PEN: {isHome ? match.homePenalties : match.awayPenalties} - {isHome ? match.awayPenalties : match.homePenalties}
+                </div>
+              )}
             </div>
 
             {/* Adversário */}
@@ -159,18 +170,18 @@ export default function MatchResultCard({ match, userTeamName, index, stage }: M
               
               <div className="flex-1 flex flex-col items-start gap-1">
                 {userScorers.map((scorer, i) => (
-                  <div key={`user-scorer-${i}`} className="flex items-center gap-1.5 text-[#0033A0]">
-                    <span className="text-[8px] md:text-[10px] drop-shadow-sm flex-shrink-0">⚽</span>
-                    <span className="truncate">{scorer}</span>
+                  <div key={`user-scorer-${i}`} className={`flex items-center gap-1.5 ${scorer.missed ? 'text-gray-400 opacity-50' : 'text-[#0033A0]'}`}>
+                    <span className="text-[8px] md:text-[10px] drop-shadow-sm flex-shrink-0">{scorer.missed ? '❌' : '⚽'}</span>
+                    <span className="truncate">{scorer.name} {scorer.minute ? `(${scorer.minute}')` : ''}</span>
                   </div>
                 ))}
               </div>
 
               <div className="flex-1 flex flex-col items-end gap-1">
                 {oppScorers.map((scorer, i) => (
-                  <div key={`opp-scorer-${i}`} className="flex items-center justify-end gap-1.5 text-rose-700">
-                    <span className="truncate">{scorer}</span>
-                    <span className="text-[8px] md:text-[10px] drop-shadow-sm flex-shrink-0">⚽</span>
+                  <div key={`opp-scorer-${i}`} className={`flex items-center justify-end gap-1.5 ${scorer.missed ? 'text-gray-400 opacity-50' : 'text-rose-700'}`}>
+                    <span className="truncate">{scorer.name} {scorer.minute ? `(${scorer.minute}')` : ''}</span>
+                    <span className="text-[8px] md:text-[10px] drop-shadow-sm flex-shrink-0">{scorer.missed ? '❌' : '⚽'}</span>
                   </div>
                 ))}
               </div>

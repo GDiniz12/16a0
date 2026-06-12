@@ -23,7 +23,10 @@ export default function KnockoutPage() {
     startKnockoutPhase
   } = useGame();
 
+  const [simulationMode, setSimulationMode] = useState<'idle' | 'automatic' | 'accompanied'>('idle');
   const [tick, setTick] = useState(0);
+  const [currentMinute, setCurrentMinute] = useState(0);
+  const [penaltyTick, setPenaltyTick] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,21 +50,107 @@ export default function KnockoutPage() {
     : 0;
 
   useEffect(() => {
-    if (knockoutRounds.length === 0) return;
+    if (simulationMode === 'idle' || knockoutRounds.length === 0) return;
     
-    const interval = setInterval(() => {
-      setTick((prev) => {
-        if (prev < maxTick) {
-          setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-          return prev + 1;
-        }
-        clearInterval(interval);
-        return prev;
-      });
-    }, 3000);
+    if (simulationMode === 'automatic') {
+      const interval = setInterval(() => {
+        setTick((prev) => {
+          if (prev < maxTick) {
+            setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+            return prev + 1;
+          }
+          clearInterval(interval);
+          return prev;
+        });
+      }, 1500); // Rápido
+      return () => clearInterval(interval);
+    }
 
-    return () => clearInterval(interval);
-  }, [knockoutRounds.length, maxTick]);
+    if (simulationMode === 'accompanied') {
+      if (tick < maxTick) {
+        // Verifica se o tick atual é a exibição de uma partida (leg1 ou leg2) ou do resultado (showAgg)
+        // Cada round ocupa 2 ou 3 ticks:
+        // Round sem leg2: startTick = leg1, startTick + 1 = Agg
+        // Round com leg2: startTick = leg1, startTick + 1 = leg2, startTick + 2 = Agg
+        
+        let isMatchTick = false;
+        let isAggTick = false;
+        let currentRound = knockoutRounds[0];
+
+        for (let i = 0; i < knockoutRounds.length; i++) {
+           const sTick = startTicks[i];
+           const hasLeg2 = knockoutRounds[i].leg2;
+           if (hasLeg2) {
+             if (tick === sTick || tick === sTick + 1) { isMatchTick = true; currentRound = knockoutRounds[i]; }
+             if (tick === sTick + 2) { isAggTick = true; currentRound = knockoutRounds[i]; }
+           } else {
+             if (tick === sTick) { isMatchTick = true; currentRound = knockoutRounds[i]; }
+             if (tick === sTick + 1) { isAggTick = true; currentRound = knockoutRounds[i]; }
+           }
+        }
+
+        if (isMatchTick) {
+          if (currentMinute <= 90) {
+            const timer = setTimeout(() => {
+              setCurrentMinute(m => m + 1);
+            }, 20000 / 90); // 20 segundos para simular 90 mins
+            return () => clearTimeout(timer);
+          } else {
+            const timer = setTimeout(() => {
+              setTick(t => t + 1);
+              setCurrentMinute(0);
+              setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+            }, 2000);
+            return () => clearTimeout(timer);
+          }
+        } else if (isAggTick) {
+          // Check if penalties are needed
+          let tie = false;
+          let hasPenalties = false;
+          if (currentRound) {
+            const h1 = currentRound.leg1.homeGoals;
+            const a1 = currentRound.leg1.awayGoals;
+            let uTot = currentRound.leg1.homeTeam === userTeamName ? h1 : a1;
+            let oTot = currentRound.leg1.homeTeam === userTeamName ? a1 : h1;
+            
+            if (currentRound.leg2) {
+               const h2 = currentRound.leg2.homeGoals;
+               const a2 = currentRound.leg2.awayGoals;
+               uTot += currentRound.leg2.homeTeam === userTeamName ? h2 : a2;
+               oTot += currentRound.leg2.homeTeam === userTeamName ? a2 : h2;
+            }
+            tie = (uTot === oTot);
+            hasPenalties = (currentRound.leg1.isPenalties || (currentRound.leg2 && currentRound.leg2.isPenalties)) ? true : false;
+          }
+
+          if (tie && hasPenalties) {
+             // We are at penalties!
+             if (penaltyTick < 12) { // Allow up to 12 penalties total (or dynamically based on length)
+               const timer = setTimeout(() => {
+                 setPenaltyTick(pt => pt + 1);
+                 setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+               }, 2000); // 2 seconds delay per penalty event
+               return () => clearTimeout(timer);
+             } else {
+               const timer = setTimeout(() => {
+                 setTick(t => t + 1);
+                 setPenaltyTick(0);
+                 setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+               }, 3000);
+               return () => clearTimeout(timer);
+             }
+          } else {
+             // No penalties, just move on
+             const timer = setTimeout(() => {
+               setTick(t => t + 1);
+               setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+             }, 3000);
+             return () => clearTimeout(timer);
+          }
+        }
+      }
+    }
+  }, [simulationMode, knockoutRounds, tick, maxTick, startTicks, currentMinute, penaltyTick, userTeamName]);
 
   if (knockoutRounds.length === 0) {
     return (
@@ -97,30 +186,76 @@ export default function KnockoutPage() {
             </p>
           </div>
 
-          <div className="space-y-6 mb-10">
-            <AnimatePresence>
-              {knockoutRounds.map((round, idx) => {
-                const sTick = startTicks[idx];
-                if (tick < sTick) return null;
-                return (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -30, scale: 0.95 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 100 }}
-                  >
-                    <KnockoutMatch 
-                      roundData={round} 
-                      userTeamName={userTeamName} 
-                      tick={tick}
-                      startTick={sTick}
-                    />
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-            <div ref={endRef} />
-          </div>
+          {simulationMode === 'idle' && (
+            <Card className="text-center mb-10 border-4 border-white">
+              <h2 className="text-2xl font-black text-[#00183F] uppercase tracking-widest mb-6">
+                ESCOLHA O MODO DE SIMULAÇÃO
+              </h2>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Button variant="primary" onClick={() => setSimulationMode('automatic')} className="w-full sm:w-auto">
+                  SIMULAÇÃO AUTOMÁTICA
+                </Button>
+                <Button variant="outline" onClick={() => setSimulationMode('accompanied')} className="w-full sm:w-auto border-[#00183F] text-[#00183F] hover:bg-[#00183F] hover:text-white">
+                  SIMULAÇÃO ACOMPANHADA
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {simulationMode !== 'idle' && (
+            <div className="space-y-6 mb-10">
+
+              {simulationMode === 'accompanied' && tick < maxTick && currentMinute > 0 && currentMinute <= 90 && (
+                <div className="mb-4 text-center">
+                  <div className="inline-block bg-white text-[#00183F] border-2 border-[#00183F] px-4 py-2 text-xl font-black font-mono">
+                    {currentMinute}'
+                  </div>
+                  <div className="w-full bg-gray-700 h-2 mt-2 max-w-lg mx-auto">
+                    <div className="bg-amber-400 h-2" style={{ width: `${(currentMinute / 90) * 100}%` }}></div>
+                  </div>
+                </div>
+              )}
+
+              <AnimatePresence>
+                {knockoutRounds.map((round, idx) => {
+                  const sTick = startTicks[idx];
+                  if (tick < sTick) return null;
+
+                  // Determine qual leg está sendo simulada neste momento
+                  let activeMinute1, activeMinute2;
+                  if (simulationMode === 'accompanied') {
+                     if (!round.leg2) {
+                       if (tick === sTick) activeMinute1 = currentMinute;
+                     } else {
+                       if (tick === sTick) activeMinute1 = currentMinute;
+                       if (tick === sTick + 1) activeMinute2 = currentMinute;
+                     }
+                  }
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 100 }}
+                    >
+                      <KnockoutMatch 
+                        roundData={round} 
+                        userTeamName={userTeamName} 
+                        tick={tick}
+                        startTick={sTick}
+                        currentMinute1={activeMinute1}
+                        currentMinute2={activeMinute2}
+                        penaltyTick={penaltyTick}
+                        simulationMode={simulationMode}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+              <div ref={endRef} />
+            </div>
+          )}
 
           {showResults && (
             <motion.div

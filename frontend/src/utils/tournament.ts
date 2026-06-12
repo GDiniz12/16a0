@@ -1,4 +1,4 @@
-import { LeagueTeam, MatchResult, KnockoutRound, TacticType, DifficultyType } from '@/types';
+import { LeagueTeam, MatchResult, KnockoutRound, TacticType, DifficultyType, MatchEvent } from '@/types';
 import { shuffleArray } from './helpers';
 
 // =========================================================
@@ -25,7 +25,9 @@ export function simulateMatch(
   isAwayUser: boolean,
   difficulty: DifficultyType,
   homeChemistry: number = 0,
-  awayChemistry: number = 0
+  awayChemistry: number = 0,
+  homePlayers: any[] = [],
+  awayPlayers: any[] = []
 ) {
   // Entrosamento (0-100): até +10 de força extra
   const homeEffectiveStrength = homeStrength + (homeChemistry / 10);
@@ -51,8 +53,6 @@ export function simulateMatch(
   const HOME_ADVANTAGE = 0.3;
 
   // Curva não linear para diferença de força
-  // diff = 10 => factor ~ 0.63
-  // diff = 15 => factor ~ 1.02
   const powerFactor = Math.sign(diff) * Math.pow(Math.abs(diff), 1.2) * 0.04;
   
   const homeExpectedRaw = BASE_GOALS + HOME_ADVANTAGE + powerFactor;
@@ -85,7 +85,66 @@ export function simulateMatch(
   homeGoals = Math.min(Math.max(homeGoals, 0), 9);
   awayGoals = Math.min(Math.max(awayGoals, 0), 9);
 
-  return { homeGoals, awayGoals };
+  let events: MatchEvent[] = [];
+
+  const addGoals = (goals: number, team: "home"|"away", players: any[]) => {
+    for(let i = 0; i < goals; i++) {
+      const minute = Math.floor(Math.random() * 90) + 1;
+      let playerStr = "Jogador";
+      if (players && players.length > 0) {
+         const scorer = players[Math.floor(Math.random() * players.length)];
+         playerStr = scorer.name;
+      }
+      events.push({ minute, player: playerStr, team, type: "goal" });
+    }
+  }
+
+  addGoals(homeGoals, "home", homePlayers);
+  addGoals(awayGoals, "away", awayPlayers);
+
+  events.sort((a,b) => a.minute - b.minute);
+
+  return { homeGoals, awayGoals, events };
+}
+
+function simulatePenalties(homePlayers: any[], awayPlayers: any[]) {
+  let homePen = 0;
+  let awayPen = 0;
+  let events: MatchEvent[] = [];
+  
+  for(let i=0; i<5; i++){
+     const hScore = Math.random() > 0.25;
+     if(hScore) homePen++;
+     let hpStr = "Jogador";
+     if(homePlayers && homePlayers.length > 0) hpStr = homePlayers[i % homePlayers.length].name;
+     events.push({ minute: 120 + i, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
+
+     const aScore = Math.random() > 0.25;
+     if(aScore) awayPen++;
+     let apStr = "Jogador";
+     if(awayPlayers && awayPlayers.length > 0) apStr = awayPlayers[i % awayPlayers.length].name;
+     events.push({ minute: 120 + i, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
+  }
+
+  let currentRound = 5;
+  while(homePen === awayPen) {
+     const hScore = Math.random() > 0.25;
+     if(hScore) homePen++;
+     let hpStr = "Jogador";
+     if(homePlayers && homePlayers.length > 0) hpStr = homePlayers[currentRound % homePlayers.length].name;
+     events.push({ minute: 120 + currentRound, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
+
+     const aScore = Math.random() > 0.25;
+     if(aScore) awayPen++;
+     let apStr = "Jogador";
+     if(awayPlayers && awayPlayers.length > 0) apStr = awayPlayers[currentRound % awayPlayers.length].name;
+     events.push({ minute: 120 + currentRound, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
+     
+     currentRound++;
+     if(homePen !== awayPen) break;
+  }
+
+  return { homePen, awayPen, penaltyEvents: events };
 }
 
 export function checkQualification(table: LeagueTeam[], teamName: string) {
@@ -99,7 +158,7 @@ export function checkQualification(table: LeagueTeam[], teamName: string) {
 export function generateLeaguePhase(
   userTeamName: string,
   userStrength: number,
-  allTeams: {name: string, strength: number}[],
+  allTeams: {name: string, strength: number, players?: any[]}[],
   userTactic: TacticType,
   difficulty: DifficultyType,
   userChemistry: number
@@ -108,7 +167,7 @@ export function generateLeaguePhase(
   const standings: Record<string, any> = {};
   
   teams.forEach(t => {
-    standings[t.name] = { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, isUser: t.name === userTeamName, avgOverall: t.strength };
+    standings[t.name] = { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, isUser: t.name === userTeamName, avgOverall: t.strength, players: t.players };
   });
 
   const userMatches: MatchResult[] = [];
@@ -134,12 +193,12 @@ export function generateLeaguePhase(
       const hChem = isHomeUser ? userChemistry : 100;
       const aChem = isAwayUser ? userChemistry : 100;
 
-      const { homeGoals, awayGoals } = simulateMatch(
-        actualHome.strength, actualAway.strength, hTac, aTac, isHomeUser, isAwayUser, difficulty, hChem, aChem
+      const { homeGoals, awayGoals, events } = simulateMatch(
+        actualHome.strength, actualAway.strength, hTac, aTac, isHomeUser, isAwayUser, difficulty, hChem, aChem, actualHome.players, actualAway.players
       );
 
       if (isHomeUser || isAwayUser) {
-        userMatches.push({ homeTeam: actualHome.name, awayTeam: actualAway.name, homeGoals, awayGoals });
+        userMatches.push({ homeTeam: actualHome.name, awayTeam: actualAway.name, homeGoals, awayGoals, events });
       }
 
       standings[actualHome.name].played++;
@@ -175,7 +234,7 @@ export function generateLeaguePhase(
     name, played: stats.played, won: stats.won, drawn: stats.drawn, lost: stats.lost, 
     goalsFor: stats.goalsFor, goalsAgainst: stats.goalsAgainst, 
     goalDifference: stats.goalsFor - stats.goalsAgainst, 
-    points: stats.points, isUser: stats.isUser, avgOverall: stats.avgOverall
+    points: stats.points, isUser: stats.isUser, avgOverall: stats.avgOverall, players: stats.players
   }));
 
   table.sort((a,b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor);
@@ -192,7 +251,7 @@ export function generateKnockoutRounds(
   userChemistry: number
 ) {
   let top16 = leagueTable.slice(0, 16).map(t => ({
-    name: t.name, strength: t.avgOverall, isUser: t.name === userTeamName
+    name: t.name, strength: t.avgOverall, isUser: t.name === userTeamName, players: t.players
   }));
   
   const knockoutRounds: KnockoutRound[] = [];
@@ -213,18 +272,25 @@ export function generateKnockoutRounds(
       const t1Chem = t1.isUser ? userChemistry : 100;
       const t2Chem = t2.isUser ? userChemistry : 100;
 
-      const res1 = simulateMatch(t1.strength, t2.strength, t1Tac, t2Tac, t1.isUser, t2.isUser, difficulty, t1Chem, t2Chem);
-      const leg1 = { homeTeam: t1.name, awayTeam: t2.name, homeGoals: res1.homeGoals, awayGoals: res1.awayGoals };
+      const res1 = simulateMatch(t1.strength, t2.strength, t1Tac, t2Tac, t1.isUser, t2.isUser, difficulty, t1Chem, t2Chem, t1.players, t2.players);
+      const leg1: MatchResult = { homeTeam: t1.name, awayTeam: t2.name, homeGoals: res1.homeGoals, awayGoals: res1.awayGoals, events: res1.events };
 
-      let winner, leg2;
+      let winner, leg2: MatchResult | undefined;
 
       if (isFinal) {
          if (res1.homeGoals > res1.awayGoals) winner = t1;
          else if (res1.awayGoals > res1.homeGoals) winner = t2;
-         else winner = Math.random() > 0.5 ? t1 : t2; 
+         else {
+            const pen = simulatePenalties(t1.players || [], t2.players || []);
+            leg1.isPenalties = true;
+            leg1.homePenalties = pen.homePen;
+            leg1.awayPenalties = pen.awayPen;
+            leg1.penaltyEvents = pen.penaltyEvents;
+            winner = pen.homePen > pen.awayPen ? t1 : t2;
+         }
       } else {
-         const res2 = simulateMatch(t2.strength, t1.strength, t2Tac, t1Tac, t2.isUser, t1.isUser, difficulty, t2Chem, t1Chem);
-         leg2 = { homeTeam: t2.name, awayTeam: t1.name, homeGoals: res2.homeGoals, awayGoals: res2.awayGoals };
+         const res2 = simulateMatch(t2.strength, t1.strength, t2Tac, t1Tac, t2.isUser, t1.isUser, difficulty, t2Chem, t1Chem, t2.players, t1.players);
+         leg2 = { homeTeam: t2.name, awayTeam: t1.name, homeGoals: res2.homeGoals, awayGoals: res2.awayGoals, events: res2.events };
 
          const agg1 = leg1.homeGoals + leg2.awayGoals;
          const agg2 = leg1.awayGoals + leg2.homeGoals;
@@ -235,7 +301,14 @@ export function generateKnockoutRounds(
             const away2 = leg1.awayGoals;
             if (away1 > away2) winner = t1;
             else if (away2 > away1) winner = t2;
-            else winner = Math.random() > 0.5 ? t1 : t2;
+            else {
+              const pen = simulatePenalties(t2.players || [], t1.players || []);
+              leg2.isPenalties = true;
+              leg2.homePenalties = pen.homePen;
+              leg2.awayPenalties = pen.awayPen;
+              leg2.penaltyEvents = pen.penaltyEvents;
+              winner = pen.homePen > pen.awayPen ? t2 : t1;
+            }
          }
       }
       nextRoundTeams.push(winner);
@@ -260,22 +333,20 @@ export function generateKnockoutRounds(
 // =========================================================
 
 export function generateOnlineTradicional(humanTeams: any[], allBots: any[], difficulty: string) {
-  // Prepara os 36 times mesclando Humanos e Bots
   const botsCount = 36 - humanTeams.length;
   const bots = shuffleArray(allBots).slice(0, botsCount).map(b => ({
     name: b.name, 
-    // MÁGICA PRO VERCEL AQUI: (s: number, p: any) explícito
     strength: b.players.reduce((s: number, p: any) => s + p.overall, 0) / b.players.length, 
-    isBot: true, tactic: 'balanced' as TacticType, chemistry: 100
+    isBot: true, tactic: 'balanced' as TacticType, chemistry: 100, players: b.players
   }));
   
   const humans = humanTeams.map(h => ({
-    name: h.nickname, strength: h.strength, isBot: false, tactic: h.tactic as TacticType, chemistry: h.chemistry
+    name: h.nickname, strength: h.strength, isBot: false, tactic: h.tactic as TacticType, chemistry: h.chemistry, players: h.players
   }));
   
   const teams = shuffleArray([...humans, ...bots]);
   const standings: Record<string, any> = {};
-  teams.forEach(t => standings[t.name] = { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, avgOverall: t.strength, isUser: !t.isBot });
+  teams.forEach(t => standings[t.name] = { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, avgOverall: t.strength, isUser: !t.isBot, players: t.players });
 
   const playerMatches: Record<string, MatchResult[]> = {};
   humanTeams.forEach(h => playerMatches[h.nickname] = []);
@@ -294,11 +365,11 @@ export function generateOnlineTradicional(humanTeams: any[], allBots: any[], dif
       const actualHome = round % 2 === 0 ? home : away;
       const actualAway = round % 2 === 0 ? away : home;
 
-      const { homeGoals, awayGoals } = simulateMatch(
-        actualHome.strength, actualAway.strength, actualHome.tactic, actualAway.tactic, !actualHome.isBot, !actualAway.isBot, difficulty as DifficultyType, actualHome.chemistry, actualAway.chemistry
+      const { homeGoals, awayGoals, events } = simulateMatch(
+        actualHome.strength, actualAway.strength, actualHome.tactic, actualAway.tactic, !actualHome.isBot, !actualAway.isBot, difficulty as DifficultyType, actualHome.chemistry, actualAway.chemistry, actualHome.players, actualAway.players
       );
 
-      const match: MatchResult = { homeTeam: actualHome.name, awayTeam: actualAway.name, homeGoals, awayGoals };
+      const match: MatchResult = { homeTeam: actualHome.name, awayTeam: actualAway.name, homeGoals, awayGoals, events };
 
       standings[actualHome.name].played++;
       standings[actualHome.name].goalsFor += homeGoals;
@@ -321,7 +392,7 @@ export function generateOnlineTradicional(humanTeams: any[], allBots: any[], dif
   }
 
   const table: LeagueTeam[] = Object.entries(standings).map(([name, stats]) => ({
-     name, played: stats.played, won: stats.won, drawn: stats.drawn, lost: stats.lost, goalsFor: stats.goalsFor, goalsAgainst: stats.goalsAgainst, goalDifference: stats.goalsFor - stats.goalsAgainst, points: stats.won * 3 + stats.drawn, isUser: stats.isUser, avgOverall: stats.avgOverall
+     name, played: stats.played, won: stats.won, drawn: stats.drawn, lost: stats.lost, goalsFor: stats.goalsFor, goalsAgainst: stats.goalsAgainst, goalDifference: stats.goalsFor - stats.goalsAgainst, points: stats.won * 3 + stats.drawn, isUser: stats.isUser, avgOverall: stats.avgOverall, players: stats.players
   }));
   table.sort((a,b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor);
 
@@ -339,18 +410,25 @@ export function generateOnlineTradicional(humanTeams: any[], allBots: any[], dif
          const t2 = top16[i+1];
          if (!t1 || !t2) continue;
 
-         const res1 = simulateMatch(t1.strength, t2.strength, t1.tactic, t2.tactic, !t1.isBot, !t2.isBot, difficulty as DifficultyType, t1.chemistry, t2.chemistry);
-         const leg1 = { homeTeam: t1.name, awayTeam: t2.name, homeGoals: res1.homeGoals, awayGoals: res1.awayGoals };
+         const res1 = simulateMatch(t1.strength, t2.strength, t1.tactic, t2.tactic, !t1.isBot, !t2.isBot, difficulty as DifficultyType, t1.chemistry, t2.chemistry, t1.players, t2.players);
+         const leg1: MatchResult = { homeTeam: t1.name, awayTeam: t2.name, homeGoals: res1.homeGoals, awayGoals: res1.awayGoals, events: res1.events };
 
-         let winner, leg2;
+         let winner, leg2: MatchResult | undefined;
 
          if (isFinal) {
              if (res1.homeGoals > res1.awayGoals) winner = t1;
              else if (res1.awayGoals > res1.homeGoals) winner = t2;
-             else winner = Math.random() > 0.5 ? t1 : t2;
+             else {
+               const pen = simulatePenalties(t1.players || [], t2.players || []);
+               leg1.isPenalties = true;
+               leg1.homePenalties = pen.homePen;
+               leg1.awayPenalties = pen.awayPen;
+               leg1.penaltyEvents = pen.penaltyEvents;
+               winner = pen.homePen > pen.awayPen ? t1 : t2;
+             }
          } else {
-             const res2 = simulateMatch(t2.strength, t1.strength, t2.tactic, t1.tactic, !t2.isBot, !t1.isBot, difficulty as DifficultyType, t2.chemistry, t1.chemistry);
-             leg2 = { homeTeam: t2.name, awayTeam: t1.name, homeGoals: res2.homeGoals, awayGoals: res2.awayGoals };
+             const res2 = simulateMatch(t2.strength, t1.strength, t2.tactic, t1.tactic, !t2.isBot, !t1.isBot, difficulty as DifficultyType, t2.chemistry, t1.chemistry, t2.players, t1.players);
+             leg2 = { homeTeam: t2.name, awayTeam: t1.name, homeGoals: res2.homeGoals, awayGoals: res2.awayGoals, events: res2.events };
 
              const agg1 = leg1.homeGoals + (leg2 ? leg2.awayGoals : 0);
              const agg2 = leg1.awayGoals + (leg2 ? leg2.homeGoals : 0);
@@ -361,7 +439,14 @@ export function generateOnlineTradicional(humanTeams: any[], allBots: any[], dif
                 const away2 = leg1.awayGoals;
                 if (away1 > away2) winner = t1;
                 else if (away2 > away1) winner = t2;
-                else winner = Math.random() > 0.5 ? t1 : t2;
+                else {
+                  const pen = simulatePenalties(t2.players || [], t1.players || []);
+                  leg2.isPenalties = true;
+                  leg2.homePenalties = pen.homePen;
+                  leg2.awayPenalties = pen.awayPen;
+                  leg2.penaltyEvents = pen.penaltyEvents;
+                  winner = pen.homePen > pen.awayPen ? t2 : t1;
+                }
              }
          }
          nextRoundTeams.push(winner);
@@ -379,22 +464,36 @@ export function generateOnlineGuerra(humanTeams: any[]) {
   let roundsData: KnockoutRound[] = [];
 
   const doMatch = (t1: any, t2: any, roundName: string, isFinal=false) => {
-     const res1 = simulateMatch(t1.strength, t2.strength, t1.tactic, t2.tactic, true, true, 'medium', t1.chemistry, t2.chemistry);
-     const leg1 = { homeTeam: t1.nickname, awayTeam: t2.nickname, homeGoals: res1.homeGoals, awayGoals: res1.awayGoals };
-     let winner, leg2;
+     const res1 = simulateMatch(t1.strength, t2.strength, t1.tactic, t2.tactic, true, true, 'medium', t1.chemistry, t2.chemistry, t1.players, t2.players);
+     const leg1: MatchResult = { homeTeam: t1.nickname, awayTeam: t2.nickname, homeGoals: res1.homeGoals, awayGoals: res1.awayGoals, events: res1.events };
+     let winner, leg2: MatchResult | undefined;
 
      if(isFinal) {
         if(res1.homeGoals > res1.awayGoals) winner = t1;
         else if (res1.awayGoals > res1.homeGoals) winner = t2;
-        else winner = Math.random() > 0.5 ? t1 : t2;
+        else {
+           const pen = simulatePenalties(t1.players || [], t2.players || []);
+           leg1.isPenalties = true;
+           leg1.homePenalties = pen.homePen;
+           leg1.awayPenalties = pen.awayPen;
+           leg1.penaltyEvents = pen.penaltyEvents;
+           winner = pen.homePen > pen.awayPen ? t1 : t2;
+        }
      } else {
-        const res2 = simulateMatch(t2.strength, t1.strength, t2.tactic, t1.tactic, true, true, 'medium', t2.chemistry, t1.chemistry);
-        leg2 = { homeTeam: t2.nickname, awayTeam: t1.nickname, homeGoals: res2.homeGoals, awayGoals: res2.awayGoals };
+        const res2 = simulateMatch(t2.strength, t1.strength, t2.tactic, t1.tactic, true, true, 'medium', t2.chemistry, t1.chemistry, t2.players, t1.players);
+        leg2 = { homeTeam: t2.nickname, awayTeam: t1.nickname, homeGoals: res2.homeGoals, awayGoals: res2.awayGoals, events: res2.events };
         const agg1 = leg1.homeGoals + leg2.awayGoals;
         const agg2 = leg1.awayGoals + leg2.homeGoals;
         if(agg1 > agg2) winner = t1;
         else if(agg2 > agg1) winner = t2;
-        else winner = Math.random() > 0.5 ? t1 : t2;
+        else {
+           const pen = simulatePenalties(t2.players || [], t1.players || []);
+           leg2.isPenalties = true;
+           leg2.homePenalties = pen.homePen;
+           leg2.awayPenalties = pen.awayPen;
+           leg2.penaltyEvents = pen.penaltyEvents;
+           winner = pen.homePen > pen.awayPen ? t2 : t1;
+        }
      }
 
      roundsData.push({ round: roundName, leg1, leg2, winner: winner.nickname, userOpponent: t2.nickname, userAdvanced: false });
