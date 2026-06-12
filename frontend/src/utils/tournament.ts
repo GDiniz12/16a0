@@ -29,20 +29,49 @@ export function simulateMatch(
   homePlayers: any[] = [],
   awayPlayers: any[] = []
 ) {
-  // Entrosamento (0-100): até +10 de força extra
-  const homeEffectiveStrength = homeStrength + (homeChemistry / 10);
-  const awayEffectiveStrength = awayStrength + (awayChemistry / 10);
+  // Entrosamento: Reduzido impacto na média, mas massivo se > 75
+  let hChemMod = 0;
+  if (homeChemistry > 75) {
+     hChemMod = (homeChemistry - 75) * 0.4; // Ex: 100 chem -> +10 OVR
+  } else {
+     hChemMod = (homeChemistry - 50) * 0.05; // Impacto minúsculo na base
+  }
+  
+  let aChemMod = 0;
+  if (awayChemistry > 75) {
+     aChemMod = (awayChemistry - 75) * 0.4; 
+  } else {
+     aChemMod = (awayChemistry - 50) * 0.05; 
+  }
 
-  let hStr = homeEffectiveStrength;
-  let aStr = awayEffectiveStrength;
+  let hStr = homeStrength + hChemMod;
+  let aStr = awayStrength + aChemMod;
 
-  // Dificuldade afeta a força do usuário
+  // Dificuldade afeta a força de forma ESCALONADA (multiplicadores baseados na força original)
   if (isHomeUser && !isAwayUser) {
-    if (difficulty === 'easy') hStr += 5;
-    if (difficulty === 'impossible') hStr -= 8;
+    if (difficulty === 'easy') {
+      aStr *= 0.85; // Oponente 15% mais fraco
+      hStr *= 1.05; // Usuário 5% mais forte
+    }
+    if (difficulty === 'medium') {
+      aStr *= 1.05; // Oponente levemente mais forte
+    }
+    if (difficulty === 'impossible') {
+      aStr *= 1.12; // Oponente 12% mais forte (escala com a força dele)
+      hStr *= 0.98; // Usuário 2% mais fraco
+    }
   } else if (!isHomeUser && isAwayUser) {
-    if (difficulty === 'easy') aStr += 5;
-    if (difficulty === 'impossible') aStr -= 8;
+    if (difficulty === 'easy') {
+      hStr *= 0.85; 
+      aStr *= 1.05; 
+    }
+    if (difficulty === 'medium') {
+      hStr *= 1.05;
+    }
+    if (difficulty === 'impossible') {
+      hStr *= 1.12;
+      aStr *= 0.98;
+    }
   }
 
   // Diferença de força
@@ -52,8 +81,8 @@ export function simulateMatch(
   const BASE_GOALS = 1.3;
   const HOME_ADVANTAGE = 0.3;
 
-  // Curva não linear para diferença de força
-  const powerFactor = Math.sign(diff) * Math.pow(Math.abs(diff), 1.2) * 0.04;
+  // Curva não linear para diferença de força - ajustada para penalizar/recompensar mais
+  const powerFactor = Math.sign(diff) * Math.pow(Math.abs(diff), 1.3) * 0.045;
   
   const homeExpectedRaw = BASE_GOALS + HOME_ADVANTAGE + powerFactor;
   const awayExpectedRaw = BASE_GOALS - powerFactor;

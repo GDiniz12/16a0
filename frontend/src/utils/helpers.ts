@@ -97,8 +97,23 @@ export function calculateTeamChemistry(slots: FormationSlot[], formation: Format
   // BÔNUS DO TÉCNICO
   let managerBonus = 0;
   if (manager) {
+    managerBonus += 30; // Bônus base por simplesmente ter um treinador
+    
+    const historicManagers = [
+      "Pep Guardiola", "Alex Ferguson", "Carlo Ancelotti", "José Mourinho", 
+      "Jürgen Klopp", "Zinedine Zidane", "Mário Zagallo", "Telê Santana", 
+      "Arsène Wenger", "Johan Cruyff", "Vicente del Bosque", "Luiz Felipe Scolari"
+    ];
+    
+    // Verificamos se o técnico faz parte dos históricos
+    const isHistoric = historicManagers.some(m => manager.tecnico.includes(m) || m.includes(manager.tecnico));
+    if (isHistoric) {
+      managerBonus += 120; // Bônus massivo pra técnicos lendários
+    }
+
     const managerEmoji = getCountryEmoji(manager.nacionalidade);
     const baseTeamManager = manager.clubeAno.split('-').slice(0, -1).join('-');
+    
     slots.forEach(s => {
       if (s.player) {
         const baseTeamPlayer = s.player.teamKey.split('-').slice(0, -1).join('-');
@@ -108,7 +123,7 @@ export function calculateTeamChemistry(slots: FormationSlot[], formation: Format
         } else if (baseTeamPlayer === baseTeamManager) {
           managerBonus += 80; // Treinou o mesmo clube mas em ano diferente
         } else if (s.player.nationality === managerEmoji) {
-          managerBonus += 50; // Mesma nacionalidade do treinador
+          managerBonus += 70; // Bônus de nacionalidade (aumentado para 70)
         }
       }
     });
