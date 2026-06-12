@@ -11,6 +11,7 @@ interface MatchResultCardProps {
   index?: number;
   stage?: string;
   currentMinute?: number;
+  hidePenalties?: boolean;
 }
 
 const getLogoUrl = (teamName: string) => {
@@ -46,7 +47,7 @@ const getOpponentPlayers = (teamName: string) => {
   return ["Atacante", "Meia", "Zagueiro", "Ponta", "Volante"];
 };
 
-export default function MatchResultCard({ match, userTeamName, index, stage, currentMinute }: MatchResultCardProps) {
+export default function MatchResultCard({ match, userTeamName, index, stage, currentMinute, hidePenalties }: MatchResultCardProps) {
   const { slots } = useGame(); 
 
   const isHome = match.homeTeam === userTeamName;
@@ -83,7 +84,7 @@ export default function MatchResultCard({ match, userTeamName, index, stage, cur
       aGoals = match.awayGoals;
     }
 
-    if (match.penaltyEvents) {
+    if (match.penaltyEvents && !hidePenalties) {
       match.penaltyEvents.forEach(e => {
         if (currentMinute !== undefined && e.minute > currentMinute) return;
 
@@ -99,7 +100,7 @@ export default function MatchResultCard({ match, userTeamName, index, stage, cur
     }
 
     return { userScorers: uScorers, oppScorers: oScorers, currentHomeGoals: hGoals, currentAwayGoals: aGoals };
-  }, [match, isHome, currentMinute]);
+  }, [match, isHome, currentMinute, hidePenalties]);
 
   const userGoals = currentMinute !== undefined && match.events ? (isHome ? currentHomeGoals : currentAwayGoals) : (isHome ? match.homeGoals : match.awayGoals);
   const oppGoals = currentMinute !== undefined && match.events ? (isHome ? currentAwayGoals : currentHomeGoals) : (isHome ? match.awayGoals : match.homeGoals);
@@ -151,7 +152,7 @@ export default function MatchResultCard({ match, userTeamName, index, stage, cur
                 <span className="text-xs sm:text-sm md:text-lg font-black text-gray-400">X</span>
                 <span className="text-lg sm:text-xl md:text-3xl font-black">{oppGoals}</span>
               </div>
-              {match.isPenalties && (
+              {match.isPenalties && !hidePenalties && (
                 <div className="text-[10px] md:text-xs font-black uppercase mt-1 bg-[#00183F] text-white px-2 py-0.5">
                   PEN: {isHome ? match.homePenalties : match.awayPenalties} - {isHome ? match.awayPenalties : match.homePenalties}
                 </div>

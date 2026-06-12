@@ -99,6 +99,16 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
     };
   }, [roundData, userTeamName, simulationMode, penaltyTick]);
 
+  // Determine whether the penalty reveal is complete
+  const totalPenaltyEvents = userPenalties.length + oppPenalties.length;
+  const penaltiesFullyRevealed = !isTie || (
+    simulationMode === 'automatic' || 
+    (simulationMode === 'accompanied' && penaltyTick !== undefined && penaltyTick > 0 && penaltyTick >= totalPenaltyEvents)
+  );
+
+  // Hide penalty details in the leg cards until the aggregate penalty reveal is done
+  const shouldHidePenaltiesInLegs = isTie && !penaltiesFullyRevealed;
+
   if (!showHeader) return null;
 
   const userLogo = getLogoUrl(userTeamName);
@@ -128,7 +138,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
           {roundData.round}
         </h2>
         
-        {showAgg && (!isTie || (isTie && (simulationMode === 'automatic' || (simulationMode === 'accompanied' && penaltyTick && penaltyTick >= (userPenalties.length + oppPenalties.length))))) && (
+        {showAgg && penaltiesFullyRevealed && (
           <motion.div 
             initial={{ scale: 0 }} animate={{ scale: 1 }}
             className={`px-3 py-1.5 border-2 border-white font-black uppercase tracking-widest text-[10px] md:text-sm shadow-[3px_3px_0_0_#00183F] ${roundData.userAdvanced ? "bg-emerald-500 text-white" : "bg-rose-600 text-white"}`}
@@ -146,6 +156,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
               userTeamName={userTeamName} 
               stage={lang === "pt" ? (roundData.leg2 ? "Jogo de Ida" : "Jogo Único") : (roundData.leg2 ? "1st Leg" : "Single Match")} 
               currentMinute={currentMinute1}
+              hidePenalties={shouldHidePenaltiesInLegs}
             />
           </motion.div>
         )}
@@ -157,6 +168,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
               userTeamName={userTeamName} 
               stage={lang === "pt" ? "Jogo de Volta" : "2nd Leg"} 
               currentMinute={currentMinute2}
+              hidePenalties={shouldHidePenaltiesInLegs}
             />
           </motion.div>
         )}
@@ -249,7 +261,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
 
               </div>
               
-              {(simulationMode === 'automatic' || (simulationMode === 'accompanied' && penaltyTick && penaltyTick >= (userPenalties.length + oppPenalties.length))) && (
+              {penaltiesFullyRevealed && (
                 <div className="mt-8 bg-[#00183F] p-3 text-center font-black text-white uppercase tracking-widest border-2 border-white shadow-[4px_4px_0_0_#D9D9D9] text-[10px] sm:text-xs md:text-sm">
                   {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className={roundData.userAdvanced ? "text-emerald-400" : "text-rose-400"}>{roundData.userAdvanced ? userTeamName : roundData.userOpponent}</span>
                 </div>

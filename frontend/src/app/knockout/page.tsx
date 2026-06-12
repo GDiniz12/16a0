@@ -27,6 +27,8 @@ export default function KnockoutPage() {
   const [tick, setTick] = useState(0);
   const [currentMinute, setCurrentMinute] = useState(0);
   const [penaltyTick, setPenaltyTick] = useState(0);
+  const [currentPenaltyRoundIdx, setCurrentPenaltyRoundIdx] = useState<number | null>(null);
+  const [completedPenaltyRounds, setCompletedPenaltyRounds] = useState<Set<number>>(new Set());
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,16 +78,17 @@ export default function KnockoutPage() {
         let isMatchTick = false;
         let isAggTick = false;
         let currentRound = knockoutRounds[0];
+        let currentRoundIdx = 0;
 
         for (let i = 0; i < knockoutRounds.length; i++) {
            const sTick = startTicks[i];
            const hasLeg2 = knockoutRounds[i].leg2;
            if (hasLeg2) {
-             if (tick === sTick || tick === sTick + 1) { isMatchTick = true; currentRound = knockoutRounds[i]; }
-             if (tick === sTick + 2) { isAggTick = true; currentRound = knockoutRounds[i]; }
+             if (tick === sTick || tick === sTick + 1) { isMatchTick = true; currentRound = knockoutRounds[i]; currentRoundIdx = i; }
+             if (tick === sTick + 2) { isAggTick = true; currentRound = knockoutRounds[i]; currentRoundIdx = i; }
            } else {
-             if (tick === sTick) { isMatchTick = true; currentRound = knockoutRounds[i]; }
-             if (tick === sTick + 1) { isAggTick = true; currentRound = knockoutRounds[i]; }
+             if (tick === sTick) { isMatchTick = true; currentRound = knockoutRounds[i]; currentRoundIdx = i; }
+             if (tick === sTick + 1) { isAggTick = true; currentRound = knockoutRounds[i]; currentRoundIdx = i; }
            }
         }
 
@@ -124,6 +127,10 @@ export default function KnockoutPage() {
           }
 
           if (tie && hasPenalties) {
+             // Track which round is actively showing penalties
+             if (currentPenaltyRoundIdx !== currentRoundIdx) {
+               setCurrentPenaltyRoundIdx(currentRoundIdx);
+             }
              // We are at penalties!
              if (penaltyTick < 12) { // Allow up to 12 penalties total (or dynamically based on length)
                const timer = setTimeout(() => {
@@ -133,8 +140,10 @@ export default function KnockoutPage() {
                return () => clearTimeout(timer);
              } else {
                const timer = setTimeout(() => {
+                 setCompletedPenaltyRounds(prev => new Set(prev).add(currentRoundIdx));
                  setTick(t => t + 1);
                  setPenaltyTick(0);
+                 setCurrentPenaltyRoundIdx(null);
                  setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
                }, 3000);
                return () => clearTimeout(timer);
@@ -150,7 +159,7 @@ export default function KnockoutPage() {
         }
       }
     }
-  }, [simulationMode, knockoutRounds, tick, maxTick, startTicks, currentMinute, penaltyTick, userTeamName]);
+  }, [simulationMode, knockoutRounds, tick, maxTick, startTicks, currentMinute, penaltyTick, userTeamName, currentPenaltyRoundIdx]);
 
   if (knockoutRounds.length === 0) {
     return (
@@ -214,6 +223,16 @@ export default function KnockoutPage() {
                      }
                   }
 
+                  // Compute effective penalty tick for this specific round
+                  let effectivePenaltyTick = penaltyTick;
+                  if (completedPenaltyRounds.has(idx)) {
+                    // This round's penalties have been fully revealed
+                    effectivePenaltyTick = 999;
+                  } else if (currentPenaltyRoundIdx !== idx) {
+                    // Not the active penalty round
+                    effectivePenaltyTick = 0;
+                  }
+
                   return (
                     <motion.div
                       key={idx}
@@ -228,7 +247,7 @@ export default function KnockoutPage() {
                         startTick={sTick}
                         currentMinute1={activeMinute1}
                         currentMinute2={activeMinute2}
-                        penaltyTick={penaltyTick}
+                        penaltyTick={effectivePenaltyTick}
                         simulationMode={simulationMode}
                       />
                     </motion.div>
