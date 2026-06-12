@@ -142,6 +142,8 @@ export function simulateMatch(
 function simulatePenalties(homePlayers: any[], awayPlayers: any[]) {
   let homePen = 0;
   let awayPen = 0;
+  let homeKicks = 0;
+  let awayKicks = 0;
   let events: MatchEvent[] = [];
   
   const isGK = (p: any) => p && p.positions && p.positions.includes("GOL");
@@ -157,32 +159,46 @@ function simulatePenalties(homePlayers: any[], awayPlayers: any[]) {
   });
   
   for(let i=0; i<5; i++){
+     // Home kicks
      const hScore = Math.random() > 0.25;
      if(hScore) homePen++;
+     homeKicks++;
      let hpStr = "Jogador";
      if(hPlayers.length > 0) hpStr = hPlayers[i % hPlayers.length].name;
-     events.push({ minute: 120 + i, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
+     events.push({ minute: 120 + events.length, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
 
+     if (homePen > awayPen + (5 - awayKicks)) break;
+     if (awayPen > homePen + (5 - homeKicks)) break;
+
+     // Away kicks
      const aScore = Math.random() > 0.25;
      if(aScore) awayPen++;
+     awayKicks++;
      let apStr = "Jogador";
      if(aPlayers.length > 0) apStr = aPlayers[i % aPlayers.length].name;
-     events.push({ minute: 120 + i, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
+     events.push({ minute: 120 + events.length, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
+
+     if (homePen > awayPen + (5 - awayKicks)) break;
+     if (awayPen > homePen + (5 - homeKicks)) break;
   }
 
   let currentRound = 5;
   while(homePen === awayPen) {
+     // Home kicks
      const hScore = Math.random() > 0.25;
      if(hScore) homePen++;
+     homeKicks++;
      let hpStr = "Jogador";
      if(hPlayers.length > 0) hpStr = hPlayers[currentRound % hPlayers.length].name;
-     events.push({ minute: 120 + currentRound, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
+     events.push({ minute: 120 + events.length, player: hpStr, team: "home", type: hScore ? "penalty_goal" : "penalty_miss" });
 
+     // Away kicks
      const aScore = Math.random() > 0.25;
      if(aScore) awayPen++;
+     awayKicks++;
      let apStr = "Jogador";
      if(aPlayers.length > 0) apStr = aPlayers[currentRound % aPlayers.length].name;
-     events.push({ minute: 120 + currentRound, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
+     events.push({ minute: 120 + events.length, player: apStr, team: "away", type: aScore ? "penalty_goal" : "penalty_miss" });
      
      currentRound++;
      if(homePen !== awayPen) break;

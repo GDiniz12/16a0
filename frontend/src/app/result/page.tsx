@@ -9,6 +9,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import FootballPitch from "@/components/FootballPitch";
+import TournamentBracket from "@/components/TournamentBracket";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function ResultPage() {
   const { socket, currentRoom, setCurrentRoom } = useSocket();
   
   // Lendo as propriedades reais expostas pelo seu GameContext
-  const { slots, stats, isChampion, resetGame, userTeamName } = useGame();
+  const { slots, stats, isChampion, resetGame, userTeamName, knockoutRounds } = useGame();
 
   const handleBackToHome = () => {
     // Limpa a sala online (se houver) para não poluir o modo offline
@@ -154,6 +155,12 @@ export default function ResultPage() {
         </motion.div>
 
       </div>
+
+      {currentRoom?.mode === 'guerra' && knockoutRounds && knockoutRounds.length > 0 && (
+         <div className="w-full mt-12 max-w-6xl mx-auto">
+            <TournamentBracket rounds={knockoutRounds} />
+         </div>
+      )}
     </div>
   );
 }
