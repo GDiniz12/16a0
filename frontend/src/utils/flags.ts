@@ -1,0 +1,48 @@
+export const FLAG_TO_COUNTRY: Record<string, string> = {
+  "🇦🇷": "ARGENTINA",
+  "🇧🇷": "BRASIL",
+  "🇺🇾": "URUGUAI",
+  "🇵🇾": "PARAGUAI",
+  "🇨🇴": "COLÔMBIA",
+  "🇨🇱": "CHILE",
+  "🇪🇨": "EQUADOR",
+  "🇵🇪": "PERU",
+  "🇻🇪": "VENEZUELA",
+  "🇧🇴": "BOLÍVIA",
+  "🇪🇸": "ESPANHA",
+  "🇫🇷": "FRANÇA",
+  "🇮🇹": "ITÁLIA",
+  "🇩🇪": "ALEMANHA",
+  "🇬🇧": "INGLATERRA",
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿": "INGLATERRA",
+  "🇵🇹": "PORTUGAL",
+  "🇳🇱": "HOLANDA",
+  "🇧🇪": "BÉLGICA",
+  "🇭🇷": "CROÁCIA",
+  "🇸🇳": "SENEGAL",
+  "🇲🇦": "MARROCOS",
+  "🇨🇲": "CAMARÕES",
+  "🇺🇸": "EUA",
+  "🇲🇽": "MÉXICO",
+  "🇨🇷": "COSTA RICA",
+  "🇬🇭": "GANA",
+  "🇨🇮": "COSTA MARFIM",
+  "🇳🇬": "NIGÉRIA",
+  "🇯🇵": "JAPÃO",
+  "🇰🇷": "CORÉIA SUL",
+  "🇶🇦": "CATAR",
+  "🇺🇦": "UCRÂNIA",
+  "🇷🇸": "SÉRVIA",
+  "🇵🇱": "POLÔNIA",
+  "🇨🇭": "SUÍÇA",
+  "🇩🇰": "DINAMARCA",
+  "🇸🇪": "SUÉCIA",
+  "🇳🇴": "NORUEGA",
+  "🏴󠁧󠁢󠁷󠁬󠁳󠁿": "PAÍS DE GALES",
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿": "ESCÓCIA"
+};
+
+export function getNationalityDisplay(emoji: string): string {
+  // Retorna apenas a bandeira, a fonte 'Twemoji Country Flags' vai garantir o render
+  return emoji;
+}

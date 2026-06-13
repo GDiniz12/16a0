@@ -4,6 +4,7 @@ import React from "react";
 import { Player } from "@/types";
 import { POSITION_LABELS_MAP } from "@/lib/constants";
 import { useLanguage } from "@/context/LanguageContext";
+import { getNationalityDisplay } from "@/utils/flags";
 
 interface PlayerRowProps {
   player: Player;
@@ -49,7 +50,7 @@ export default function PlayerRow({
       
       {/* NOME + BANDEIRA NO MEIO (Oculta a bandeira se hideOverall for true) */}
       <span className="flex-1 text-sm font-bold truncate flex items-center gap-2">
-        {player.name} {!hideOverall && <span className="text-sm">{player.nationality}</span>}
+        {player.name} {!hideOverall && <span className="text-sm font-bold text-[#00183F] flag-emoji">{getNationalityDisplay(player.nationality)}</span>}
       </span>
       
       {/* OVR À DIREITA (Com regra do Hardcore) */}
