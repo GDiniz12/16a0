@@ -222,8 +222,12 @@ io.on('connection', (socket) => {
 
     const finishedCount = room.players.filter(p => p.draftFinished).length;
     const totalPlayers = room.players.length;
+    const playersStatus = room.players.map(p => ({
+      nickname: p.nickname,
+      draftFinished: p.draftFinished
+    }));
 
-    io.to(roomId).emit('draftProgress', { finishedCount, totalPlayers });
+    io.to(roomId).emit('draftProgress', { finishedCount, totalPlayers, playersStatus });
 
     if (finishedCount === totalPlayers) {
       room.status = 'playing';
