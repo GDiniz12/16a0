@@ -128,31 +128,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
         else newStats.draws++;
       });
 
-      // Filtra o Mata-Mata para conter APENAS as partidas onde o jogador participou
-      const userKnockoutMatches = ko.filter((r: any) => r.leg1.homeTeam === nickname || r.leg1.awayTeam === nickname);
+      // No modo guerra, mostra TODOS os confrontos para todos os jogadores
+      const relevantMatches = data.mode === 'guerra' ? ko : ko.filter((r: any) => r.leg1.homeTeam === nickname || r.leg1.awayTeam === nickname);
 
-      const koWithUserContext = userKnockoutMatches.map((r: any) => {
+      const koWithUserContext = relevantMatches.map((r: any) => {
+        const isUserInMatch = r.leg1.homeTeam === nickname || r.leg1.awayTeam === nickname;
         const isLeg1Home = r.leg1.homeTeam === nickname;
-        const myOpponent = isLeg1Home ? r.leg1.awayTeam : r.leg1.homeTeam;
+        const myOpponent = isUserInMatch 
+          ? (isLeg1Home ? r.leg1.awayTeam : r.leg1.homeTeam)
+          : r.leg1.awayTeam;
 
-        // Soma os placares da Ida
-        const ug1 = isLeg1Home ? r.leg1.homeGoals : r.leg1.awayGoals;
-        const og1 = isLeg1Home ? r.leg1.awayGoals : r.leg1.homeGoals;
-        newStats.goalsScored += ug1; newStats.goalsConceded += og1;
-        if (ug1 > og1) newStats.wins++; else if (ug1 < og1) newStats.losses++; else newStats.draws++;
+        // Só contabiliza stats de partidas que o jogador participou
+        if (isUserInMatch) {
+          const ug1 = isLeg1Home ? r.leg1.homeGoals : r.leg1.awayGoals;
+          const og1 = isLeg1Home ? r.leg1.awayGoals : r.leg1.homeGoals;
+          newStats.goalsScored += ug1; newStats.goalsConceded += og1;
+          if (ug1 > og1) newStats.wins++; else if (ug1 < og1) newStats.losses++; else newStats.draws++;
 
-        // Soma os placares da Volta (Se existir)
-        if (r.leg2) {
-          const isLeg2Home = r.leg2.homeTeam === nickname;
-          const ug2 = isLeg2Home ? r.leg2.homeGoals : r.leg2.awayGoals;
-          const og2 = isLeg2Home ? r.leg2.awayGoals : r.leg2.homeGoals;
-          newStats.goalsScored += ug2; newStats.goalsConceded += og2;
-          if (ug2 > og2) newStats.wins++; else if (ug2 < og2) newStats.losses++; else newStats.draws++;
+          if (r.leg2) {
+            const isLeg2Home = r.leg2.homeTeam === nickname;
+            const ug2 = isLeg2Home ? r.leg2.homeGoals : r.leg2.awayGoals;
+            const og2 = isLeg2Home ? r.leg2.awayGoals : r.leg2.homeGoals;
+            newStats.goalsScored += ug2; newStats.goalsConceded += og2;
+            if (ug2 > og2) newStats.wins++; else if (ug2 < og2) newStats.losses++; else newStats.draws++;
+          }
         }
 
         return {
           ...r,
-          userAdvanced: r.winner === nickname,
+          isUserMatch: isUserInMatch,
+          userAdvanced: isUserInMatch ? r.winner === nickname : false,
           userOpponent: myOpponent
         };
       });

@@ -82,6 +82,7 @@ export interface KnockoutRound {
   leg2?: MatchResult;
   winner: string;
   userAdvanced: boolean;
+  isUserMatch?: boolean;
 }
 
 export interface GameStats {

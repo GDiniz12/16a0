@@ -249,6 +249,7 @@ export default function KnockoutPage() {
                         currentMinute2={activeMinute2}
                         penaltyTick={effectivePenaltyTick}
                         simulationMode={simulationMode}
+                        isUserMatch={round.isUserMatch}
                       />
                     </motion.div>
                   );

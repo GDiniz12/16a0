@@ -17,6 +17,7 @@ interface KnockoutMatchProps {
   currentMinute2?: number;
   penaltyTick?: number;
   simulationMode?: string;
+  isUserMatch?: boolean;
 }
 
 const getLogoUrl = (teamName: string) => {
@@ -30,15 +31,76 @@ const getLogoUrl = (teamName: string) => {
   return clubLogos[formatted] || "";
 };
 
-export default function KnockoutMatch({ roundData, userTeamName, tick, startTick, currentMinute1, currentMinute2, penaltyTick, simulationMode }: KnockoutMatchProps) {
+export default function KnockoutMatch({ roundData, userTeamName, tick, startTick, currentMinute1, currentMinute2, penaltyTick, simulationMode, isUserMatch }: KnockoutMatchProps) {
   const { lang } = useLanguage();
+
+  // Detect neutral (non-user) match
+  const isNeutral = isUserMatch === false || (roundData.leg1.homeTeam !== userTeamName && roundData.leg1.awayTeam !== userTeamName);
   
   const showHeader = tick >= startTick; 
   const showLeg1 = tick >= startTick; 
   const showLeg2 = roundData.leg2 && tick >= startTick + 1; 
   const showAgg = roundData.leg2 ? tick >= startTick + 2 : tick >= startTick + 1; 
 
+  // Team references for neutral display
+  const team1Name = roundData.leg1.homeTeam;
+  const team2Name = roundData.leg1.awayTeam;
+
   const { isTie, userTotal, oppTotal, userPenalties, oppPenalties, userPenScore, oppPenScore } = useMemo(() => {
+    if (isNeutral) {
+      // Neutral mode: use homeTeam of leg1 as team1, awayTeam as team2
+      let t1Total = roundData.leg1.homeGoals;
+      let t2Total = roundData.leg1.awayGoals;
+
+      if (roundData.leg2) {
+        // In leg2 the home/away might be swapped, so find by team name
+        const isT1HomeLeg2 = roundData.leg2.homeTeam === team1Name;
+        t1Total += isT1HomeLeg2 ? roundData.leg2.homeGoals : roundData.leg2.awayGoals;
+        t2Total += isT1HomeLeg2 ? roundData.leg2.awayGoals : roundData.leg2.homeGoals;
+      }
+
+      const tie = t1Total === t2Total;
+      const hasPenalties = (roundData.leg1.isPenalties || (roundData.leg2 && roundData.leg2.isPenalties)) ? true : false;
+      const isPenTie = tie && hasPenalties;
+
+      let t1Pens: {name: string, scored: boolean, missed: boolean, order: number}[] = [];
+      let t2Pens: {name: string, scored: boolean, missed: boolean, order: number}[] = [];
+      let t1PenScore = 0;
+      let t2PenScore = 0;
+
+      if (isPenTie) {
+        const penMatch = roundData.leg2 && roundData.leg2.isPenalties ? roundData.leg2 : roundData.leg1;
+        const isT1HomePen = penMatch.homeTeam === team1Name;
+        const pEvents = penMatch.penaltyEvents || [];
+        pEvents.forEach((ev, idx) => {
+          const isMiss = ev.type === "penalty_miss";
+          const isEvHome = ev.team === "home";
+          const isT1 = isEvHome ? isT1HomePen : !isT1HomePen;
+          if (simulationMode === 'accompanied' && penaltyTick !== undefined) {
+            if (idx >= penaltyTick) return;
+          }
+          if (isT1) {
+            t1Pens.push({ name: ev.player, scored: !isMiss, missed: isMiss, order: idx });
+            if (!isMiss) t1PenScore++;
+          } else {
+            t2Pens.push({ name: ev.player, scored: !isMiss, missed: isMiss, order: idx });
+            if (!isMiss) t2PenScore++;
+          }
+        });
+      }
+
+      return {
+        isTie: isPenTie,
+        userTotal: t1Total,
+        oppTotal: t2Total,
+        userPenalties: t1Pens,
+        oppPenalties: t2Pens,
+        userPenScore: t1PenScore,
+        oppPenScore: t2PenScore
+      };
+    }
+
+    // User match: original logic
     const isHomeLeg1 = roundData.leg1.homeTeam === userTeamName;
     const userGoals1 = isHomeLeg1 ? roundData.leg1.homeGoals : roundData.leg1.awayGoals;
     const oppGoals1 = isHomeLeg1 ? roundData.leg1.awayGoals : roundData.leg1.homeGoals;
@@ -97,7 +159,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
       userPenScore: uPenScore,
       oppPenScore: oPenScore
     };
-  }, [roundData, userTeamName, simulationMode, penaltyTick]);
+  }, [roundData, userTeamName, simulationMode, penaltyTick, isNeutral, team1Name]);
 
   // Determine whether the penalty reveal is complete
   const penMatchLocal = roundData.leg2 && roundData.leg2.isPenalties ? roundData.leg2 : roundData.leg1;
@@ -113,8 +175,12 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
 
   if (!showHeader) return null;
 
-  const userLogo = getLogoUrl(userTeamName);
-  const oppLogo = getLogoUrl(roundData.userOpponent);
+  const displayTeam1 = isNeutral ? team1Name : userTeamName;
+  const displayTeam2 = isNeutral ? team2Name : roundData.userOpponent;
+  const team1Won = roundData.winner === displayTeam1;
+
+  const userLogo = getLogoUrl(displayTeam1);
+  const oppLogo = getLogoUrl(displayTeam2);
 
   const isFinal = roundData.round === 'Final' || roundData.round === 'Finals' || roundData.round === 'FINAL';
   const containerClass = isFinal
@@ -143,9 +209,12 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
         {showAgg && penaltiesFullyRevealed && (
           <motion.div 
             initial={{ scale: 0 }} animate={{ scale: 1 }}
-            className={`px-3 py-1.5 border-2 border-white font-black uppercase tracking-widest text-[10px] md:text-sm shadow-[3px_3px_0_0_#00183F] ${roundData.userAdvanced ? "bg-emerald-500 text-white" : "bg-rose-600 text-white"}`}
+            className={`px-3 py-1.5 border-2 border-white font-black uppercase tracking-widest text-[10px] md:text-sm shadow-[3px_3px_0_0_#00183F] ${isNeutral ? "bg-sky-600 text-white" : roundData.userAdvanced ? "bg-emerald-500 text-white" : "bg-rose-600 text-white"}`}
           >
-            {roundData.userAdvanced ? (lang === "pt" ? "Avançou" : "Advanced") : (lang === "pt" ? "Eliminado" : "Eliminated")}
+            {isNeutral
+              ? `${roundData.winner} ${lang === "pt" ? "avançou" : "advanced"}`
+              : roundData.userAdvanced ? (lang === "pt" ? "Avançou" : "Advanced") : (lang === "pt" ? "Eliminado" : "Eliminated")
+            }
           </motion.div>
         )}
       </div>
@@ -188,9 +257,9 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
           <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-8 flex-nowrap">
             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
               {userLogo && (
-                <img src={userLogo} alt={userTeamName} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
+                <img src={userLogo} alt={displayTeam1} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
               )}
-              <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${roundData.userAdvanced && !isTie ? "text-emerald-600" : "text-[#00183F]"}`}>
+              <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (team1Won && !isTie ? "text-sky-600" : "text-[#00183F]") : (roundData.userAdvanced && !isTie ? "text-emerald-600" : "text-[#00183F]")}`}>
                 {userTotal}
               </span>
             </div>
@@ -198,11 +267,11 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
             <span className="text-gray-400 font-black text-xl sm:text-2xl md:text-3xl flex-shrink-0">X</span>
             
             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-              <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${!roundData.userAdvanced && !isTie ? "text-rose-600" : "text-[#00183F]"}`}>
+              <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (!team1Won && !isTie ? "text-sky-600" : "text-[#00183F]") : (!roundData.userAdvanced && !isTie ? "text-rose-600" : "text-[#00183F]")}`}>
                 {oppTotal}
               </span>
               {oppLogo && (
-                <img src={oppLogo} alt={roundData.userOpponent} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
+                <img src={oppLogo} alt={displayTeam2} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
               )}
             </div>
           </div>
@@ -214,16 +283,16 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
               </h4>
               
               <div className="flex items-center justify-center gap-4 sm:gap-6 mb-8 bg-[#D9D9D9] py-3 sm:py-4 border-y-4 border-[#00183F]">
-                 <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${roundData.userAdvanced ? "text-emerald-600" : "text-[#00183F]"}`}>{userPenScore}</span>
+                 <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (team1Won ? "text-sky-600" : "text-[#00183F]") : (roundData.userAdvanced ? "text-emerald-600" : "text-[#00183F]")}`}>{userPenScore}</span>
                  <span className="text-gray-500 font-black text-lg sm:text-xl md:text-2xl">X</span>
-                 <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${!roundData.userAdvanced ? "text-rose-600" : "text-[#00183F]"}`}>{oppPenScore}</span>
+                 <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (!team1Won ? "text-sky-600" : "text-[#00183F]") : (!roundData.userAdvanced ? "text-rose-600" : "text-[#00183F]")}`}>{oppPenScore}</span>
               </div>
 
               <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-4 text-[10px] md:text-sm font-bold uppercase tracking-wide">
                 
                 <div className="flex-1 flex flex-col items-start gap-2 sm:gap-3 min-w-0">
-                  <span className="text-[#0033A0] font-black border-b-2 border-[#0033A0] pb-1 mb-1 truncate w-full text-left">
-                    {userTeamName}
+                  <span className={`font-black border-b-2 pb-1 mb-1 truncate w-full text-left ${isNeutral ? "text-[#00183F] border-[#00183F]" : "text-[#0033A0] border-[#0033A0]"}`}>
+                    {displayTeam1}
                   </span>
                   {userPenalties.map((pen, i) => (
                     <motion.div 
@@ -242,8 +311,8 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
                 </div>
 
                 <div className="flex-1 flex flex-col items-start sm:items-end gap-2 sm:gap-3 min-w-0">
-                  <span className="text-rose-700 font-black border-b-2 border-rose-700 pb-1 mb-1 truncate w-full text-left sm:text-right">
-                    {roundData.userOpponent}
+                  <span className={`font-black border-b-2 pb-1 mb-1 truncate w-full text-left sm:text-right ${isNeutral ? "text-[#00183F] border-[#00183F]" : "text-rose-700 border-rose-700"}`}>
+                    {displayTeam2}
                   </span>
                   {oppPenalties.map((pen, i) => (
                     <motion.div 
@@ -265,7 +334,7 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
               
               {penaltiesFullyRevealed && (
                 <div className="mt-8 bg-[#00183F] p-3 text-center font-black text-white uppercase tracking-widest border-2 border-white shadow-[4px_4px_0_0_#D9D9D9] text-[10px] sm:text-xs md:text-sm">
-                  {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className={roundData.userAdvanced ? "text-emerald-400" : "text-rose-400"}>{roundData.userAdvanced ? userTeamName : roundData.userOpponent}</span>
+                  {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className={isNeutral ? "text-sky-400" : roundData.userAdvanced ? "text-emerald-400" : "text-rose-400"}>{roundData.winner}</span>
                 </div>
               )}
             </div>
