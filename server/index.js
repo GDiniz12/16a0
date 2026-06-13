@@ -22,6 +22,7 @@ const io = new Server(server, {
 });
 
 const rooms = {};
+const disconnectTimers = {}; // Timers de desconexão pendentes para reconexão mobile
 
 io.on('connection', (socket) => {
   console.log('Novo usuário conectado:', socket.id);
@@ -63,6 +64,10 @@ io.on('connection', (socket) => {
       }]
     };
 
+    // Salva dados no socket para reconexão mobile
+    socket._nickname = data.nickname;
+    socket._roomId = roomId;
+
     socket.join(roomId);
     emitAvailableRooms();
     callback({ success: true, roomId });
@@ -84,10 +89,50 @@ io.on('connection', (socket) => {
       teamData: null
     });
 
+    // Salva dados no socket para reconexão mobile
+    socket._nickname = data.nickname;
+    socket._roomId = data.roomId;
+
     socket.join(room.id);
     io.to(room.id).emit('roomUpdated', getSafeRoom(room));
     emitAvailableRooms();
     callback({ success: true, roomId: room.id });
+  });
+
+  // Reconexão mobile — jogador que trocou de aba/app e voltou
+  socket.on('rejoinRoom', ({ nickname, roomId }, callback) => {
+    const room = rooms[roomId];
+    if (!room) return callback({ success: false, message: 'Sala não encontrada.' });
+
+    const player = room.players.find(p => p.nickname === nickname);
+    if (!player) return callback({ success: false, message: 'Jogador não encontrado na sala.' });
+
+    // Cancela o timer de desconexão pendente, se existir
+    const timerKey = `${nickname}::${roomId}`;
+    if (disconnectTimers[timerKey]) {
+      clearTimeout(disconnectTimers[timerKey]);
+      delete disconnectTimers[timerKey];
+      console.log(`Reconexão: timer cancelado para ${nickname} na sala ${roomId}`);
+    }
+
+    const oldId = player.id;
+
+    // Atualiza o id do jogador para o novo socket
+    player.id = socket.id;
+    socket.join(roomId);
+
+    // Se o jogador antigo era o host, atualiza o host
+    if (room.host === oldId) {
+      room.host = socket.id;
+    }
+
+    // Salva dados no socket para futuras reconexões
+    socket._nickname = nickname;
+    socket._roomId = roomId;
+
+    io.to(roomId).emit('roomUpdated', getSafeRoom(room));
+    console.log(`Jogador ${nickname} reconectou na sala ${roomId} (${oldId} -> ${socket.id})`);
+    callback({ success: true, room: getSafeRoom(room) });
   });
 
   socket.on('getRoom', (roomId, callback) => {
@@ -115,8 +160,21 @@ io.on('connection', (socket) => {
     if (room) {
       const index = room.players.findIndex(p => p.id === socket.id);
       if (index !== -1) {
+        // Limpa timer de desconexão pendente, se existir
+        const nickname = room.players[index].nickname;
+        const timerKey = `${nickname}::${roomId}`;
+        if (disconnectTimers[timerKey]) {
+          clearTimeout(disconnectTimers[timerKey]);
+          delete disconnectTimers[timerKey];
+        }
+
         room.players.splice(index, 1);
         socket.leave(roomId);
+
+        // Limpa dados de reconexão do socket
+        socket._nickname = null;
+        socket._roomId = null;
+
         if (room.players.length === 0) delete rooms[roomId];
         else {
           if (room.host === socket.id) room.host = room.players[0].id;
@@ -131,6 +189,15 @@ io.on('connection', (socket) => {
   socket.on('cancelRoom', (roomId, callback) => {
     const room = rooms[roomId];
     if (room && room.host === socket.id) {
+      // Limpa todos os timers de desconexão dos jogadores desta sala
+      for (const player of room.players) {
+        const timerKey = `${player.nickname}::${roomId}`;
+        if (disconnectTimers[timerKey]) {
+          clearTimeout(disconnectTimers[timerKey]);
+          delete disconnectTimers[timerKey];
+        }
+      }
+
       io.to(roomId).emit('roomCancelled');
       delete rooms[roomId];
       emitAvailableRooms();
@@ -165,19 +232,45 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    for (const roomId in rooms) {
-      const room = rooms[roomId];
-      const playerIndex = room.players.findIndex(p => p.id === socket.id);
-      if (playerIndex !== -1) {
-        room.players.splice(playerIndex, 1);
-        if (room.players.length === 0) delete rooms[roomId]; 
-        else {
-          if (room.host === socket.id) room.host = room.players[0].id;
-          io.to(roomId).emit('roomUpdated', getSafeRoom(room));
-        }
-        emitAvailableRooms();
+    const nickname = socket._nickname;
+    const roomId = socket._roomId;
+
+    // Se o socket não tinha sala/nickname, nada a fazer
+    if (!nickname || !roomId) return;
+
+    const room = rooms[roomId];
+    if (!room) return;
+
+    const playerIndex = room.players.findIndex(p => p.id === socket.id);
+    if (playerIndex === -1) return;
+
+    // Inicia um timer de 15 segundos antes de remover o jogador (reconexão mobile)
+    const timerKey = `${nickname}::${roomId}`;
+    console.log(`Desconexão detectada: ${nickname} na sala ${roomId}. Aguardando 15s para reconexão...`);
+
+    disconnectTimers[timerKey] = setTimeout(() => {
+      delete disconnectTimers[timerKey];
+
+      // Verifica se a sala ainda existe
+      const currentRoom = rooms[roomId];
+      if (!currentRoom) return;
+
+      // Verifica se o jogador ainda está na sala (pode ter reconectado com outro nickname)
+      const idx = currentRoom.players.findIndex(p => p.nickname === nickname);
+      if (idx === -1) return;
+
+      // Remove o jogador após o timeout
+      currentRoom.players.splice(idx, 1);
+      console.log(`Jogador ${nickname} removido da sala ${roomId} após timeout de reconexão.`);
+
+      if (currentRoom.players.length === 0) {
+        delete rooms[roomId];
+      } else {
+        if (currentRoom.host === socket.id) currentRoom.host = currentRoom.players[0].id;
+        io.to(roomId).emit('roomUpdated', getSafeRoom(currentRoom));
       }
-    }
+      emitAvailableRooms();
+    }, 15000);
   });
 });
 

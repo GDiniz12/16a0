@@ -9,7 +9,7 @@ export default function LobbyPage() {
   const params = useParams();
   const roomId = params.id as string;
   
-  const { socket, currentRoom, setCurrentRoom, nickname, setNickname } = useSocket();
+  const { socket, currentRoom, setCurrentRoom, nickname, setNickname, saveSession, clearSession } = useSocket();
   const [errorMsg, setErrorMsg] = useState("");
   
   // Estados para o acesso via Link Direto
@@ -25,6 +25,7 @@ export default function LobbyPage() {
       socket.emit("getRoom", roomId, (response: any) => {
         if (response.success) {
           setCurrentRoom(response.room);
+          saveSession(roomId);
           setShowJoinForm(false);
         } else {
           if (response.reason === 'not_in_room') {
@@ -48,6 +49,7 @@ export default function LobbyPage() {
     const onRoomUpdated = (roomData: any) => setCurrentRoom(roomData);
     const onGameStarted = () => router.push(`/formation?onlineRoom=${roomId}`);
     const onRoomCancelled = () => {
+      clearSession();
       alert("O host cancelou esta sala.");
       router.push("/online");
     };
@@ -77,6 +79,7 @@ export default function LobbyPage() {
   };
 
   const handleLeaveRoom = () => {
+    clearSession();
     socket?.emit("leaveRoom", roomId, () => {
       router.push("/online");
     });
@@ -84,6 +87,7 @@ export default function LobbyPage() {
 
   const handleCancelRoom = () => {
     if (confirm("Tem certeza que deseja cancelar a sala? Todos serão desconectados.")) {
+      clearSession();
       socket?.emit("cancelRoom", roomId, () => {
         router.push("/online");
       });
@@ -97,6 +101,7 @@ export default function LobbyPage() {
     socket?.emit("joinRoom", { roomId, nickname: joinNickname, password: joinPassword }, (res: any) => {
       if (res.success) {
         setNickname(joinNickname);
+        saveSession(roomId);
         setShowJoinForm(false);
         // Atualiza os dados da sala logo após entrar
         socket.emit("getRoom", roomId, (resp: any) => {

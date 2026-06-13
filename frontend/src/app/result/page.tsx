@@ -14,13 +14,14 @@ import TournamentBracket from "@/components/TournamentBracket";
 export default function ResultPage() {
   const router = useRouter();
   const { lang } = useLanguage();
-  const { socket, currentRoom, setCurrentRoom } = useSocket();
+  const { socket, currentRoom, setCurrentRoom, clearSession } = useSocket();
   
   // Lendo as propriedades reais expostas pelo seu GameContext
   const { slots, stats, isChampion, resetGame, userTeamName, knockoutRounds } = useGame();
 
   const handleBackToHome = () => {
     // Limpa a sala online (se houver) para não poluir o modo offline
+    clearSession();
     if (currentRoom) {
       socket?.emit("leaveRoom", currentRoom.id);
       setCurrentRoom(null);
