@@ -60,7 +60,8 @@ export default function PlayerMarker({
               : "bg-white/10 border-dashed border-white/60 text-white/90"
           }
           ${isHighlighted ? "ring-2 md:ring-4 ring-yellow-400 border-solid animate-pulse-soft" : ""}
-          ${onClick && !hasPlayer ? "cursor-pointer hover:bg-white/20" : ""}
+          ${onClick ? "cursor-pointer" : ""}
+          ${onClick && !hasPlayer ? "hover:bg-white/20" : ""}
         `}
       >
         {/* Posição no topo do card */}

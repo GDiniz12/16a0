@@ -25,13 +25,15 @@ export default function DraftPage() {
   const {
     draftRound, currentDraftTeam, currentDraftManagers, manager,
     assignManager, slots, formation, assignPlayerToSlot, drawNextTeam, gameMode,
-    tactic, setOnlineTournamentState
+    tactic, setOnlineTournamentState, swapPlayers
   } = useGame();
 
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showPositionPicker, setShowPositionPicker] = useState(false);
   const [showChemModal, setShowChemModal] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<FormationSlot[]>([]);
+  const [swapSourceSlot, setSwapSourceSlot] = useState<FormationSlot | null>(null);
+  const [swapAvailableSlots, setSwapAvailableSlots] = useState<FormationSlot[]>([]);
   
   const allTeams = useMemo(() => getAllTeams(americans, europeans), []);
   const [isRolling, setIsRolling] = useState(false);
@@ -176,20 +178,72 @@ export default function DraftPage() {
     setAvailableSlots(avail);
   };
 
+  const startSwap = (slot: FormationSlot) => {
+    const player = slot.player;
+    if (!player) return;
+
+    const validSlots = slots.filter(targetSlot => {
+      if (targetSlot.id === slot.id) return false;
+      
+      const p1CanPlayTarget = player.positions.includes(targetSlot.position);
+      if (!p1CanPlayTarget) return false;
+
+      if (targetSlot.player) {
+        return targetSlot.player.positions.includes(slot.position);
+      }
+      
+      return true;
+    });
+
+    if (validSlots.length > 0) {
+      setSwapSourceSlot(slot);
+      setSwapAvailableSlots(validSlots);
+    }
+  };
+
   const handleSlotClick = (slotId: number) => {
     if (selectedPlayer && highlightedSlotIds.includes(slotId)) {
       assignPlayerToSlot(selectedPlayer, slotId);
       setSelectedPlayer(null);
       setAvailableSlots([]);
+      return;
+    }
+
+    if (swapSourceSlot) {
+      if (swapAvailableSlots.find(s => s.id === slotId)) {
+        swapPlayers(swapSourceSlot.id, slotId);
+        setSwapSourceSlot(null);
+        setSwapAvailableSlots([]);
+      } else {
+        const clickedSlot = slots.find(s => s.id === slotId);
+        if (clickedSlot?.player && clickedSlot.id !== swapSourceSlot.id) {
+          startSwap(clickedSlot);
+        } else {
+          setSwapSourceSlot(null);
+          setSwapAvailableSlots([]);
+        }
+      }
+      return;
+    }
+
+    if (!selectedPlayer && !swapSourceSlot) {
+      const clickedSlot = slots.find(s => s.id === slotId);
+      if (clickedSlot?.player) {
+        startSwap(clickedSlot);
+      }
     }
   };
 
   const handleCancel = () => {
     setSelectedPlayer(null);
     setAvailableSlots([]);
+    setSwapSourceSlot(null);
+    setSwapAvailableSlots([]);
   };
 
-  const highlightedSlotIds = availableSlots.map((s) => s.id);
+  const highlightedSlotIds = selectedPlayer 
+    ? availableSlots.map((s) => s.id) 
+    : (swapSourceSlot ? swapAvailableSlots.map(s => s.id) : []);
   const { lang } = useLanguage();
 
   const tDraft = {
@@ -436,6 +490,16 @@ export default function DraftPage() {
                <div className="bg-amber-400 border-4 border-[#00183F] p-3 mb-4 flex justify-between items-center shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]">
                  <span className="text-[#00183F] font-black uppercase text-xs md:text-sm">
                    ESCOLHA A POSIÇÃO NO CAMPO PARA {selectedPlayer.name}
+                 </span>
+                 <button onClick={handleCancel} className="bg-rose-500 text-white font-black text-xs px-2 py-1 border-2 border-[#00183F] hover:bg-rose-600 transition-colors">
+                   CANCELAR
+                 </button>
+               </div>
+            )}
+            {swapSourceSlot && !selectedPlayer && (
+               <div className="bg-sky-400 border-4 border-[#00183F] p-3 mb-4 flex justify-between items-center shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]">
+                 <span className="text-[#00183F] font-black uppercase text-xs md:text-sm">
+                   TROCAR POSIÇÃO DE {swapSourceSlot.player?.name}
                  </span>
                  <button onClick={handleCancel} className="bg-rose-500 text-white font-black text-xs px-2 py-1 border-2 border-[#00183F] hover:bg-rose-600 transition-colors">
                    CANCELAR

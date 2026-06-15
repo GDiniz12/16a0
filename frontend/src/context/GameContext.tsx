@@ -42,6 +42,7 @@ interface GameContextType extends GameState {
   setPhase: (p: GamePhase) => void;
   setOnlineTournamentState: (data: any, nickname: string) => void;
   resetGame: () => void;
+  swapPlayers: (slotId1: number, slotId2: number) => void;
 }
 
 const initialStats: GameStats = { wins: 0, losses: 0, draws: 0, goalsScored: 0, goalsConceded: 0 };
@@ -107,6 +108,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const assignManager = useCallback((manager: Manager) => {
     setState((prev) => {
       return { ...prev, manager, draftRound: prev.draftRound + 1, currentDraftManagers: [] };
+    });
+  }, []);
+
+  const swapPlayers = useCallback((slotId1: number, slotId2: number) => {
+    setState((prev) => {
+      const s1 = prev.slots.find(s => s.id === slotId1);
+      const s2 = prev.slots.find(s => s.id === slotId2);
+      if (!s1 || !s2) return prev;
+      
+      const newSlots = prev.slots.map(s => {
+        if (s.id === slotId1) return { ...s, player: s2.player };
+        if (s.id === slotId2) return { ...s, player: s1.player };
+        return s;
+      });
+      return { ...prev, slots: newSlots };
     });
   }, []);
 
@@ -244,7 +260,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetGame = useCallback(() => setState({ ...initialState, userTeamName: TRANSLATIONS[lang].your_team }), [lang]);
 
   return (
-    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame }}>
+    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers }}>
       {children}
     </GameContext.Provider>
   );

@@ -33,6 +33,8 @@ export default function FormationPage() {
     }
   }, [currentRoom, setGameMode, setDifficulty]);
 
+  const [infoModal, setInfoModal] = React.useState<string | null>(null);
+
   const handleBegin = () => {
     if (!formation) return;
     setPhase("draft");
@@ -43,7 +45,6 @@ export default function FormationPage() {
   const t = TRANSLATIONS[lang];
   const isPt = lang === "pt";
 
-  // Gera o texto superior para informar o jogador de forma explícita
   const getSubtitle = () => {
     if (!currentRoom) return t.choose_formation_sub;
     if (currentRoom.mode === 'guerra') return "Online: GUERRA (Mata-Mata Direto)";
@@ -54,12 +55,45 @@ export default function FormationPage() {
     return `Online: Tradicional | Draft: ${translatedMode} | Dif: ${translatedDiff}`;
   };
 
+  const infoTexts: Record<string, { title: string, content: string }> = {
+    classic: {
+      title: isPt ? "Modo Clássico" : "Classic Mode",
+      content: isPt 
+        ? "No modo clássico, o seu time participará de uma fase de pontos corridos com outros 35 times (formato de liga, como o novo formato da Champions League). Os 16 melhores avançam para a fase de mata-mata! É um campeonato mais longo e permite se recuperar de eventuais tropeços." 
+        : "In classic mode, your team will play in a league phase against 35 other teams (Champions League style format). The top 16 advance to the knockout stage! It's a longer tournament and allows you to recover from mistakes."
+    },
+    hardcore: {
+      title: isPt ? "Modo Hardcore" : "Hardcore Mode",
+      content: isPt
+        ? "No modo hardcore, é mata-mata desde o início! Perdeu, está fora. Você não tem segundas chances para arrumar a equipe, além de ter menos opções de refazer escolhas (rerolls) no momento de recrutar seus jogadores no Draft."
+        : "In hardcore mode, it's a straight knockout from the start! Lose and you're out. You have no second chances to fix your team, plus fewer re-rolls when drafting players."
+    },
+    defensive: {
+      title: isPt ? "Tática Defensiva" : "Defensive Tactic",
+      content: isPt
+        ? "Foco na defesa (Retranca).\n\nPrós: Reduz drasticamente as chances do adversário marcar e fortalece o seu sistema defensivo.\nContras: Sua equipe fará menos gols e terá muita dificuldade contra defesas muito fechadas."
+        : "Focus on defense.\n\nPros: Drastically reduces the opponent's chances of scoring and strengthens your defensive line.\nCons: Your team will score fewer goals and struggle against deep defenses."
+    },
+    balanced: {
+      title: isPt ? "Tática Equilibrada" : "Balanced Tactic",
+      content: isPt
+        ? "O time ataca e defende de forma padronizada.\n\nSem expor muito a defesa, mas também sem sufocar o adversário no ataque. Ideal para quando você tem um time muito bem balanceado e não quer se arriscar muito."
+        : "Standard attack and defense.\n\nDoesn't expose the defense too much, but also doesn't overwhelm the opponent in attack. Ideal when you have a very balanced team and don't want to take extreme risks."
+    },
+    offensive: {
+      title: isPt ? "Tática Ofensiva" : "Offensive Tactic",
+      content: isPt
+        ? "Foco total no ataque (Pressão).\n\nPrós: Aumenta muito as chances de marcar gols e dominar a posse de bola no ataque.\nContras: Deixa sua defesa vulnerável a contra-ataques, podendo sofrer muitos gols se o adversário for forte e rápido."
+        : "Total focus on attack.\n\nPros: Greatly increases chances of scoring and dominating possession.\nCons: Leaves your defense vulnerable to counterattacks, risking many conceded goals against strong opponents."
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#00183F] px-4 py-12 flex flex-col items-center font-sans text-white relative">
       {!currentRoom && (
         <button 
           onClick={() => router.push("/")}
-          className="absolute top-4 left-4 md:top-6 md:left-6 bg-white text-[#00183F] px-4 py-2 font-black uppercase text-sm border-4 border-transparent hover:border-amber-400 hover:-translate-y-1 transition-all z-50"
+          className="absolute top-4 left-4 md:top-6 md:left-6 bg-white text-[#00183F] px-4 py-2 font-black uppercase text-sm border-4 border-transparent hover:border-amber-400 hover:-translate-y-1 transition-all z-40"
         >
           ← {isPt ? 'Voltar' : 'Back'}
         </button>
@@ -89,11 +123,27 @@ export default function FormationPage() {
                   {isPt ? "Modo" : "Mode"}
                 </h2>
                 <div className="flex flex-col gap-3 w-full">
-                  <button onClick={() => setGameMode("classic")} className={`flex flex-col items-center justify-center p-3 border-4 border-[#00183F] w-full transition-all duration-75 ${gameMode === 'classic' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                    <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Clássico' : 'Classic'}</span>
+                  <button onClick={() => setGameMode("classic")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 w-full ${gameMode === 'classic' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                    <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                      {gameMode === 'classic' && <span className="text-amber-400">✅</span>} {isPt ? 'Clássico' : 'Classic'}
+                    </span>
+                    <div 
+                      onClick={(e) => { e.stopPropagation(); setInfoModal('classic'); }}
+                      className="absolute right-3 w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center border border-current text-sm font-bold transition-colors cursor-help"
+                    >
+                      ?
+                    </div>
                   </button>
-                  <button onClick={() => setGameMode("hardcore")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 w-full ${gameMode === 'hardcore' ? 'bg-rose-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-[#00183F]' : 'bg-[#1E293B] text-rose-500 shadow-[4px_4px_0_0_#9f1239] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F]'}`}>
-                    <span className="text-lg font-black uppercase tracking-widest">Hardcore</span>
+                  <button onClick={() => setGameMode("hardcore")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 w-full ${gameMode === 'hardcore' ? 'bg-rose-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#1E293B] text-rose-500 shadow-[4px_4px_0_0_#9f1239] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                    <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                      {gameMode === 'hardcore' && <span className="text-amber-400">✅</span>} Hardcore
+                    </span>
+                    <div 
+                      onClick={(e) => { e.stopPropagation(); setInfoModal('hardcore'); }}
+                      className="absolute right-3 w-6 h-6 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center border border-current text-sm font-bold transition-colors cursor-help"
+                    >
+                      ?
+                    </div>
                   </button>
                 </div>
               </div>
@@ -103,14 +153,20 @@ export default function FormationPage() {
                   {isPt ? "Dificuldade" : "Difficulty"}
                 </h2>
                 <div className="flex flex-col gap-3 w-full">
-                  <button onClick={() => setDifficulty("easy")} className={`p-3 border-4 border-[#00183F] transition-all duration-75 ${difficulty === 'easy' ? 'bg-emerald-600 text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white text-[#00183F] shadow-[4px_4px_0_0_#059669] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                    <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Fácil' : 'Easy'}</span>
+                  <button onClick={() => setDifficulty("easy")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${difficulty === 'easy' ? 'bg-emerald-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#059669] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                    <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                      {difficulty === 'easy' && <span className="text-amber-400">✅</span>} {isPt ? 'Fácil' : 'Easy'}
+                    </span>
                   </button>
-                  <button onClick={() => setDifficulty("medium")} className={`p-3 border-4 border-[#00183F] transition-all duration-75 ${difficulty === 'medium' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                    <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Médio' : 'Medium'}</span>
+                  <button onClick={() => setDifficulty("medium")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${difficulty === 'medium' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                    <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                      {difficulty === 'medium' && <span className="text-amber-400">✅</span>} {isPt ? 'Médio' : 'Medium'}
+                    </span>
                   </button>
-                  <button onClick={() => setDifficulty("impossible")} className={`p-3 border-4 border-[#00183F] transition-all duration-75 ${difficulty === 'impossible' ? 'bg-zinc-900 text-red-500 translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-[#1E293B] text-red-500 shadow-[4px_4px_0_0_#000000] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                    <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Impossível' : 'Impossible'}</span>
+                  <button onClick={() => setDifficulty("impossible")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${difficulty === 'impossible' ? 'bg-zinc-900 text-red-500 translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#1E293B] text-red-500 shadow-[4px_4px_0_0_#000000] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                    <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                      {difficulty === 'impossible' && <span className="text-amber-400">✅</span>} {isPt ? 'Impossível' : 'Impossible'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -123,14 +179,38 @@ export default function FormationPage() {
               {isPt ? "Sua Tática" : "Your Tactics"}
             </h2>
             <div className="flex flex-col gap-3 w-full">
-              <button onClick={() => setTactic("defensive")} className={`p-3 border-4 border-[#00183F] transition-all duration-75 ${tactic === 'defensive' ? 'bg-cyan-600 text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white text-[#00183F] shadow-[4px_4px_0_0_#0891b2] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Defensivo' : 'Defensive'}</span>
+              <button onClick={() => setTactic("defensive")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${tactic === 'defensive' ? 'bg-cyan-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0891b2] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                  {tactic === 'defensive' && <span className="text-amber-400">✅</span>} {isPt ? 'Defensivo' : 'Defensive'}
+                </span>
+                <div 
+                  onClick={(e) => { e.stopPropagation(); setInfoModal('defensive'); }}
+                  className="absolute right-3 w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center border border-current text-sm font-bold transition-colors cursor-help"
+                >
+                  ?
+                </div>
               </button>
-              <button onClick={() => setTactic("balanced")} className={`p-3 border-4 border-[#00183F] transition-all duration-75 ${tactic === 'balanced' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Equilibrado' : 'Balanced'}</span>
+              <button onClick={() => setTactic("balanced")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${tactic === 'balanced' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                  {tactic === 'balanced' && <span className="text-amber-400">✅</span>} {isPt ? 'Equilibrado' : 'Balanced'}
+                </span>
+                <div 
+                  onClick={(e) => { e.stopPropagation(); setInfoModal('balanced'); }}
+                  className="absolute right-3 w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center border border-current text-sm font-bold transition-colors cursor-help"
+                >
+                  ?
+                </div>
               </button>
-              <button onClick={() => setTactic("offensive")} className={`p-3 border-4 border-[#00183F] transition-all duration-75 ${tactic === 'offensive' ? 'bg-orange-500 text-white translate-x-[2px] translate-y-[2px] shadow-none' : 'bg-white text-[#00183F] shadow-[4px_4px_0_0_#ea580c] hover:-translate-y-1 hover:-translate-x-1'}`}>
-                <span className="text-lg font-black uppercase tracking-widest">{isPt ? 'Ofensivo' : 'Offensive'}</span>
+              <button onClick={() => setTactic("offensive")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${tactic === 'offensive' ? 'bg-orange-500 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#ea580c] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
+                <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                  {tactic === 'offensive' && <span className="text-amber-400">✅</span>} {isPt ? 'Ofensivo' : 'Offensive'}
+                </span>
+                <div 
+                  onClick={(e) => { e.stopPropagation(); setInfoModal('offensive'); }}
+                  className="absolute right-3 w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center border border-current text-sm font-bold transition-colors cursor-help"
+                >
+                  ?
+                </div>
               </button>
             </div>
           </div>
@@ -143,12 +223,12 @@ export default function FormationPage() {
               key={f}
               onClick={() => setFormation(f)}
               className={`
-                px-6 py-3 md:px-8 md:py-4 font-black text-xl md:text-2xl uppercase tracking-widest
-                transition-all duration-75 border-4 border-[#00183F] rounded-none
-                ${formation === f ? "bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none" : "bg-white text-[#00183F] hover:bg-[#D9D9D9] shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_#0033A0]"}
+                px-6 py-3 md:px-8 md:py-4 font-black text-xl md:text-2xl uppercase tracking-widest flex items-center gap-2
+                transition-all duration-75 border-4 rounded-none
+                ${formation === f ? "bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400" : "bg-white text-[#00183F] border-[#00183F] hover:bg-[#D9D9D9] shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 opacity-70 hover:opacity-100"}
               `}
             >
-              {f}
+              {formation === f && <span className="text-amber-400 text-lg">✅</span>} {f}
             </button>
           ))}
         </div>
@@ -169,12 +249,37 @@ export default function FormationPage() {
           )}
         </div>
 
-        <div className="text-center">
+        <div className="text-center pb-12">
           <Button variant="primary" size="lg" onClick={handleBegin} disabled={!formation} className="w-full md:w-auto min-w-[300px]">
             {t.begin_draft}
           </Button>
         </div>
       </motion.div>
+
+      {infoModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#D9D9D9] border-4 border-[#00183F] p-6 max-w-lg w-full text-[#00183F] shadow-[10px_10px_0_0_#0033A0] flex flex-col relative">
+            <button
+              onClick={() => setInfoModal(null)}
+              className="absolute top-2 right-2 text-2xl font-black text-[#00183F] hover:text-red-600 transition-colors"
+            >
+              ×
+            </button>
+            <h2 className="text-2xl font-black uppercase tracking-tight mb-4 border-b-4 border-[#0033A0] pb-2 inline-block self-start">
+              {infoTexts[infoModal]?.title}
+            </h2>
+            <div className="font-bold text-sm md:text-base whitespace-pre-wrap leading-relaxed">
+              {infoTexts[infoModal]?.content}
+            </div>
+            <button
+              onClick={() => setInfoModal(null)}
+              className="mt-6 w-full bg-[#0033A0] text-white border-2 border-[#00183F] py-3 font-black uppercase tracking-widest shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#00183F] transition-all text-lg"
+            >
+              {isPt ? "Entendi" : "Got it"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
