@@ -163,19 +163,6 @@ export default function ResultPage() {
               </div>
             </div>
             
-            {manager && (
-              <div className="mb-4 bg-[#D9D9D9]/50 border-2 border-[#00183F] p-3 flex justify-between items-center text-[#00183F]">
-                <div className="flex flex-col">
-                  <span className="text-[10px] md:text-xs font-black uppercase text-gray-500">Técnico</span>
-                  <span className="font-black text-sm md:text-base uppercase">{manager.tecnico}</span>
-                </div>
-                <div className="text-right flex flex-col">
-                  <span className="text-[10px] md:text-xs font-black uppercase text-gray-500">Nacionalidade</span>
-                  <span className="font-black text-sm md:text-base uppercase">{manager.nacionalidade}</span>
-                </div>
-              </div>
-            )}
-            
             <div className="bg-[#1E293B] p-4 border-4 border-[#00183F]">
               <FootballPitch slots={slots} manager={manager} />
             </div>
