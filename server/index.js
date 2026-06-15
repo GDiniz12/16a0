@@ -42,13 +42,17 @@ io.on('connection', (socket) => {
   emitAvailableRooms();
 
   socket.on('createRoom', (data, callback) => {
+    const isAlreadyInRoom = Object.values(rooms).some(r => r.players.some(p => p.id === socket.id));
+    if (isAlreadyInRoom) return callback({ success: false, message: 'Você já está em uma sala.' });
+
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const cleanNickname = data.nickname.trim();
     
     rooms[roomId] = {
       id: roomId,
-      name: data.roomName || `Sala de ${data.nickname}`,
+      name: data.roomName || `Sala de ${cleanNickname}`,
       host: socket.id,
-      hostNickname: data.nickname,
+      hostNickname: cleanNickname,
       mode: data.mode,
       draftMode: data.mode === 'tradicional' ? (data.draftMode || 'classic') : 'classic',
       difficulty: data.mode === 'tradicional' ? (data.difficulty || 'medium') : 'medium',
@@ -58,7 +62,7 @@ io.on('connection', (socket) => {
       status: 'waiting',
       players: [{
         id: socket.id,
-        nickname: data.nickname,
+        nickname: cleanNickname,
         isReady: false,
         draftFinished: false,
         teamData: null
@@ -75,17 +79,22 @@ io.on('connection', (socket) => {
   });
 
   socket.on('joinRoom', (data, callback) => {
+    const isAlreadyInRoom = Object.values(rooms).some(r => r.players.some(p => p.id === socket.id));
+    if (isAlreadyInRoom) return callback({ success: false, message: 'Você já está em uma sala.' });
+
     const room = rooms[data.roomId];
 
     if (!room) return callback({ success: false, message: 'Sala não encontrada.' });
     if (room.status !== 'waiting') return callback({ success: false, message: 'Jogo já em andamento.' });
     if (room.players.length >= room.maxPlayers) return callback({ success: false, message: 'Sala cheia.' });
     if (room.hasPassword && room.password !== data.password) return callback({ success: false, message: 'Senha incorreta.' });
-    if (room.players.some(p => p.nickname === data.nickname)) return callback({ success: false, message: 'Este nickname já está em uso nesta sala.' });
+    
+    const cleanNickname = data.nickname.trim();
+    if (room.players.some(p => p.nickname.toLowerCase() === cleanNickname.toLowerCase())) return callback({ success: false, message: 'Este nickname já está em uso nesta sala.' });
 
     room.players.push({
       id: socket.id,
-      nickname: data.nickname,
+      nickname: cleanNickname,
       isReady: false,
       draftFinished: false,
       teamData: null
