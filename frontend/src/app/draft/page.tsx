@@ -445,7 +445,7 @@ export default function DraftPage() {
             </>
           ) : (
             <>
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 md:mb-6 gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border-4 border-[#00183F] p-4 shadow-[6px_6px_0_0_#0033A0] mb-4 md:mb-6 gap-4">
                 <div>
                   <h3 className="text-base md:text-lg font-black text-[#00183F] uppercase leading-none">
                     {tDraft.title}
