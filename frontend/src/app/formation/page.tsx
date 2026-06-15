@@ -65,8 +65,8 @@ export default function FormationPage() {
     hardcore: {
       title: isPt ? "Modo Hardcore" : "Hardcore Mode",
       content: isPt
-        ? "No modo hardcore, é mata-mata desde o início! Perdeu, está fora. Você não tem segundas chances para arrumar a equipe, além de ter menos opções de refazer escolhas (rerolls) no momento de recrutar seus jogadores no Draft."
-        : "In hardcore mode, it's a straight knockout from the start! Lose and you're out. You have no second chances to fix your team, plus fewer re-rolls when drafting players."
+        ? "No modo hardcore, o campeonato funciona da mesma forma que o clássico, com fase de liga e mata-mata.\n\nA diferença é a dificuldade extrema na montagem do time: você terá apenas 1 opção de refazer escolha (re-roll), e as cartas dos jogadores não mostrarão o overall nem a nacionalidade. Você precisa conhecer o jogador pelo nome e clube!"
+        : "In hardcore mode, the tournament works just like classic mode, with a league phase and knockout stage.\n\nThe difference is the extreme difficulty when drafting: you will only have 1 re-roll option, and the player cards will hide their overall rating and nationality. You must know the player by name and club!"
     },
     defensive: {
       title: isPt ? "Tática Defensiva" : "Defensive Tactic",
@@ -125,7 +125,7 @@ export default function FormationPage() {
                 <div className="flex flex-col gap-3 w-full">
                   <button onClick={() => setGameMode("classic")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 w-full ${gameMode === 'classic' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                     <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                      {gameMode === 'classic' && <span className="text-amber-400">✅</span>} {isPt ? 'Clássico' : 'Classic'}
+                      {isPt ? 'Clássico' : 'Classic'}
                     </span>
                     <div 
                       onClick={(e) => { e.stopPropagation(); setInfoModal('classic'); }}
@@ -136,7 +136,7 @@ export default function FormationPage() {
                   </button>
                   <button onClick={() => setGameMode("hardcore")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 w-full ${gameMode === 'hardcore' ? 'bg-rose-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#1E293B] text-rose-500 shadow-[4px_4px_0_0_#9f1239] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                     <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                      {gameMode === 'hardcore' && <span className="text-amber-400">✅</span>} Hardcore
+                      Hardcore
                     </span>
                     <div 
                       onClick={(e) => { e.stopPropagation(); setInfoModal('hardcore'); }}
@@ -155,17 +155,17 @@ export default function FormationPage() {
                 <div className="flex flex-col gap-3 w-full">
                   <button onClick={() => setDifficulty("easy")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${difficulty === 'easy' ? 'bg-emerald-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#059669] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                     <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                      {difficulty === 'easy' && <span className="text-amber-400">✅</span>} {isPt ? 'Fácil' : 'Easy'}
+                      {isPt ? 'Fácil' : 'Easy'}
                     </span>
                   </button>
                   <button onClick={() => setDifficulty("medium")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${difficulty === 'medium' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                     <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                      {difficulty === 'medium' && <span className="text-amber-400">✅</span>} {isPt ? 'Médio' : 'Medium'}
+                      {isPt ? 'Médio' : 'Medium'}
                     </span>
                   </button>
                   <button onClick={() => setDifficulty("impossible")} className={`flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${difficulty === 'impossible' ? 'bg-zinc-900 text-red-500 translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#1E293B] text-red-500 shadow-[4px_4px_0_0_#000000] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                     <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                      {difficulty === 'impossible' && <span className="text-amber-400">✅</span>} {isPt ? 'Impossível' : 'Impossible'}
+                      {isPt ? 'Impossível' : 'Impossible'}
                     </span>
                   </button>
                 </div>
@@ -181,7 +181,7 @@ export default function FormationPage() {
             <div className="flex flex-col gap-3 w-full">
               <button onClick={() => setTactic("defensive")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${tactic === 'defensive' ? 'bg-cyan-600 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0891b2] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                 <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                  {tactic === 'defensive' && <span className="text-amber-400">✅</span>} {isPt ? 'Defensivo' : 'Defensive'}
+                  {isPt ? 'Defensivo' : 'Defensive'}
                 </span>
                 <div 
                   onClick={(e) => { e.stopPropagation(); setInfoModal('defensive'); }}
@@ -192,7 +192,7 @@ export default function FormationPage() {
               </button>
               <button onClick={() => setTactic("balanced")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${tactic === 'balanced' ? 'bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                 <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                  {tactic === 'balanced' && <span className="text-amber-400">✅</span>} {isPt ? 'Equilibrado' : 'Balanced'}
+                  {isPt ? 'Equilibrado' : 'Balanced'}
                 </span>
                 <div 
                   onClick={(e) => { e.stopPropagation(); setInfoModal('balanced'); }}
@@ -203,7 +203,7 @@ export default function FormationPage() {
               </button>
               <button onClick={() => setTactic("offensive")} className={`relative flex flex-col items-center justify-center p-3 border-4 transition-all duration-75 ${tactic === 'offensive' ? 'bg-orange-500 text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400' : 'bg-[#E2E8F0] text-[#00183F] shadow-[4px_4px_0_0_#ea580c] hover:-translate-y-1 hover:-translate-x-1 border-[#00183F] opacity-70 hover:opacity-100'}`}>
                 <span className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                  {tactic === 'offensive' && <span className="text-amber-400">✅</span>} {isPt ? 'Ofensivo' : 'Offensive'}
+                  {isPt ? 'Ofensivo' : 'Offensive'}
                 </span>
                 <div 
                   onClick={(e) => { e.stopPropagation(); setInfoModal('offensive'); }}
@@ -223,12 +223,12 @@ export default function FormationPage() {
               key={f}
               onClick={() => setFormation(f)}
               className={`
-                px-6 py-3 md:px-8 md:py-4 font-black text-xl md:text-2xl uppercase tracking-widest flex items-center gap-2
-                transition-all duration-75 border-4 rounded-none
-                ${formation === f ? "bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none border-amber-400" : "bg-white text-[#00183F] border-[#00183F] hover:bg-[#D9D9D9] shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 opacity-70 hover:opacity-100"}
+                px-6 py-3 md:px-8 md:py-4 font-black text-xl md:text-2xl uppercase tracking-widest
+                transition-all duration-75 border-4 border-[#00183F] rounded-none
+                ${formation === f ? "bg-[#0033A0] text-white translate-x-[2px] translate-y-[2px] shadow-none" : "bg-white text-[#00183F] hover:bg-[#D9D9D9] shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_#0033A0]"}
               `}
             >
-              {formation === f && <span className="text-amber-400 text-lg">✅</span>} {f}
+              {f}
             </button>
           ))}
         </div>
