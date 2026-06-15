@@ -180,7 +180,7 @@ export default function OnlinePage() {
               <label className="block font-black uppercase mb-1">Modo de Jogo</label>
               <select className="w-full border-4 border-[#00183F] p-2 font-bold bg-gray-50 uppercase" value={mode} onChange={e => setMode(e.target.value)}>
                 <option value="tradicional">Tradicional (Pontos Corridos + Mata-mata)</option>
-                <option value="guerra">Guerra (Chaveamento Direto PvP - Requer N° Par)</option>
+                <option value="guerra">Guerra (Chaveamento Direto PvP)</option>
               </select>
             </div>
 

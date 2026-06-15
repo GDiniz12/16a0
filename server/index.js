@@ -159,7 +159,7 @@ io.on('connection', (socket) => {
     const room = rooms[roomId];
     if (!room) return;
     if (room.host !== socket.id) return callback({ success: false, message: 'Apenas o host pode iniciar.' });
-    if (room.mode === 'guerra' && room.players.length % 2 !== 0) return callback({ success: false, message: 'Modo Guerra exige número de jogadores par.' });
+    if (room.mode === 'guerra' && room.players.length < 2) return callback({ success: false, message: 'Modo Guerra exige pelo menos 2 jogadores.' });
 
     room.status = 'drafting';
     io.to(roomId).emit('gameStarted');
