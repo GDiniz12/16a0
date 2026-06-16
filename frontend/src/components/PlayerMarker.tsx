@@ -32,6 +32,15 @@ export default function PlayerMarker({
     clubLogo = clubLogos[clubBaseName] || "";
   }
 
+  const getCardStyle = () => {
+    if (!hasPlayer || !slot.player) return "bg-white/10 border-dashed border-white/60 text-white/90";
+    const over = slot.player.overall;
+    if (over >= 93) return "bg-gradient-to-br from-cyan-300 via-blue-500 to-purple-600 border-yellow-300 text-white shadow-[0_0_15px_rgba(168,85,247,0.8)]";
+    if (over >= 85) return "bg-gradient-to-br from-yellow-200 via-amber-400 to-yellow-600 border-yellow-100 text-[#00183F] shadow-[0_0_10px_rgba(251,191,36,0.6)]";
+    if (over >= 75) return "bg-gradient-to-br from-gray-100 via-gray-300 to-gray-400 border-white text-[#00183F] shadow-[0_0_8px_rgba(156,163,175,0.6)]";
+    return "bg-gradient-to-br from-orange-300 via-orange-400 to-orange-600 border-orange-200 text-[#3d1a00] shadow-[0_0_6px_rgba(251,146,60,0.6)]";
+  };
+
   return (
     <div
       className="absolute z-10"
@@ -51,21 +60,16 @@ export default function PlayerMarker({
         className={`
           relative flex flex-col justify-between
           w-[46px] h-[60px] sm:w-[54px] sm:h-[68px] md:w-[72px] md:h-[85px] 
-          border-2 border-[#00183F] text-center
+          border-2 text-center
           transition-colors duration-200 rounded-none overflow-hidden
-          shadow-[2px_2px_0_0_rgba(0,0,0,0.5)] md:shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]
-          ${
-            hasPlayer
-              ? "bg-white text-[#00183F]"
-              : "bg-white/10 border-dashed border-white/60 text-white/90"
-          }
+          ${getCardStyle()}
           ${isHighlighted ? "ring-2 md:ring-4 ring-yellow-400 border-solid animate-pulse-soft" : ""}
           ${onClick ? "cursor-pointer" : ""}
           ${onClick && !hasPlayer ? "hover:bg-white/20" : ""}
         `}
       >
         {/* Posição no topo do card */}
-        <div className={`text-[7px] sm:text-[8px] md:text-[9px] font-black py-0.5 border-b border-[#00183F] w-full ${hasPlayer ? "bg-[#00183F] text-white" : "bg-black/40 text-white"}`}>
+        <div className={`text-[7px] sm:text-[8px] md:text-[9px] font-black py-0.5 border-b border-black/20 w-full ${hasPlayer ? "bg-black/10" : "bg-black/40 text-white"}`}>
           {POSITION_LABELS_MAP[lang][slot.position]}
         </div>
 
@@ -73,7 +77,7 @@ export default function PlayerMarker({
         <div className="flex-1 flex flex-col items-center justify-center p-0.5 w-full">
           {hasPlayer ? (
             <>
-              <span className={`text-sm sm:text-base md:text-xl font-black leading-none ${slot.player!.overall >= 95 ? "text-amber-600" : "text-[#00183F]"}`}>
+              <span className="text-sm sm:text-base md:text-xl font-black leading-none drop-shadow-sm">
                 {slot.player!.overall}
               </span>
               <span className="text-[6px] sm:text-[7px] md:text-[9px] font-bold mt-0.5 md:mt-1 truncate w-full px-0.5">
@@ -89,9 +93,9 @@ export default function PlayerMarker({
                 {/* Escudo do Clube e Ano */}
                 <div className="flex items-center gap-[1px]">
                   {clubLogo && (
-                    <img src={clubLogo} alt="Escudo" className="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] md:w-[14px] md:h-[14px] object-contain drop-shadow-[1px_1px_0_rgba(0,0,0,0.3)]" />
+                    <img src={clubLogo} alt="Escudo" className="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] md:w-[14px] md:h-[14px] object-contain drop-shadow-[1px_1px_0_rgba(255,255,255,0.4)]" />
                   )}
-                  <span className="text-[5px] sm:text-[6px] md:text-[7px] font-black text-[#00183F] leading-none">
+                  <span className="text-[5px] sm:text-[6px] md:text-[7px] font-black leading-none opacity-80">
                     '{yearTwoDigits}
                   </span>
                 </div>
