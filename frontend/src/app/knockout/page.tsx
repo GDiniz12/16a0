@@ -260,50 +260,82 @@ export default function KnockoutPage() {
 
           {showResults && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring" }}
+              transition={{ type: "spring", damping: 15 }}
+              className="mt-8 relative z-50"
             >
               {isChampion ? (
-                <Card className="text-center mb-10 border-8 border-yellow-400 bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 p-8 md:p-14 shadow-[12px_12px_0_0_#b45309] relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.4) 20px, rgba(255,255,255,0.4) 40px)" }} />
-                  <div className="relative z-10 flex flex-col items-center">
+                <div className="relative group overflow-hidden rounded-2xl border-[12px] border-amber-400 bg-[#111] p-1 shadow-[0_0_80px_rgba(251,191,36,0.6)] text-center">
+                  <div className="absolute inset-0 bg-gradient-to-t from-amber-600 via-transparent to-transparent opacity-80" />
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 animate-pulse" />
+                  
+                  {/* Luz Giratória de Fundo */}
+                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(251,191,36,0.3)_360deg)] animate-[spin_4s_linear_infinite]" />
+                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_160deg,rgba(251,191,36,0.3)_180deg,transparent_180deg)] animate-[spin_4s_linear_infinite]" />
+                  
+                  <div className="relative z-10 bg-black/40 backdrop-blur-sm p-8 md:p-16 border-4 border-amber-400/50 rounded-xl flex flex-col items-center">
                     <motion.div 
-                      initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", bounce: 0.5 }}
-                      className="text-8xl md:text-9xl mb-6 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
+                      initial={{ scale: 0, y: -100, rotate: -10 }} 
+                      animate={{ scale: 1, y: 0, rotate: 0 }} 
+                      transition={{ type: "spring", bounce: 0.6, duration: 1.5 }}
+                      className="text-8xl md:text-9xl mb-4 drop-shadow-[0_0_30px_rgba(251,191,36,1)]"
                     >
                       🏆
                     </motion.div>
-                    <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter drop-shadow-[4px_4px_0_#00183F] mb-4">
+                    
+                    <motion.h2 
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5, duration: 0.8 }}
+                      className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] mb-2"
+                    >
                       {TRANSLATIONS[lang].champion_title}
-                    </h2>
-                    <p className="text-[#00183F] font-black uppercase text-xl md:text-2xl bg-white/60 inline-block px-6 py-3 border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F]">
-                      {TRANSLATIONS[lang].champion_desc}
-                    </p>
+                    </motion.h2>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1 }}
+                    >
+                      <p className="text-amber-100 font-black uppercase text-xl md:text-3xl tracking-widest mt-4 border-y-2 border-amber-400/50 py-2 shadow-[0_0_15px_rgba(251,191,36,0.4)]">
+                        {TRANSLATIONS[lang].champion_desc}
+                      </p>
+                    </motion.div>
                   </div>
-                </Card>
+                </div>
               ) : (
-                <Card className="text-center mb-10 border-8 border-rose-950 bg-gradient-to-br from-rose-800 via-red-900 to-black p-8 md:p-14 shadow-[12px_12px_0_0_#000000] relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #fff 2px, transparent 2px)", backgroundSize: "30px 30px" }} />
-                  <div className="relative z-10 flex flex-col items-center">
+                <div className="relative overflow-hidden rounded-2xl border-8 border-red-900 bg-black p-1 shadow-[0_0_60px_rgba(153,27,27,0.8)] text-center">
+                  <div className="absolute inset-0 bg-gradient-to-b from-red-950 via-black to-black opacity-90" />
+                  
+                  {/* Linhas de "Glitch" Vermelhas */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-red-600 opacity-50 animate-[ping_2s_infinite]" />
+                  <div className="absolute bottom-10 left-0 w-full h-[2px] bg-red-600 opacity-30" />
+                  
+                  <div className="relative z-10 p-8 md:p-16 border-4 border-red-900/40 rounded-xl flex flex-col items-center">
                     <motion.div 
-                      initial={{ scale: 0, y: -50 }} animate={{ scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.6 }}
-                      className="text-8xl md:text-9xl mb-6 drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)] opacity-90"
+                      initial={{ scale: 2, opacity: 0 }} 
+                      animate={{ scale: 1, opacity: 1 }} 
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className="text-8xl md:text-9xl mb-6 drop-shadow-[0_0_20px_rgba(220,38,38,0.8)] opacity-90 grayscale"
+                      style={{ filter: "hue-rotate(-20deg) contrast(1.5)" }}
                     >
                       ☠️
                     </motion.div>
-                    <h2 className="text-5xl md:text-7xl font-black text-rose-500 uppercase tracking-tighter drop-shadow-[4px_4px_0_#000000] mb-4">
+                    
+                    <h2 className="text-5xl md:text-7xl font-black text-red-600 uppercase tracking-tighter drop-shadow-[0_5px_0_#450a0a] mb-4">
                       {TRANSLATIONS[lang].eliminated_title}
                     </h2>
-                    <p className="text-rose-100 font-bold uppercase text-lg md:text-xl bg-black/50 inline-block px-6 py-3 border-4 border-rose-950 shadow-[4px_4px_0_0_#000000]">
+                    
+                    <p className="text-red-200/70 font-bold uppercase text-lg md:text-2xl tracking-[0.2em] border-b border-red-900 pb-2">
                       {TRANSLATIONS[lang].eliminated_desc}
                     </p>
                   </div>
-                </Card>
+                </div>
               )}
 
-              <div className="text-center">
-                <Button variant="primary" size="lg" onClick={handleContinue} className="w-full md:w-auto min-w-[300px]">
+              <div className="text-center mt-10">
+                <Button variant="primary" size="lg" onClick={handleContinue} className="w-full md:w-auto min-w-[300px] shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                   {TRANSLATIONS[lang].view_results}
                 </Button>
               </div>
