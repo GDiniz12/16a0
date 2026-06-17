@@ -23,6 +23,7 @@ export default function LobbyPage() {
   const [roomHasPassword, setRoomHasPassword] = useState(false);
   const [joinNickname, setJoinNickname] = useState("");
   const [joinPassword, setJoinPassword] = useState("");
+  const [kickTarget, setKickTarget] = useState<{ id: string; nickname: string } | null>(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -119,8 +120,14 @@ export default function LobbyPage() {
     });
   };
 
-  const handleKickPlayer = (targetId: string) => {
-    socket?.emit("kickPlayer", { roomId, targetId });
+  const handleKickPlayer = (player: { id: string; nickname: string }) => {
+    setKickTarget(player);
+  };
+
+  const confirmKick = () => {
+    if (!kickTarget) return;
+    socket?.emit("kickPlayer", { roomId, targetId: kickTarget.id });
+    setKickTarget(null);
   };
 
   const handleCancelRoom = () => {
@@ -269,11 +276,12 @@ export default function LobbyPage() {
                     )}
                     {isHost && player.id !== currentRoom.host && (
                       <button
-                        onClick={() => handleKickPlayer(player.id)}
-                        className="bg-rose-500 text-white text-xs font-black px-2 py-1 border-2 border-[#00183F] uppercase hover:bg-rose-700 transition-colors"
+                        onClick={() => handleKickPlayer({ id: player.id, nickname: player.nickname })}
+                        className="group relative w-8 h-8 bg-rose-600 border-2 border-[#00183F] shadow-[3px_3px_0_0_#00183F] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all duration-100 flex items-center justify-center flex-shrink-0"
                         title="Remover jogador"
                       >
-                        ✕
+                        <span className="block w-4 h-0.5 bg-white absolute rotate-45 rounded-full" />
+                        <span className="block w-4 h-0.5 bg-white absolute -rotate-45 rounded-full" />
                       </button>
                     )}
                   </div>
@@ -370,6 +378,39 @@ export default function LobbyPage() {
         </div>
 
       </div>
+
+      {/* Modal de confirmação de kick */}
+      {kickTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00183F]/70 backdrop-blur-sm p-4">
+          <div className="bg-[#D9D9D9] border-4 border-[#00183F] shadow-[10px_10px_0_0_#0033A0] max-w-sm w-full p-8 flex flex-col items-center gap-6">
+            <div className="w-16 h-16 bg-rose-600 border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F] flex items-center justify-center">
+              <span className="text-white font-black text-3xl leading-none select-none">✕</span>
+            </div>
+            <div className="text-center">
+              <p className="text-[#00183F] font-black uppercase text-xl mb-1">Remover jogador?</p>
+              <p className="text-[#00183F] font-bold text-base">
+                Quer mesmo remover{" "}
+                <span className="text-rose-600 uppercase">{kickTarget.nickname}</span>{" "}
+                da sala?
+              </p>
+            </div>
+            <div className="flex gap-4 w-full">
+              <button
+                onClick={() => setKickTarget(null)}
+                className="flex-1 bg-white text-[#00183F] py-3 font-black uppercase border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmKick}
+                className="flex-1 bg-rose-600 text-white py-3 font-black uppercase border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
