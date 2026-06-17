@@ -247,99 +247,157 @@ export default function KnockoutMatch({ roundData, userTeamName, tick, startTick
 
       {showAgg && (
         <motion.div 
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 bg-white text-[#00183F] border-4 border-[#00183F] p-4 md:p-8 text-center shadow-[4px_4px_0_0_#00183F]"
+          initial={{ opacity: 0, y: 20, scale: 0.95 }} 
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 100, damping: 20 }}
+          className="relative z-10 overflow-hidden rounded-3xl bg-gradient-to-br from-[#0b132b] via-[#121f3d] to-[#0b132b] border border-white/5 p-6 md:p-10 mt-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] backdrop-blur-xl"
         >
-          <span className="block text-[10px] md:text-xs font-black uppercase text-gray-500 tracking-widest mb-4">
-            {lang === "pt" ? "Placar Agregado" : "Aggregate Score"}
-          </span>
-          
-          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-8 flex-nowrap">
-            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-              {userLogo && (
-                <img src={userLogo} alt={displayTeam1} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
-              )}
-              <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (team1Won && !isTie ? "text-sky-600" : "text-[#00183F]") : (roundData.userAdvanced && !isTie ? "text-emerald-600" : "text-[#00183F]")}`}>
-                {userTotal}
-              </span>
-            </div>
-
-            <span className="text-gray-400 font-black text-xl sm:text-2xl md:text-3xl flex-shrink-0">X</span>
-            
-            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-              <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (!team1Won && !isTie ? "text-sky-600" : "text-[#00183F]") : (!roundData.userAdvanced && !isTie ? "text-rose-600" : "text-[#00183F]")}`}>
-                {oppTotal}
-              </span>
-              {oppLogo && (
-                <img src={oppLogo} alt={displayTeam2} className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
-              )}
-            </div>
+          {/* Decorative glowing orbs */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none rounded-3xl">
+            <div className={`absolute -top-32 -left-32 w-64 h-64 rounded-full blur-[100px] opacity-30 ${isNeutral ? (team1Won ? 'bg-sky-500' : 'bg-gray-500') : (roundData.userAdvanced ? 'bg-emerald-500' : 'bg-rose-500')}`} />
+            <div className={`absolute -bottom-32 -right-32 w-64 h-64 rounded-full blur-[100px] opacity-30 ${isNeutral ? (!team1Won ? 'bg-sky-500' : 'bg-gray-500') : (!roundData.userAdvanced ? 'bg-rose-500' : 'bg-emerald-500')}`} />
           </div>
-          
-          {isTie && (
-            <div className="mt-8 pt-8 border-t-4 border-dashed border-[#00183F]/20">
-              <h4 className="text-lg md:text-2xl font-black uppercase tracking-widest text-[#00183F] mb-6 text-center">
-                {lang === "pt" ? "Decisão nos Pênaltis" : "Penalty Shootout"}
-              </h4>
-              
-              <div className="flex items-center justify-center gap-4 sm:gap-6 mb-8 bg-[#D9D9D9] py-3 sm:py-4 border-y-4 border-[#00183F]">
-                 <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (team1Won ? "text-sky-600" : "text-[#00183F]") : (roundData.userAdvanced ? "text-emerald-600" : "text-[#00183F]")}`}>{userPenScore}</span>
-                 <span className="text-gray-500 font-black text-lg sm:text-xl md:text-2xl">X</span>
-                 <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${isNeutral ? (!team1Won ? "text-sky-600" : "text-[#00183F]") : (!roundData.userAdvanced ? "text-rose-600" : "text-[#00183F]")}`}>{oppPenScore}</span>
-              </div>
 
-              <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-4 text-[10px] md:text-sm font-bold uppercase tracking-wide">
-                
-                <div className="flex-1 flex flex-col items-start gap-2 sm:gap-3 min-w-0">
-                  <span className={`font-black border-b-2 pb-1 mb-1 truncate w-full text-left ${isNeutral ? "text-[#00183F] border-[#00183F]" : "text-[#0033A0] border-[#0033A0]"}`}>
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 shadow-inner mb-8">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+              <span className="text-[10px] md:text-xs font-bold uppercase text-blue-200 tracking-[0.2em]">
+                {lang === "pt" ? "Placar Agregado" : "Aggregate Score"}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-center w-full max-w-3xl gap-4 sm:gap-8 md:gap-12">
+              {/* Team 1 Side */}
+              <div className="flex flex-col items-center flex-1 gap-4">
+                {userLogo && (
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-white/10 rounded-full blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100 scale-150" />
+                    <img src={userLogo} alt={displayTeam1} className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2" />
+                  </div>
+                )}
+                <div className="flex flex-col items-center">
+                  <span className={`text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter drop-shadow-[0_5px_10px_rgba(0,0,0,0.5)] ${isNeutral ? (team1Won && !isTie ? "text-sky-400" : "text-white") : (roundData.userAdvanced && !isTie ? "text-emerald-400" : "text-white")}`}>
+                    {userTotal}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold uppercase text-gray-400 tracking-wider text-center max-w-[120px] sm:max-w-[160px] truncate mt-2">
                     {displayTeam1}
                   </span>
-                  {userPenalties.map((pen, i) => (
-                    <motion.div 
-                      key={i} 
-                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                      className="flex items-center gap-1.5 sm:gap-2 w-full"
-                    >
-                      <span className="text-xs sm:text-sm md:text-base flex-shrink-0">
-                        {pen.scored ? "✅" : "❌"}
-                      </span>
-                      <span className={`truncate ${pen.scored ? "text-[#00183F]" : "text-gray-400 line-through"}`}>
-                        {pen.name}
-                      </span>
-                    </motion.div>
-                  ))}
                 </div>
+              </div>
 
-                <div className="flex-1 flex flex-col items-start sm:items-end gap-2 sm:gap-3 min-w-0">
-                  <span className={`font-black border-b-2 pb-1 mb-1 truncate w-full text-left sm:text-right ${isNeutral ? "text-[#00183F] border-[#00183F]" : "text-rose-700 border-rose-700"}`}>
-                    {displayTeam2}
-                  </span>
-                  {oppPenalties.map((pen, i) => (
-                    <motion.div 
-                      key={i} 
-                      initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
-                      className="flex items-center gap-1.5 sm:gap-2 sm:flex-row-reverse w-full"
-                    >
-                      <span className="text-xs sm:text-sm md:text-base flex-shrink-0">
-                        {pen.scored ? "✅" : "❌"}
-                      </span>
-                      <span className={`truncate sm:text-right ${pen.scored ? "text-[#00183F]" : "text-gray-400 line-through"}`}>
-                        {pen.name}
-                      </span>
-                    </motion.div>
-                  ))}
+              {/* VS Divider */}
+              <div className="flex flex-col items-center justify-center gap-3">
+                <div className="w-[1px] h-12 md:h-16 bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-30" />
+                <div className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <span className="text-gray-400 font-bold text-xs md:text-sm tracking-widest">VS</span>
                 </div>
-
+                <div className="w-[1px] h-12 md:h-16 bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-30" />
               </div>
               
-              {penaltiesFullyRevealed && (
-                <div className="mt-8 bg-[#00183F] p-3 text-center font-black text-white uppercase tracking-widest border-2 border-white shadow-[4px_4px_0_0_#D9D9D9] text-[10px] sm:text-xs md:text-sm">
-                  {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className={isNeutral ? "text-sky-400" : roundData.userAdvanced ? "text-emerald-400" : "text-rose-400"}>{roundData.winner}</span>
+              {/* Team 2 Side */}
+              <div className="flex flex-col items-center flex-1 gap-4">
+                {oppLogo && (
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-white/10 rounded-full blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100 scale-150" />
+                    <img src={oppLogo} alt={displayTeam2} className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2" />
+                  </div>
+                )}
+                <div className="flex flex-col items-center">
+                  <span className={`text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter drop-shadow-[0_5px_10px_rgba(0,0,0,0.5)] ${isNeutral ? (!team1Won && !isTie ? "text-sky-400" : "text-white") : (!roundData.userAdvanced && !isTie ? "text-rose-400" : "text-white")}`}>
+                    {oppTotal}
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold uppercase text-gray-400 tracking-wider text-center max-w-[120px] sm:max-w-[160px] truncate mt-2">
+                    {displayTeam2}
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
-          )}
+            
+            {/* Penalties Section */}
+            {isTie && (
+              <div className="w-full mt-10 pt-8 border-t border-white/10 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0b132b] px-4">
+                  <h4 className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-blue-300">
+                    {lang === "pt" ? "Pênaltis" : "Penalties"}
+                  </h4>
+                </div>
+                
+                <div className="flex items-center justify-center gap-6 sm:gap-10 mb-8 bg-white/5 rounded-2xl py-4 sm:py-6 border border-white/5 backdrop-blur-md shadow-inner">
+                   <span className={`text-4xl sm:text-5xl font-black drop-shadow-md ${isNeutral ? (team1Won ? "text-sky-400" : "text-white") : (roundData.userAdvanced ? "text-emerald-400" : "text-white")}`}>{userPenScore}</span>
+                   <span className="text-gray-500 font-bold text-sm sm:text-base">X</span>
+                   <span className={`text-4xl sm:text-5xl font-black drop-shadow-md ${isNeutral ? (!team1Won ? "text-sky-400" : "text-white") : (!roundData.userAdvanced ? "text-rose-400" : "text-white")}`}>{oppPenScore}</span>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
+                  {/* Team 1 Penalties */}
+                  <div className="flex flex-col gap-3">
+                    <span className={`text-xs font-bold uppercase tracking-wider pb-2 border-b border-white/10 mb-2 truncate ${isNeutral ? "text-blue-300" : "text-blue-300"}`}>
+                      {displayTeam1}
+                    </span>
+                    {userPenalties.map((pen, i) => (
+                      <motion.div 
+                        key={i} 
+                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-3 bg-white/5 px-3 py-2 rounded-lg border border-white/5"
+                      >
+                        <div className={`flex items-center justify-center w-6 h-6 rounded-full shadow-inner ${pen.scored ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                          {pen.scored ? (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                          )}
+                        </div>
+                        <span className={`text-sm font-medium truncate ${pen.scored ? "text-gray-200" : "text-gray-500 line-through"}`}>
+                          {pen.name}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Team 2 Penalties */}
+                  <div className="flex flex-col gap-3">
+                    <span className={`text-xs font-bold uppercase tracking-wider pb-2 border-b border-white/10 mb-2 truncate sm:text-right ${isNeutral ? "text-blue-300" : "text-rose-400"}`}>
+                      {displayTeam2}
+                    </span>
+                    {oppPenalties.map((pen, i) => (
+                      <motion.div 
+                        key={i} 
+                        initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-3 sm:flex-row-reverse bg-white/5 px-3 py-2 rounded-lg border border-white/5"
+                      >
+                        <div className={`flex items-center justify-center w-6 h-6 rounded-full shadow-inner ${pen.scored ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                          {pen.scored ? (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                          )}
+                        </div>
+                        <span className={`text-sm font-medium truncate sm:text-right ${pen.scored ? "text-gray-200" : "text-gray-500 line-through"}`}>
+                          {pen.name}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+                
+                {penaltiesFullyRevealed && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mt-10 p-4 rounded-xl text-center border font-bold uppercase tracking-widest text-xs sm:text-sm backdrop-blur-md ${
+                      isNeutral 
+                        ? "bg-sky-500/10 border-sky-500/30 text-sky-300" 
+                        : roundData.userAdvanced 
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" 
+                          : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                    }`}
+                  >
+                    {lang === "pt" ? "Vencedor nos Pênaltis:" : "Shootout Winner:"} <span className="text-white ml-2">{roundData.winner}</span>
+                  </motion.div>
+                )}
+              </div>
+            )}
+          </div>
         </motion.div>
       )}
 
