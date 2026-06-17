@@ -181,6 +181,26 @@ export default function KnockoutPage() {
   const title = lang === "pt" ? "SUPER MUNDIAL DE CLUBES" : "SUPER CLUB WORLD CUP";
   const phaseLabel = lang === "pt" ? "FASE MATA-MATA" : "KNOCKOUT STAGE";
 
+  const userKnockoutRounds = knockoutRounds.filter(r =>
+    r.leg1.homeTeam === userTeamName || r.leg1.awayTeam === userTeamName
+  );
+  const knockoutGoals = userKnockoutRounds.reduce(
+    (acc, r) => {
+      const isHome1 = r.leg1.homeTeam === userTeamName;
+      let scored = isHome1 ? r.leg1.homeGoals : r.leg1.awayGoals;
+      let conceded = isHome1 ? r.leg1.awayGoals : r.leg1.homeGoals;
+      if (r.leg2) {
+        const isHome2 = r.leg2.homeTeam === userTeamName;
+        scored += isHome2 ? r.leg2.homeGoals : r.leg2.awayGoals;
+        conceded += isHome2 ? r.leg2.awayGoals : r.leg2.homeGoals;
+      }
+      return { scored: acc.scored + scored, conceded: acc.conceded + conceded };
+    },
+    { scored: 0, conceded: 0 }
+  );
+  const knockoutWins = userKnockoutRounds.filter(r => r.userAdvanced).length;
+  const lastRound = userKnockoutRounds[userKnockoutRounds.length - 1]?.round || "";
+
   return (
     <div className="min-h-screen bg-[#00183F] px-4 py-10 font-sans text-white">
       <div className="max-w-4xl mx-auto">
@@ -266,70 +286,127 @@ export default function KnockoutPage() {
               className="mt-8 relative z-50"
             >
               {isChampion ? (
-                <div className="relative group overflow-hidden rounded-2xl border-[12px] border-amber-400 bg-[#111] p-1 shadow-[0_0_80px_rgba(251,191,36,0.6)] text-center">
-                  <div className="absolute inset-0 bg-gradient-to-t from-amber-600 via-transparent to-transparent opacity-80" />
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 animate-pulse" />
-                  
-                  {/* Luz Giratória de Fundo */}
-                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(251,191,36,0.3)_360deg)] animate-[spin_4s_linear_infinite]" />
-                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_160deg,rgba(251,191,36,0.3)_180deg,transparent_180deg)] animate-[spin_4s_linear_infinite]" />
-                  
-                  <div className="relative z-10 bg-black/40 backdrop-blur-sm p-8 md:p-16 border-4 border-amber-400/50 rounded-xl flex flex-col items-center">
-                    <motion.div 
-                      initial={{ scale: 0, y: -100, rotate: -10 }} 
-                      animate={{ scale: 1, y: 0, rotate: 0 }} 
-                      transition={{ type: "spring", bounce: 0.6, duration: 1.5 }}
-                      className="text-8xl md:text-9xl mb-4 drop-shadow-[0_0_30px_rgba(251,191,36,1)]"
+                <div className="relative overflow-hidden border-2 border-amber-500/30 bg-[#07060a] text-center shadow-[0_0_80px_rgba(251,191,36,0.12)]">
+                  {/* Rotating conic glow — kept for drama */}
+                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(251,191,36,0.08)_360deg)] animate-[spin_6s_linear_infinite] pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_180deg,transparent_0_160deg,rgba(251,191,36,0.06)_180deg,transparent_180deg)] animate-[spin_6s_linear_infinite] pointer-events-none" />
+                  {/* Top edge highlight */}
+                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+
+                  <div className="relative z-10 p-8 md:p-12 flex flex-col items-center">
+                    {/* SVG Trophy — replaces emoji */}
+                    <motion.div
+                      initial={{ scale: 0, y: -50, rotate: -8 }}
+                      animate={{ scale: 1, y: 0, rotate: 0 }}
+                      transition={{ type: "spring", bounce: 0.55, duration: 1.2 }}
+                      className="mb-6"
                     >
-                      🏆
+                      <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[0_0_24px_rgba(251,191,36,0.6)]">
+                        <path d="M18 8h36v8c0 12-8 20-18 22C26 36 18 28 18 16V8z" fill="#F59E0B"/>
+                        <path d="M18 16v-8H8v4c0 6 4 11 10 13V16z" fill="#D97706"/>
+                        <path d="M54 16v-8h10v4c0 6-4 11-10 13V16z" fill="#D97706"/>
+                        <path d="M30 38v8h-4v6h20v-6h-4v-8" fill="#D97706"/>
+                        <rect x="22" y="52" width="28" height="5" rx="1" fill="#F59E0B"/>
+                        <rect x="18" y="57" width="36" height="5" rx="1" fill="#92400E"/>
+                      </svg>
                     </motion.div>
-                    
-                    <motion.h2 
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.5, duration: 0.8 }}
-                      className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] mb-2"
+
+                    <motion.h2
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.45, duration: 0.6 }}
+                      className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 mb-2"
                     >
                       {TRANSLATIONS[lang].champion_title}
                     </motion.h2>
 
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1 }}
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.75 }}
+                      className="text-amber-500/40 font-bold uppercase text-[10px] tracking-[0.35em] mb-8"
                     >
-                      <p className="text-amber-100 font-black uppercase text-xl md:text-3xl tracking-widest mt-4 border-y-2 border-amber-400/50 py-2 shadow-[0_0_15px_rgba(251,191,36,0.4)]">
-                        {TRANSLATIONS[lang].champion_desc}
-                      </p>
+                      {TRANSLATIONS[lang].champion_desc}
+                    </motion.p>
+
+                    {/* Stats grid */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.1 }}
+                      className="w-full grid grid-cols-2 sm:grid-cols-4 border border-amber-500/10"
+                    >
+                      {[
+                        { label: lang === "pt" ? "Vitórias" : "Wins", value: knockoutWins },
+                        { label: lang === "pt" ? "Gols" : "Goals", value: knockoutGoals.scored },
+                        { label: lang === "pt" ? "Sofridos" : "Conceded", value: knockoutGoals.conceded },
+                        { label: lang === "pt" ? "Rodadas" : "Rounds", value: userKnockoutRounds.length },
+                      ].map((stat, i) => (
+                        <div key={i} className="flex flex-col items-center py-5 bg-amber-500/[0.04] border-r border-amber-500/10 last:border-r-0">
+                          <span className="text-2xl md:text-3xl font-black text-amber-300 tracking-tighter">{stat.value}</span>
+                          <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-600/50 mt-1">{stat.label}</span>
+                        </div>
+                      ))}
                     </motion.div>
                   </div>
                 </div>
               ) : (
-                <div className="relative overflow-hidden rounded-2xl border-8 border-red-900 bg-black p-1 shadow-[0_0_60px_rgba(153,27,27,0.8)] text-center">
-                  <div className="absolute inset-0 bg-gradient-to-b from-red-950 via-black to-black opacity-90" />
-                  
-                  {/* Linhas de "Glitch" Vermelhas */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-red-600 opacity-50 animate-[ping_2s_infinite]" />
-                  <div className="absolute bottom-10 left-0 w-full h-[2px] bg-red-600 opacity-30" />
-                  
-                  <div className="relative z-10 p-8 md:p-16 border-4 border-red-900/40 rounded-xl flex flex-col items-center">
-                    <motion.div 
-                      initial={{ scale: 2, opacity: 0 }} 
-                      animate={{ scale: 1, opacity: 1 }} 
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                      className="text-8xl md:text-9xl mb-6 drop-shadow-[0_0_20px_rgba(220,38,38,0.8)] opacity-90 grayscale"
-                      style={{ filter: "hue-rotate(-20deg) contrast(1.5)" }}
+                <div className="relative overflow-hidden border border-red-900/40 bg-[#07060a] text-center shadow-[0_0_50px_rgba(127,29,29,0.25)]">
+                  {/* Top accent line */}
+                  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-700/70 to-transparent" />
+
+                  <div className="relative z-10 p-8 md:p-12 flex flex-col items-center">
+                    {/* Geometric cross — replaces skull emoji */}
+                    <motion.div
+                      initial={{ scale: 1.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
+                      className="mb-6 relative"
                     >
-                      ☠️
+                      <div className="w-16 h-16 md:w-20 md:h-20 border-2 border-red-800/50 rotate-45 flex items-center justify-center">
+                        <svg
+                          width="28" height="28" viewBox="0 0 28 28" fill="none"
+                          className="-rotate-45"
+                        >
+                          <path d="M3 3L25 25M25 3L3 25" stroke="#7F1D1D" strokeWidth="2.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
+                      <div className="absolute inset-0 blur-xl opacity-20 bg-red-700 -z-10" />
                     </motion.div>
-                    
-                    <h2 className="text-5xl md:text-7xl font-black text-red-600 uppercase tracking-tighter drop-shadow-[0_5px_0_#450a0a] mb-4">
+
+                    <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-red-800 mb-1">
                       {TRANSLATIONS[lang].eliminated_title}
                     </h2>
-                    
-                    <p className="text-red-200/70 font-bold uppercase text-lg md:text-2xl tracking-[0.2em] border-b border-red-900 pb-2">
+
+                    {lastRound && (
+                      <p className="text-red-700/50 font-bold uppercase text-[10px] tracking-[0.3em] mb-1">
+                        {lastRound}
+                      </p>
+                    )}
+
+                    <p className="text-red-900/50 font-bold uppercase text-[10px] tracking-[0.2em] mb-8">
                       {TRANSLATIONS[lang].eliminated_desc}
                     </p>
+
+                    {/* Stats grid */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="w-full grid grid-cols-2 sm:grid-cols-4 border border-red-900/20"
+                    >
+                      {[
+                        { label: lang === "pt" ? "Vitórias" : "Wins", value: knockoutWins },
+                        { label: lang === "pt" ? "Gols" : "Goals", value: knockoutGoals.scored },
+                        { label: lang === "pt" ? "Sofridos" : "Conceded", value: knockoutGoals.conceded },
+                        { label: lang === "pt" ? "Rodadas" : "Rounds", value: userKnockoutRounds.length },
+                      ].map((stat, i) => (
+                        <div key={i} className="flex flex-col items-center py-5 bg-red-900/[0.05] border-r border-red-900/15 last:border-r-0">
+                          <span className="text-2xl md:text-3xl font-black text-red-700/70 tracking-tighter">{stat.value}</span>
+                          <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-red-900/40 mt-1">{stat.label}</span>
+                        </div>
+                      ))}
+                    </motion.div>
                   </div>
                 </div>
               )}
