@@ -39,7 +39,7 @@ export default function SupportButton() {
         <div className="w-full max-w-4xl border-t-4 border-dashed border-white/20 mb-6" />
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
           <p className="text-white/90 font-black text-sm md:text-base uppercase">
-            {lang === 'pt' ? 'Ajude a manter o 16a0, sua ajuda vale muito!' : 'Help maintain 16a0, your support means a lot!'}
+            {lang === 'pt' ? 'Ajude a manter o vs11, sua ajuda vale muito!' : 'Help maintain vs11, your support means a lot!'}
           </p>
           <button
             onClick={() => setIsOpen(true)}
