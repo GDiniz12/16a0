@@ -286,22 +286,21 @@ export default function KnockoutPage() {
               className="mt-8 relative z-50"
             >
               {isChampion ? (
-                <div className="relative overflow-hidden border-2 border-amber-500/30 bg-[#07060a] text-center shadow-[0_0_80px_rgba(251,191,36,0.12)]">
-                  {/* Rotating conic glow — kept for drama */}
-                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(251,191,36,0.08)_360deg)] animate-[spin_6s_linear_infinite] pointer-events-none" />
-                  <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_180deg,transparent_0_160deg,rgba(251,191,36,0.06)_180deg,transparent_180deg)] animate-[spin_6s_linear_infinite] pointer-events-none" />
-                  {/* Top edge highlight */}
-                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+                <div className="border-4 border-amber-400 bg-white text-center shadow-[8px_8px_0_0_#b45309] overflow-hidden">
+                  <div className="bg-amber-400 border-b-4 border-[#00183F] px-6 py-2">
+                    <span className="text-[#00183F] font-black uppercase text-xs tracking-widest">
+                      {TRANSLATIONS[lang].champion_desc}
+                    </span>
+                  </div>
 
-                  <div className="relative z-10 p-8 md:p-12 flex flex-col items-center">
-                    {/* SVG Trophy — replaces emoji */}
+                  <div className="p-8 md:p-12 flex flex-col items-center">
                     <motion.div
                       initial={{ scale: 0, y: -50, rotate: -8 }}
                       animate={{ scale: 1, y: 0, rotate: 0 }}
                       transition={{ type: "spring", bounce: 0.55, duration: 1.2 }}
                       className="mb-6"
                     >
-                      <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[0_0_24px_rgba(251,191,36,0.6)]">
+                      <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[4px_4px_0_rgba(0,0,0,0.3)]">
                         <path d="M18 8h36v8c0 12-8 20-18 22C26 36 18 28 18 16V8z" fill="#F59E0B"/>
                         <path d="M18 16v-8H8v4c0 6 4 11 10 13V16z" fill="#D97706"/>
                         <path d="M54 16v-8h10v4c0 6-4 11-10 13V16z" fill="#D97706"/>
@@ -315,26 +314,16 @@ export default function KnockoutPage() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.45, duration: 0.6 }}
-                      className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 mb-2"
+                      className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-amber-600 mb-8"
                     >
                       {TRANSLATIONS[lang].champion_title}
                     </motion.h2>
 
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.75 }}
-                      className="text-amber-500/40 font-bold uppercase text-[10px] tracking-[0.35em] mb-8"
-                    >
-                      {TRANSLATIONS[lang].champion_desc}
-                    </motion.p>
-
-                    {/* Stats grid */}
                     <motion.div
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 1.1 }}
-                      className="w-full grid grid-cols-2 sm:grid-cols-4 border border-amber-500/10"
+                      className="w-full grid grid-cols-2 sm:grid-cols-4 border-4 border-[#00183F] shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]"
                     >
                       {[
                         { label: lang === "pt" ? "Vitórias" : "Wins", value: knockoutWins },
@@ -342,58 +331,51 @@ export default function KnockoutPage() {
                         { label: lang === "pt" ? "Sofridos" : "Conceded", value: knockoutGoals.conceded },
                         { label: lang === "pt" ? "Rodadas" : "Rounds", value: userKnockoutRounds.length },
                       ].map((stat, i) => (
-                        <div key={i} className="flex flex-col items-center py-5 bg-amber-500/[0.04] border-r border-amber-500/10 last:border-r-0">
-                          <span className="text-2xl md:text-3xl font-black text-amber-300 tracking-tighter">{stat.value}</span>
-                          <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-600/50 mt-1">{stat.label}</span>
+                        <div key={i} className="flex flex-col items-center py-5 bg-[#00183F] border-r-2 border-white/20 last:border-r-0">
+                          <span className="text-2xl md:text-3xl font-black text-white tracking-tighter">{stat.value}</span>
+                          <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-white/50 mt-1">{stat.label}</span>
                         </div>
                       ))}
                     </motion.div>
                   </div>
                 </div>
               ) : (
-                <div className="relative overflow-hidden border border-red-900/40 bg-[#07060a] text-center shadow-[0_0_50px_rgba(127,29,29,0.25)]">
-                  {/* Top accent line */}
-                  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-700/70 to-transparent" />
+                <div className="border-4 border-[#00183F] bg-[#D9D9D9] text-center shadow-[8px_8px_0_0_rgba(0,0,0,0.8)] overflow-hidden">
+                  {lastRound && (
+                    <div className="bg-[#00183F] border-b-4 border-[#00183F] px-6 py-2">
+                      <span className="text-white font-black uppercase text-xs tracking-widest">
+                        {lastRound}
+                      </span>
+                    </div>
+                  )}
 
-                  <div className="relative z-10 p-8 md:p-12 flex flex-col items-center">
-                    {/* Geometric cross — replaces skull emoji */}
+                  <div className="p-8 md:p-12 flex flex-col items-center">
                     <motion.div
                       initial={{ scale: 1.6, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ duration: 0.45, ease: "easeOut" }}
-                      className="mb-6 relative"
+                      className="mb-6"
                     >
-                      <div className="w-16 h-16 md:w-20 md:h-20 border-2 border-red-800/50 rotate-45 flex items-center justify-center">
-                        <svg
-                          width="28" height="28" viewBox="0 0 28 28" fill="none"
-                          className="-rotate-45"
-                        >
-                          <path d="M3 3L25 25M25 3L3 25" stroke="#7F1D1D" strokeWidth="2.5" strokeLinecap="round"/>
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-600 border-4 border-[#00183F] flex items-center justify-center shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                          <path d="M4 4L28 28M28 4L4 28" stroke="white" strokeWidth="4" strokeLinecap="round"/>
                         </svg>
                       </div>
-                      <div className="absolute inset-0 blur-xl opacity-20 bg-red-700 -z-10" />
                     </motion.div>
 
-                    <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-red-800 mb-1">
+                    <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-rose-600 mb-2">
                       {TRANSLATIONS[lang].eliminated_title}
                     </h2>
 
-                    {lastRound && (
-                      <p className="text-red-700/50 font-bold uppercase text-[10px] tracking-[0.3em] mb-1">
-                        {lastRound}
-                      </p>
-                    )}
-
-                    <p className="text-red-900/50 font-bold uppercase text-[10px] tracking-[0.2em] mb-8">
+                    <p className="text-[#00183F] font-bold uppercase text-[10px] tracking-[0.2em] mb-8">
                       {TRANSLATIONS[lang].eliminated_desc}
                     </p>
 
-                    {/* Stats grid */}
                     <motion.div
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
-                      className="w-full grid grid-cols-2 sm:grid-cols-4 border border-red-900/20"
+                      className="w-full grid grid-cols-2 sm:grid-cols-4 border-4 border-[#00183F] shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]"
                     >
                       {[
                         { label: lang === "pt" ? "Vitórias" : "Wins", value: knockoutWins },
@@ -401,9 +383,9 @@ export default function KnockoutPage() {
                         { label: lang === "pt" ? "Sofridos" : "Conceded", value: knockoutGoals.conceded },
                         { label: lang === "pt" ? "Rodadas" : "Rounds", value: userKnockoutRounds.length },
                       ].map((stat, i) => (
-                        <div key={i} className="flex flex-col items-center py-5 bg-red-900/[0.05] border-r border-red-900/15 last:border-r-0">
-                          <span className="text-2xl md:text-3xl font-black text-red-700/70 tracking-tighter">{stat.value}</span>
-                          <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-red-900/40 mt-1">{stat.label}</span>
+                        <div key={i} className="flex flex-col items-center py-5 bg-[#00183F] border-r-2 border-white/20 last:border-r-0">
+                          <span className="text-2xl md:text-3xl font-black text-white tracking-tighter">{stat.value}</span>
+                          <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-white/50 mt-1">{stat.label}</span>
                         </div>
                       ))}
                     </motion.div>
