@@ -184,16 +184,16 @@ export default function OnlinePage() {
               </select>
             </div>
 
-            {/* SE FOR TRADICIONAL, MOSTRA AS CONFIGURAÇÕES */}
-            {mode === "tradicional" && (
-              <div className="flex flex-col sm:flex-row gap-4 mt-4 bg-gray-100 p-4 border-2 border-dashed border-[#00183F]">
-                <div className="flex-1">
-                  <label className="block font-black uppercase mb-1 text-sm">Modo de Draft</label>
-                  <select className="w-full border-4 border-[#00183F] p-2 font-bold bg-white uppercase" value={draftMode} onChange={e => setDraftMode(e.target.value)}>
-                    <option value="classic">Clássico (3 Rerolls)</option>
-                    <option value="hardcore">Hardcore (1 Reroll, Sem Força)</option>
-                  </select>
-                </div>
+            {/* MODO DE DRAFT (todos os modos) + DIFICULDADE (só Tradicional) */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-4 bg-gray-100 p-4 border-2 border-dashed border-[#00183F]">
+              <div className="flex-1">
+                <label className="block font-black uppercase mb-1 text-sm">Modo de Draft</label>
+                <select className="w-full border-4 border-[#00183F] p-2 font-bold bg-white uppercase" value={draftMode} onChange={e => setDraftMode(e.target.value)}>
+                  <option value="classic">Clássico (3 Rerolls)</option>
+                  <option value="hardcore">Hardcore (1 Reroll, Sem Força)</option>
+                </select>
+              </div>
+              {mode === "tradicional" && (
                 <div className="flex-1">
                   <label className="block font-black uppercase mb-1 text-sm">Dificuldade dos Bots</label>
                   <select className="w-full border-4 border-[#00183F] p-2 font-bold bg-white uppercase" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
@@ -202,8 +202,8 @@ export default function OnlinePage() {
                     <option value="impossible">Impossível</option>
                   </select>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="flex items-center gap-2 mt-4">
               <input type="checkbox" id="hasPassword" checked={hasPassword} onChange={(e) => setHasPassword(e.target.checked)} className="w-5 h-5" />

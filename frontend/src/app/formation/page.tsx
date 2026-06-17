@@ -25,11 +25,13 @@ export default function FormationPage() {
     slots, drawNextTeam, setPhase 
   } = useGame();
 
-  // NOVO: Sincroniza as regras da sala criadas pelo host para a máquina local do jogador
+  // Sincroniza as regras da sala criadas pelo host para a máquina local do jogador
   useEffect(() => {
-    if (currentRoom && currentRoom.mode === 'tradicional') {
+    if (currentRoom) {
       setGameMode(currentRoom.draftMode || "classic");
-      setDifficulty(currentRoom.difficulty || "medium");
+      if (currentRoom.mode === 'tradicional') {
+        setDifficulty(currentRoom.difficulty || "medium");
+      }
     }
   }, [currentRoom, setGameMode, setDifficulty]);
 
@@ -47,12 +49,10 @@ export default function FormationPage() {
 
   const getSubtitle = () => {
     if (!currentRoom) return t.choose_formation_sub;
-    if (currentRoom.mode === 'guerra') return "Online: GUERRA (Mata-Mata Direto)";
-    
-    const translatedMode = currentRoom.draftMode === 'hardcore' ? 'Hardcore' : 'Clássico';
-    const translatedDiff = currentRoom.difficulty === 'impossible' ? 'Impossível' : currentRoom.difficulty === 'easy' ? 'Fácil' : 'Médio';
-    
-    return `Online: Tradicional | Draft: ${translatedMode} | Dif: ${translatedDiff}`;
+    const draftLabel = currentRoom.draftMode === 'hardcore' ? 'Hardcore' : 'Clássico';
+    if (currentRoom.mode === 'guerra') return `Online: GUERRA (Mata-Mata Direto) | Draft: ${draftLabel}`;
+    const diffLabel = currentRoom.difficulty === 'impossible' ? 'Impossível' : currentRoom.difficulty === 'easy' ? 'Fácil' : 'Médio';
+    return `Online: Tradicional | Draft: ${draftLabel} | Dif: ${diffLabel}`;
   };
 
   const infoTexts: Record<string, { title: string, content: string }> = {

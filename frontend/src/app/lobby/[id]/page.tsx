@@ -250,15 +250,13 @@ export default function LobbyPage() {
             <div className="flex flex-wrap justify-between items-center mb-8 bg-white p-4 border-2 border-[#00183F] gap-4">
               <p className="text-[#00183F] font-bold uppercase">Modo: <span className="font-black text-amber-500">{currentRoom.mode}</span></p>
               
+              <p className="text-[#00183F] font-bold uppercase text-xs md:text-base">
+                Draft: <span className={`font-black ${currentRoom.draftMode === 'hardcore' ? 'text-rose-600' : 'text-emerald-600'}`}>{currentRoom.draftMode === 'hardcore' ? 'Hardcore' : 'Clássico'}</span>
+              </p>
               {currentRoom.mode === 'tradicional' && (
-                <>
-                  <p className="text-[#00183F] font-bold uppercase text-xs md:text-base">
-                    Draft: <span className="font-black text-rose-600">{currentRoom.draftMode === 'hardcore' ? 'Hardcore' : 'Clássico'}</span>
-                  </p>
-                  <p className="text-[#00183F] font-bold uppercase text-xs md:text-base">
-                    Dif: <span className="font-black text-blue-600">{currentRoom.difficulty === 'impossible' ? 'Impossível' : currentRoom.difficulty === 'easy' ? 'Fácil' : 'Médio'}</span>
-                  </p>
-                </>
+                <p className="text-[#00183F] font-bold uppercase text-xs md:text-base">
+                  Dif: <span className="font-black text-blue-600">{currentRoom.difficulty === 'impossible' ? 'Impossível' : currentRoom.difficulty === 'easy' ? 'Fácil' : 'Médio'}</span>
+                </p>
               )}
 
               <p className="text-[#00183F] font-bold uppercase">Jogadores: <span className="font-black">{currentRoom.players.length}/8</span></p>
