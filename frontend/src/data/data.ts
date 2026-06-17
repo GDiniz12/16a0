@@ -135,6 +135,30 @@ export const americans: RawTeamData = {
     ["Walter Aguerre", 77, ["MC", "VOL"], "🇺🇾"], ["Luis Cubilla", 89, ["PD", "CA"], "🇺🇾"], ["Júpiter Crescio", 85, ["MEI", "PD"], "🇺🇾"],
     ["Carlos Borges", 87, ["PE", "CA"], "🇺🇾"], ["Alberto Spencer", 92, ["CA"], "🇪🇨"],
   ],
+  "gremio-2017": [
+    ["Marcelo Grohe", 85, ["GOL"], "🇧🇷"], ["Edílson", 84, ["LD"], "🇧🇷"], ["Geromel", 85, ["ZAG"], "🇧🇷"],
+    ["Kannemann", 86, ["ZAG"], "🇦🇷"], ["Cortez", 82, ["LE"], "🇧🇷"], ["Michel", 83, ["VOL", "MC"], "🇧🇷"],
+    ["Arthur", 83, ["MC", "VOL"], "🇧🇷"], ["Ramiro", 84, ["MD", "MC"], "🇧🇷"], ["Luan", 85, ["MEI", "CA"], "🇧🇷"],
+    ["Fernandinho", 84, ["PE", "PD"], "🇧🇷"], ["Lucas Barrios", 81, ["CA"], "🇵🇾"],
+  ],
+  "corinthians-2015": [
+    ["Cássio", 87, ["GOL"], "🇧🇷"], ["Fagner", 85, ["LD"], "🇧🇷"], ["Gil", 82, ["ZAG"], "🇧🇷"],
+    ["Felipe", 84, ["ZAG"], "🇧🇷"], ["Uendel", 82, ["LE"], "🇧🇷"], ["Ralf", 83, ["VOL"], "🇧🇷"],
+    ["Elias", 84, ["MC", "VOL"], "🇧🇷"], ["Jadson", 85, ["MEI", "MD"], "🇧🇷"], ["Renato Augusto", 86, ["MEI", "MC"], "🇧🇷"],
+    ["Malcom", 83, ["PE", "PD"], "🇧🇷"], ["Vágner Love", 84, ["CA"], "🇧🇷"],
+  ],
+  "santos-2020": [
+    ["John", 82, ["GOL"], "🇧🇷"], ["Pará", 73, ["LD"], "🇧🇷"], ["Lucas Veríssimo", 82, ["ZAG"], "🇧🇷"],
+    ["Luan Peres", 76, ["ZAG", "LE"], "🇧🇷"], ["Felipe Jonatan", 81, ["LE", "ME"], "🇧🇷"], ["Alison", 75, ["VOL"], "🇧🇷"],
+    ["Diego Pituca", 77, ["MC", "VOL"], "🇧🇷"], ["Sandry", 72, ["MC", "VOL"], "🇧🇷"], ["Marinho", 85, ["PD", "PE"], "🇧🇷"],
+    ["Soteldo", 86, ["PE", "MEI"], "🇻🇪"], ["Kaio Jorge", 78, ["CA"], "🇧🇷"],
+  ],
+  "corinthians-2025": [
+    ["Hugo Souza", 83, ["GOL"], "🇧🇷"], ["Matheuzinho", 80, ["LD"], "🇧🇷"], ["André Ramalho", 78, ["ZAG"], "🇧🇷"],
+    ["Gustavo Henrique", 82, ["ZAG"], "🇧🇷"], ["Matheus Bidu", 80, ["LE", "ME"], "🇧🇷"], ["José Martínez", 79, ["VOL"], "🇻🇪"],
+    ["Raniele", 81, ["VOL", "ZAG"], "🇧🇷"], ["Breno Bidon", 79, ["MC", "VOL"], "🇧🇷"], ["Rodrigo Garro", 83, ["MEI", "MC"], "🇦🇷"],
+    ["Memphis Depay", 84, ["CA", "PE"], "🇳🇱"], ["Yuri Alberto", 81, ["CA"], "🇧🇷"],
+  ],
 };
 
 export const europeans: RawTeamData = {
@@ -336,6 +360,42 @@ export const europeans: RawTeamData = {
     ["Joseíto", 86, ["PD", "CA"], "🇪🇸"], ["Marsal", 84, ["MC", "MEI"], "🇪🇸"], ["Di Stéfano", 96, ["MEI", "CA"], "🇦🇷"],
     ["Rial", 91, ["CA", "MEI"], "🇦🇷"], ["Gento", 92, ["PE", "ME"], "🇪🇸"],
   ],
+  "barcelona-2025": [
+    ["Ter Stegen", 88, ["GOL"], "🇩🇪"], ["Koundé", 87, ["LD", "ZAG"], "🇫🇷"], ["Cubarsí", 86, ["ZAG"], "🇪🇸"],
+    ["Iñigo Martínez", 85, ["ZAG"], "🇪🇸"], ["Balde", 86, ["LE", "ME"], "🇪🇸"], ["Frenkie de Jong", 88, ["MC", "VOL"], "🇳🇱"],
+    ["Pedri", 91, ["MC", "MEI"], "🇪🇸"], ["Gavi", 87, ["MC", "MEI"], "🇪🇸"], ["Lamine Yamal", 90, ["PD", "MEI"], "🇪🇸"],
+    ["Raphinha", 88, ["PE", "PD"], "🇧🇷"], ["Lewandowski", 89, ["CA"], "🇵🇱"],
+  ],
+  "juventus-2015": [
+    ["Buffon", 91, ["GOL"], "🇮🇹"], ["Lichtsteiner", 85, ["LD", "MD"], "🇨🇭"], ["Barzagli", 88, ["ZAG"], "🇮🇹"],
+    ["Bonucci", 88, ["ZAG"], "🇮🇹"], ["Evra", 85, ["LE"], "🇫🇷"], ["Pirlo", 90, ["MC", "VOL"], "🇮🇹"],
+    ["Marchisio", 87, ["MC", "VOL"], "🇮🇹"], ["Pogba", 89, ["MC", "MEI"], "🇫🇷"], ["Vidal", 88, ["MEI", "MC"], "🇨🇱"],
+    ["Tévez", 90, ["CA", "MEI"], "🇦🇷"], ["Morata", 86, ["CA"], "🇪🇸"],
+  ],
+  "bayern-munich-2000": [
+    ["Kahn", 92, ["GOL"], "🇩🇪"], ["Sagnol", 85, ["LD"], "🇫🇷"], ["Kuffour", 86, ["ZAG"], "🇬🇭"],
+    ["Patrik Andersson", 85, ["ZAG"], "🇸🇪"], ["Lizarazu", 88, ["LE", "ME"], "🇫🇷"], ["Hargreaves", 84, ["VOL", "MC"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+    ["Effenberg", 90, ["MC", "MEI"], "🇩🇪"], ["Salihamidžić", 86, ["MD", "MC"], "🇧🇦"], ["Scholl", 88, ["MEI", "MC"], "🇩🇪"],
+    ["Élber", 89, ["CA"], "🇧🇷"], ["Jancker", 85, ["CA"], "🇩🇪"],
+  ],
+  "manchester-city-2021": [
+    ["Ederson", 89, ["GOL"], "🇧🇷"], ["Kyle Walker", 86, ["LD", "ZAG"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Rúben Dias", 89, ["ZAG"], "🇵🇹"],
+    ["John Stones", 86, ["ZAG"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Zinchenko", 84, ["LE", "MC"], "🇺🇦"], ["Gündogan", 88, ["MC", "VOL"], "🇩🇪"],
+    ["Bernardo Silva", 88, ["MC", "MD"], "🇵🇹"], ["De Bruyne", 93, ["MEI", "MC"], "🇧🇪"], ["Mahrez", 88, ["PD", "MEI"], "🇩🇿"],
+    ["Sterling", 88, ["PE", "PD"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["Foden", 87, ["PE", "MEI"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+  ],
+  "borussia-dortmund-2013": [
+    ["Weidenfeller", 86, ["GOL"], "🇩🇪"], ["Piszczek", 86, ["LD"], "🇵🇱"], ["Subotić", 85, ["ZAG"], "🇷🇸"],
+    ["Hummels", 88, ["ZAG"], "🇩🇪"], ["Schmelzer", 84, ["LE"], "🇩🇪"], ["S. Bender", 84, ["VOL"], "🇩🇪"],
+    ["Gündoğan", 88, ["MC", "VOL"], "🇩🇪"], ["Blaszczykowski", 86, ["PD", "MD"], "🇵🇱"], ["Reus", 90, ["MEI", "PE"], "🇩🇪"],
+    ["Großkreutz", 83, ["ME", "LD"], "🇩🇪"], ["Lewandowski", 91, ["CA"], "🇵🇱"],
+  ],
+  "bayern-munich-2026": [
+    ["Neuer", 89, ["GOL"], "🇩🇪"], ["Stanišić", 83, ["LD", "ZAG"], "🇭🇷"], ["Upamecano", 86, ["ZAG"], "🇫🇷"],
+    ["Jonathan Tah", 85, ["ZAG"], "🇩🇪"], ["Davies", 87, ["LE", "ME"], "🇨🇦"], ["Kimmich", 89, ["MC", "VOL"], "🇩🇪"],
+    ["Pavlović", 85, ["VOL", "MC"], "🇷🇸"], ["Musiala", 91, ["MEI", "MC"], "🇩🇪"], ["Olise", 88, ["PD", "MEI"], "🇫🇷"],
+    ["Luis Díaz", 89, ["PE", "PD"], "🇨🇴"], ["Harry Kane", 92, ["CA"], "🏴󠁧󠁢󠁥󠁮󠁧󠁿"],
+  ],
 };
 
 export const clubLogos: Record<string, string> = {
@@ -430,5 +490,15 @@ export const managersData: Manager[] = [
   { "tecnico": "Juan José Pizzuti", "clubeAno": "racing-1967", "nacionalidade": "Argentina", "overall": 82 },
   { "tecnico": "Osvaldo Zubeldía", "clubeAno": "estudiantes-1970", "nacionalidade": "Argentina", "overall": 81 },
   { "tecnico": "Zezé Moreira", "clubeAno": "cruzeiro-1976", "nacionalidade": "Brasil", "overall": 86 },
-  { "tecnico": "Paulo César Carpegiani", "clubeAno": "flamengo-1981", "nacionalidade": "Brasil", "overall": 83 }
+  { "tecnico": "Paulo César Carpegiani", "clubeAno": "flamengo-1981", "nacionalidade": "Brasil", "overall": 83 },
+  { "tecnico": "Renato Portaluppi", "clubeAno": "gremio-2017", "nacionalidade": "Brasil", "overall": 84 },
+  { "tecnico": "Tite", "clubeAno": "corinthians-2015", "nacionalidade": "Brasil", "overall": 85 },
+  { "tecnico": "Cuca", "clubeAno": "santos-2020", "nacionalidade": "Brasil", "overall": 82 },
+  { "tecnico": "Dorival Júnior", "clubeAno": "corinthians-2025", "nacionalidade": "Brasil", "overall": 82 },
+  { "tecnico": "Hansi Flick", "clubeAno": "barcelona-2025", "nacionalidade": "Alemanha", "overall": 88 },
+  { "tecnico": "Massimiliano Allegri", "clubeAno": "juventus-2015", "nacionalidade": "Itália", "overall": 86 },
+  { "tecnico": "Ottmar Hitzfeld", "clubeAno": "bayern-munich-2000", "nacionalidade": "Alemanha", "overall": 87 },
+  { "tecnico": "Pep Guardiola", "clubeAno": "manchester-city-2021", "nacionalidade": "Espanha", "overall": 93 },
+  { "tecnico": "Jürgen Klopp", "clubeAno": "borussia-dortmund-2013", "nacionalidade": "Alemanha", "overall": 88 },
+  { "tecnico": "Vincent Kompany", "clubeAno": "bayern-munich-2026", "nacionalidade": "Bélgica", "overall": 83 }
 ];
