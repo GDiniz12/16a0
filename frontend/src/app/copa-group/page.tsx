@@ -5,19 +5,52 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useGame } from "@/context/GameContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { LeagueTeam } from "@/types";
+import { CopaGroup, LeagueTeam, MatchResult } from "@/types";
+import { getNationalTeamFlag } from "@/utils/helpers";
+
+function TeamNameWithFlag({ name, isUser }: { name: string; isUser: boolean }) {
+  const flag = getNationalTeamFlag(name);
+  const shortName = name.replace(/\s+\d{4}$/, '').trim();
+  return (
+    <span className={`flex items-center gap-1 font-black truncate ${isUser ? "text-amber-300" : "text-white"}`} title={name}>
+      {flag && <span className="flex-shrink-0 text-xs">{flag}</span>}
+      <span className="truncate max-w-[72px] text-[11px]">{shortName}</span>
+    </span>
+  );
+}
+
+function GroupMatchResult({ match, userTeamName }: { match: MatchResult; userTeamName: string }) {
+  const isUserMatch = match.homeTeam === userTeamName || match.awayTeam === userTeamName;
+  const homeFlag = getNationalTeamFlag(match.homeTeam);
+  const awayFlag = getNationalTeamFlag(match.awayTeam);
+  const homeShort = match.homeTeam.replace(/\s+\d{4}$/, '');
+  const awayShort = match.awayTeam.replace(/\s+\d{4}$/, '');
+
+  return (
+    <div className={`flex items-center text-[10px] font-black py-0.5 px-2 gap-1 ${isUserMatch ? "bg-amber-400/15" : ""}`}>
+      <span className={`flex-1 text-right truncate ${match.homeTeam === userTeamName ? "text-amber-300" : "text-white/80"}`}>
+        {homeFlag} {homeShort}
+      </span>
+      <span className="flex-shrink-0 text-white/60 font-black px-1 text-xs">
+        {match.homeGoals}–{match.awayGoals}
+      </span>
+      <span className={`flex-1 truncate ${match.awayTeam === userTeamName ? "text-amber-300" : "text-white/80"}`}>
+        {awayFlag} {awayShort}
+      </span>
+    </div>
+  );
+}
 
 function GroupCard({
-  name,
-  teams,
+  group,
   userTeamName,
   delay,
 }: {
-  name: string;
-  teams: LeagueTeam[];
+  group: CopaGroup;
   userTeamName: string;
   delay: number;
 }) {
+  const { name, teams, matches } = group;
   const isUserGroup = teams.some((t) => t.isUser);
 
   return (
@@ -28,7 +61,7 @@ function GroupCard({
       className={`border-4 ${isUserGroup ? "border-amber-400 shadow-[6px_6px_0_0_#92400e]" : "border-white shadow-[6px_6px_0_0_rgba(0,0,0,0.5)]"}`}
     >
       <div className={`px-3 py-2 flex items-center justify-between ${isUserGroup ? "bg-amber-400" : "bg-white"}`}>
-        <span className={`font-black text-sm uppercase tracking-widest ${isUserGroup ? "text-[#00183F]" : "text-[#00183F]"}`}>
+        <span className="font-black text-sm uppercase tracking-widest text-[#00183F]">
           GRUPO {name}
         </span>
         {isUserGroup && (
@@ -38,16 +71,17 @@ function GroupCard({
         )}
       </div>
 
+      {/* Standings */}
       <table className="w-full text-xs font-black text-white bg-[#00183F]">
         <thead>
           <tr className="border-b-2 border-white/20 text-white/50">
-            <th className="text-left pl-2 py-1 font-black uppercase">Time</th>
-            <th className="py-1 w-7">J</th>
-            <th className="py-1 w-7">V</th>
-            <th className="py-1 w-7">E</th>
-            <th className="py-1 w-7">D</th>
+            <th className="text-left pl-2 py-1 font-black uppercase">Seleção</th>
+            <th className="py-1 w-6">J</th>
+            <th className="py-1 w-6">V</th>
+            <th className="py-1 w-6">E</th>
+            <th className="py-1 w-6">D</th>
             <th className="py-1 w-7">SG</th>
-            <th className="py-1 w-8 pr-2">Pts</th>
+            <th className="py-1 w-7 pr-2">Pts</th>
           </tr>
         </thead>
         <tbody>
@@ -57,23 +91,14 @@ function GroupCard({
               <tr
                 key={team.name}
                 className={`border-t border-white/10 ${
-                  team.isUser
-                    ? "bg-amber-400/20"
-                    : qualified
-                    ? "bg-emerald-900/30"
-                    : "bg-rose-900/20"
+                  team.isUser ? "bg-amber-400/20" : qualified ? "bg-emerald-900/30" : "bg-rose-900/20"
                 }`}
               >
-                <td className="pl-2 py-1.5 flex items-center gap-1.5">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${qualified ? "bg-emerald-400" : "bg-rose-400"}`}
-                  />
-                  <span
-                    className={`truncate max-w-[80px] ${team.isUser ? "text-amber-300" : "text-white"}`}
-                    title={team.name}
-                  >
-                    {team.name.split(" ").slice(0, 2).join(" ")}
-                  </span>
+                <td className="pl-2 py-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${qualified ? "bg-emerald-400" : "bg-rose-400"}`} />
+                    <TeamNameWithFlag name={team.name} isUser={team.isUser} />
+                  </div>
                 </td>
                 <td className="text-center py-1.5 text-white/80">{team.played}</td>
                 <td className="text-center py-1.5 text-emerald-400">{team.won}</td>
@@ -88,6 +113,19 @@ function GroupCard({
           })}
         </tbody>
       </table>
+
+      {/* Match results */}
+      {matches && matches.length > 0 && (
+        <div className="border-t-2 border-white/20 bg-[#000f2a]">
+          <p className="text-[9px] font-black uppercase tracking-widest text-white/40 px-2 pt-1.5 pb-0.5">
+            Resultados
+          </p>
+          {matches.map((m, i) => (
+            <GroupMatchResult key={i} match={m} userTeamName={userTeamName} />
+          ))}
+          <div className="pb-1" />
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -106,7 +144,7 @@ export default function CopaGroupPage() {
 
   if (copaGroups.length === 0) return null;
 
-  const userGroup = copaGroups.find((g) => g.teams.some((t) => t.isUser));
+  const userGroup = copaGroups.find((g: typeof copaGroups[0]) => g.teams.some((t) => t.isUser));
   const userPosition = userGroup ? userGroup.teams.findIndex((t) => t.isUser) : -1;
   const userQualified = userPosition === 0 || userPosition === 1;
 
@@ -141,8 +179,7 @@ export default function CopaGroupPage() {
           {copaGroups.map((group, i) => (
             <GroupCard
               key={group.name}
-              name={group.name}
-              teams={group.teams}
+              group={group}
               userTeamName={userTeamName}
               delay={i * 0.05}
             />

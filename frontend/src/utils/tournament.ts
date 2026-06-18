@@ -362,7 +362,8 @@ export function generateKnockoutRounds(
   userTactic: TacticType,
   difficulty: DifficultyType,
   userChemistry: number,
-  userManagerBonus: number = 0
+  userManagerBonus: number = 0,
+  singleLeg: boolean = false
 ) {
   let top16 = leagueTable.slice(0, 16).map(t => ({
     name: t.name, strength: t.avgOverall, isUser: t.name === userTeamName, players: t.players
@@ -393,7 +394,7 @@ export function generateKnockoutRounds(
 
       let winner, leg2: MatchResult | undefined;
 
-      if (isFinal) {
+      if (isFinal || singleLeg) {
          if (res1.homeGoals > res1.awayGoals) winner = t1;
          else if (res1.awayGoals > res1.homeGoals) winner = t2;
          else {
@@ -475,6 +476,8 @@ export function generateCopaGroups(
       };
     });
 
+    const groupMatches: MatchResult[] = [];
+
     for (let i = 0; i < raw.teams.length; i++) {
       for (let j = i + 1; j < raw.teams.length; j++) {
         const home = raw.teams[i];
@@ -494,8 +497,11 @@ export function generateCopaGroups(
           isAwayUser ? userManagerBonus : 0,
         );
 
+        const match: MatchResult = { homeTeam: home.name, awayTeam: away.name, homeGoals, awayGoals, events };
+        groupMatches.push(match);
+
         if (isHomeUser || isAwayUser) {
-          userGroupMatches.push({ homeTeam: home.name, awayTeam: away.name, homeGoals, awayGoals, events });
+          userGroupMatches.push(match);
         }
 
         const updateStanding = (teamName: string, gf: number, ga: number) => {
@@ -516,7 +522,7 @@ export function generateCopaGroups(
     const sorted = Object.values(standings).sort(
       (a, b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
     );
-    return { name: raw.name, teams: sorted };
+    return { name: raw.name, teams: sorted, matches: groupMatches };
   });
 
   const qualifiedTeams: LeagueTeam[] = [];

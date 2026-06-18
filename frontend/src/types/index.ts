@@ -103,6 +103,7 @@ export type GamePhase = "home" | "formation" | "draft" | "league" | "copa-group-
 export interface CopaGroup {
   name: string;
   teams: LeagueTeam[];
+  matches: MatchResult[];
 }
 
 export interface BrasileiraoRound {

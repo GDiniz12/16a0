@@ -59,6 +59,19 @@ export function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
+const NATIONAL_FLAG_MAP: Record<string, string> = {
+  'Brasil': '🇧🇷', 'Argentina': '🇦🇷', 'Franca': '🇫🇷', 'Alemanha': '🇩🇪',
+  'Espanha': '🇪🇸', 'Italia': '🇮🇹', 'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Holanda': '🇳🇱',
+  'Hungria': '🇭🇺', 'Mexico': '🇲🇽', 'Polonia': '🇵🇱', 'Portugal': '🇵🇹',
+  'Suecia': '🇸🇪', 'Tchecoslovaquia': '🇨🇿', 'Uruguai': '🇺🇾', 'Croacia': '🇭🇷',
+  'Costa Rica': '🇨🇷', 'Curacao': '🇨🇼',
+};
+
+export function getNationalTeamFlag(teamName: string): string {
+  const country = teamName.replace(/\s+\d{4}$/, '').trim();
+  return NATIONAL_FLAG_MAP[country] ?? '';
+}
+
 export function getCountryEmoji(country: string): string {
   const map: Record<string, string> = {
     "Brasil": "🇧🇷", "Portugal": "🇵🇹", "Argentina": "🇦🇷", "Espanha": "🇪🇸",

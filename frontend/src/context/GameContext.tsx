@@ -435,7 +435,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const userStrength = calculateTeamStrength(userPlayers, prev.manager);
       const userChemistry = calculateTeamChemistry(prev.slots, prev.formation, prev.manager);
 
-      const rounds = generateKnockoutRounds(prev.leagueTable, prev.userTeamName, userStrength, prev.tactic, prev.difficulty, userChemistry, getManagerBonus(prev.manager));
+      const singleLeg = prev.tournamentMode === 'copa-do-mundo';
+      const rounds = generateKnockoutRounds(prev.leagueTable, prev.userTeamName, userStrength, prev.tactic, prev.difficulty, userChemistry, getManagerBonus(prev.manager), singleLeg);
 
       const newStats = { ...prev.stats };
       rounds.forEach((r) => {
