@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "@/context/GameContext";
 import { useSocket } from "@/context/SocketContext"; 
 import { Player, FormationSlot, TeamData } from "@/types";
-import { getAvailablePositions, getAllTeams, getCountryEmoji, calculateTeamChemistry } from "@/utils/helpers";
+import { getAvailablePositions, getAllTeams, getBrazilianTeams, getCountryEmoji, calculateTeamChemistry } from "@/utils/helpers";
 import { calculateTeamStrength, calculateSectorStrengths } from "@/utils/simulation";
 import { generateOnlineGuerra, generateOnlineTradicional } from "@/utils/tournament";
 import { americans, europeans, nationalTeams } from "@/data/data";
@@ -24,7 +24,7 @@ export default function DraftPage() {
   const {
     draftRound, currentDraftTeam, currentDraftManagers, manager,
     assignManager, slots, formation, assignPlayerToSlot, drawNextTeam, gameMode,
-    tournamentMode, startCopaGroupStage,
+    tournamentMode, startCopaGroupStage, startBrasileirao,
     tactic, setOnlineTournamentState, swapPlayers
   } = useGame();
 
@@ -37,6 +37,7 @@ export default function DraftPage() {
   
   const allTeams = useMemo(() => {
     if (tournamentMode === 'copa-do-mundo') return getAllTeams({} as any, {} as any, nationalTeams);
+    if (tournamentMode === 'brasileirao') return getBrazilianTeams(americans);
     return getAllTeams(americans, europeans, nationalTeams);
   }, [tournamentMode]);
   const [isRolling, setIsRolling] = useState(false);
@@ -389,6 +390,9 @@ export default function DraftPage() {
                       if (tournamentMode === 'copa-do-mundo') {
                         startCopaGroupStage();
                         router.push("/copa-group");
+                      } else if (tournamentMode === 'brasileirao') {
+                        startBrasileirao();
+                        router.push("/brasileirao");
                       } else {
                         router.push("/tournament");
                       }

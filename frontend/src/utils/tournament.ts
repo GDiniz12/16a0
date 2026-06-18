@@ -1,4 +1,4 @@
-import { LeagueTeam, MatchResult, KnockoutRound, CopaGroup, TacticType, DifficultyType, MatchEvent } from '@/types';
+import { LeagueTeam, MatchResult, KnockoutRound, CopaGroup, BrasileiraoRound, TacticType, DifficultyType, MatchEvent } from '@/types';
 import { shuffleArray, calculateBotChemistry, getManagerBonus } from './helpers';
 
 // =========================================================
@@ -525,6 +525,91 @@ export function generateCopaGroups(
   });
 
   return { groups: copaGroups, qualifiedTeams, userGroupMatches };
+}
+
+// =========================================================
+// BRASILEIRÃO: 20 CLUBES, 38 RODADAS (TURNO + RETURNO)
+// =========================================================
+
+export function generateBrasileirao(
+  userTeamName: string,
+  allTeams: { name: string; strength: number; players?: any[] }[],
+  userTactic: TacticType,
+  difficulty: DifficultyType,
+  userChemistry: number,
+  userManagerBonus: number = 0
+): { rounds: BrasileiraoRound[]; finalTable: LeagueTeam[] } {
+  const standings: Record<string, LeagueTeam> = {};
+  allTeams.forEach((t) => {
+    standings[t.name] = {
+      name: t.name, played: 0, won: 0, drawn: 0, lost: 0,
+      goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0,
+      isUser: t.name === userTeamName, avgOverall: t.strength, players: t.players,
+    };
+  });
+
+  type Team = typeof allTeams[0];
+
+  const playMatch = (home: Team, away: Team): MatchResult => {
+    const isHU = home.name === userTeamName;
+    const isAU = away.name === userTeamName;
+    const { homeGoals, awayGoals, events } = simulateMatch(
+      home.strength, away.strength,
+      isHU ? userTactic : 'balanced', isAU ? userTactic : 'balanced',
+      isHU, isAU, difficulty,
+      isHU ? userChemistry : calculateBotChemistry(home.players || []),
+      isAU ? userChemistry : calculateBotChemistry(away.players || []),
+      home.players || [], away.players || [],
+      isHU ? userManagerBonus : 0, isAU ? userManagerBonus : 0,
+    );
+    const updateS = (name: string, gf: number, ga: number) => {
+      const s = standings[name];
+      s.played++; s.goalsFor += gf; s.goalsAgainst += ga;
+      s.goalDifference = s.goalsFor - s.goalsAgainst;
+      if (gf > ga) { s.won++; s.points += 3; }
+      else if (gf === ga) { s.drawn++; s.points += 1; }
+      else { s.lost++; }
+    };
+    updateS(home.name, homeGoals, awayGoals);
+    updateS(away.name, awayGoals, homeGoals);
+    return { homeTeam: home.name, awayTeam: away.name, homeGoals, awayGoals, events };
+  };
+
+  const sortedSnapshot = (): LeagueTeam[] =>
+    Object.values(standings).map((s) => ({ ...s })).sort(
+      (a, b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
+    );
+
+  const rounds: BrasileiraoRound[] = [];
+  const fixed = allTeams[0];
+  const rotating = [...allTeams.slice(1)]; // 19 teams
+
+  const runHalf = (startRound: number, swapHomeAway: boolean) => {
+    const rot = [...rotating];
+    for (let r = 0; r < 19; r++) {
+      const current = [fixed, ...rot];
+      const allMatches: MatchResult[] = [];
+      let userMatch: MatchResult | null = null;
+
+      for (let i = 0; i < 10; i++) {
+        const a = current[i];
+        const b = current[19 - i];
+        const match = swapHomeAway ? playMatch(b, a) : playMatch(a, b);
+        allMatches.push(match);
+        if (match.homeTeam === userTeamName || match.awayTeam === userTeamName) {
+          userMatch = match;
+        }
+      }
+
+      rounds.push({ roundNumber: startRound + r, userMatch, allMatches, standingsAfterRound: sortedSnapshot() });
+      rot.unshift(rot.pop()!);
+    }
+  };
+
+  runHalf(1, false);
+  runHalf(20, true);
+
+  return { rounds, finalTable: sortedSnapshot() };
 }
 
 // =========================================================

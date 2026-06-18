@@ -35,6 +35,21 @@ export function getRandomTeam(americans: any, europeans: any, nationalTeams?: an
   return all[Math.floor(Math.random() * all.length)];
 }
 
+const NON_BRAZILIAN_KEYS = new Set([
+  'river-plate', 'boca-juniors', 'independiente', 'estudiantes', 'racing', 'penarol',
+]);
+
+export function getBrazilianTeams(americans: any): TeamData[] {
+  const filtered: any = {};
+  Object.keys(americans).forEach((key) => {
+    const prefix = key.split('-').slice(0, -1).join('-');
+    if (!NON_BRAZILIAN_KEYS.has(key) && !NON_BRAZILIAN_KEYS.has(prefix)) {
+      filtered[key] = americans[key];
+    }
+  });
+  return getAllTeams(filtered, {} as any);
+}
+
 export function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {

@@ -98,9 +98,16 @@ export interface GameStats {
   goalsConceded: number;
 }
 
-export type GamePhase = "home" | "formation" | "draft" | "league" | "copa-group-stage" | "knockout" | "result";
+export type GamePhase = "home" | "formation" | "draft" | "league" | "copa-group-stage" | "brasileirao" | "knockout" | "result";
 
 export interface CopaGroup {
   name: string;
   teams: LeagueTeam[];
+}
+
+export interface BrasileiraoRound {
+  roundNumber: number;
+  userMatch: MatchResult | null;
+  allMatches: MatchResult[];
+  standingsAfterRound: LeagueTeam[];
 }

@@ -1,13 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { FormationType, FormationSlot, Player, TeamData, GamePhase, LeagueTeam, MatchResult, KnockoutRound, GameStats, GameMode, TacticType, DifficultyType, Manager, TournamentMode, CopaGroup } from '@/types';
+import { FormationType, FormationSlot, Player, TeamData, GamePhase, LeagueTeam, MatchResult, KnockoutRound, GameStats, GameMode, TacticType, DifficultyType, Manager, TournamentMode, CopaGroup, BrasileiraoRound } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import { TRANSLATIONS } from '@/lib/constants';
 import { getFormationSlots } from '@/utils/formations';
-import { getRandomTeam, getAllTeams, shuffleArray, calculateTeamChemistry, getManagerBonus } from '@/utils/helpers';
+import { getRandomTeam, getAllTeams, getBrazilianTeams, shuffleArray, calculateTeamChemistry, getManagerBonus } from '@/utils/helpers';
 import { calculateTeamStrength } from '@/utils/simulation';
-import { generateLeaguePhase, generateKnockoutRounds, generateCopaGroups } from '@/utils/tournament';
+import { generateLeaguePhase, generateKnockoutRounds, generateCopaGroups, generateBrasileirao } from '@/utils/tournament';
 import { americans, europeans, nationalTeams, managersData } from '@/data/data';
 
 interface GameState {
@@ -26,6 +26,7 @@ interface GameState {
   userMatches: MatchResult[];
   knockoutRounds: KnockoutRound[];
   copaGroups: CopaGroup[];
+  brasilRounds: BrasileiraoRound[];
   isChampion: boolean;
   stats: GameStats;
   userTeamName: string;
@@ -36,6 +37,7 @@ interface GameContextType extends GameState {
   setGameMode: (m: GameMode) => void;
   setTournamentMode: (m: TournamentMode) => void;
   startCopaGroupStage: () => void;
+  startBrasileirao: () => void;
   setTactic: (t: TacticType) => void;
   setDifficulty: (d: DifficultyType) => void;
   assignPlayerToSlot: (player: Player, slotId: number) => void;
@@ -70,6 +72,7 @@ const initialState: GameState = {
   userMatches: [],
   knockoutRounds: [],
   copaGroups: [],
+  brasilRounds: [],
   isChampion: false,
   stats: { ...initialStats },
   userTeamName: '',
@@ -136,8 +139,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const setTactic = useCallback((t: TacticType) => setState((prev) => ({ ...prev, tactic: t })), []);
   const setDifficulty = useCallback((d: DifficultyType) => setState((prev) => ({ ...prev, difficulty: d })), []);
   
-  const getTeamPoolForMode = (mode: TournamentMode) => {
-    if (mode === 'copa-do-mundo') return getRandomTeam({} as any, {} as any, nationalTeams);
+  const getTeamPoolForMode = (mode: TournamentMode): TeamData => {
+    if (mode === 'copa-do-mundo') {
+      const pool = getAllTeams({} as any, {} as any, nationalTeams);
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+    if (mode === 'brasileirao') {
+      const pool = getBrazilianTeams(americans);
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
     return getRandomTeam(americans, europeans, nationalTeams);
   };
 
@@ -145,6 +155,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (mode === 'copa-do-mundo') {
       const nationalKeys = new Set(Object.keys(nationalTeams));
       return managersData.filter((m) => nationalKeys.has(m.clubeAno));
+    }
+    if (mode === 'brasileirao') {
+      const brazilianKeys = new Set(getBrazilianTeams(americans).map((t) => t.key));
+      return managersData.filter((m) => brazilianKeys.has(m.clubeAno));
     }
     return managersData;
   };
@@ -360,6 +374,60 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
   }, [lang]);
 
+  const startBrasileirao = useCallback(() => {
+    setState((prev) => {
+      const userPlayers = prev.slots.filter((s) => s.player).map((s) => {
+        const p = { ...s.player! };
+        if (!p.positions.includes(s.position)) {
+          p.overall = Math.max(40, p.overall - 12);
+          p.name = p.name + ' ⚠️';
+        }
+        return p;
+      });
+      const userStrength = calculateTeamStrength(userPlayers, prev.manager);
+      const userTeamName = TRANSLATIONS[lang].your_team;
+      const userChemistry = calculateTeamChemistry(prev.slots, prev.formation, prev.manager);
+
+      const brazilianPool = getBrazilianTeams(americans);
+      const botTeams = shuffleArray(brazilianPool)
+        .slice(0, 19)
+        .map((t) => ({
+          name: t.name,
+          strength: t.players.reduce((s: number, p: any) => s + p.overall, 0) / t.players.length,
+          players: t.players,
+        }));
+
+      const allTeams = shuffleArray([
+        { name: userTeamName, strength: userStrength, players: userPlayers },
+        ...botTeams,
+      ]);
+
+      const { rounds, finalTable } = generateBrasileirao(
+        userTeamName, allTeams, prev.tactic, prev.difficulty, userChemistry, getManagerBonus(prev.manager)
+      );
+
+      const stats: GameStats = { ...initialStats };
+      rounds.forEach((r) => {
+        const m = r.userMatch;
+        if (!m) return;
+        const isHome = m.homeTeam === userTeamName;
+        const ug = isHome ? m.homeGoals : m.awayGoals;
+        const og = isHome ? m.awayGoals : m.homeGoals;
+        stats.goalsScored += ug; stats.goalsConceded += og;
+        if (ug > og) stats.wins++; else if (ug < og) stats.losses++; else stats.draws++;
+      });
+
+      return {
+        ...prev,
+        phase: 'brasileirao' as GamePhase,
+        brasilRounds: rounds,
+        leagueTable: finalTable,
+        stats,
+        userTeamName,
+      };
+    });
+  }, [lang]);
+
   const startKnockoutPhase = useCallback(() => {
     setState((prev) => {
       const userPlayers = prev.slots.filter((s) => s.player).map((s) => s.player!);
@@ -396,7 +464,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetGame = useCallback(() => setState({ ...initialState, userTeamName: TRANSLATIONS[lang].your_team }), [lang]);
 
   return (
-    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTournamentMode, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startCopaGroupStage, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers, undoPick, canUndo: undoStack.length > 0, clearSave }}>
+    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTournamentMode, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startCopaGroupStage, startBrasileirao, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers, undoPick, canUndo: undoStack.length > 0, clearSave }}>
       {children}
     </GameContext.Provider>
   );
