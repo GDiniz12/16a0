@@ -138,7 +138,7 @@ export default function MatchResultCard({ match, userTeamName, index, stage, cur
                 <img src={userLogo} alt={userTeamName} className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 object-contain flex-shrink-0 drop-shadow-[2px_2px_0_rgba(0,0,0,0.3)]" />
               )}
               <div className="text-left min-w-0">
-                <h3 className="text-xs sm:text-sm md:text-xl font-black uppercase tracking-tight text-[#0033A0] truncate">
+                <h3 className="text-xs sm:text-sm md:text-xl font-black uppercase tracking-tight text-[#0033A0] break-words leading-tight">
                   {userTeamName}
                 </h3>
                 <span className="text-[8px] sm:text-[10px] font-bold text-gray-500 uppercase">{isHome ? "Mandante" : "Visitante"}</span>
@@ -162,7 +162,7 @@ export default function MatchResultCard({ match, userTeamName, index, stage, cur
             {/* Adversário */}
             <div className="flex-1 flex items-center justify-end gap-1.5 sm:gap-2 md:gap-3 min-w-0">
               <div className="text-right min-w-0">
-                <h3 className="text-xs sm:text-sm md:text-xl font-black uppercase tracking-tight text-rose-700 truncate">
+                <h3 className="text-xs sm:text-sm md:text-xl font-black uppercase tracking-tight text-rose-700 break-words leading-tight">
                   {opponentName}
                 </h3>
                 <span className="text-[8px] sm:text-[10px] font-bold text-gray-500 uppercase">{isHome ? "Visitante" : "Mandante"}</span>
