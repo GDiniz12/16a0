@@ -24,6 +24,7 @@ export default function DraftPage() {
   const {
     draftRound, currentDraftTeam, currentDraftManagers, manager,
     assignManager, slots, formation, assignPlayerToSlot, drawNextTeam, gameMode,
+    tournamentMode, startCopaGroupStage,
     tactic, setOnlineTournamentState, swapPlayers
   } = useGame();
 
@@ -34,7 +35,10 @@ export default function DraftPage() {
   const [swapSourceSlot, setSwapSourceSlot] = useState<FormationSlot | null>(null);
   const [swapAvailableSlots, setSwapAvailableSlots] = useState<FormationSlot[]>([]);
   
-  const allTeams = useMemo(() => getAllTeams(americans, europeans, nationalTeams), []);
+  const allTeams = useMemo(() => {
+    if (tournamentMode === 'copa-do-mundo') return getAllTeams({} as any, {} as any, nationalTeams);
+    return getAllTeams(americans, europeans, nationalTeams);
+  }, [tournamentMode]);
   const [isRolling, setIsRolling] = useState(false);
   const [rollingTeam, setRollingTeam] = useState<TeamData | null>(null);
 
@@ -381,7 +385,14 @@ export default function DraftPage() {
                     {tDraft.ready}
                   </p>
                   <button
-                    onClick={() => router.push("/tournament")}
+                    onClick={() => {
+                      if (tournamentMode === 'copa-do-mundo') {
+                        startCopaGroupStage();
+                        router.push("/copa-group");
+                      } else {
+                        router.push("/tournament");
+                      }
+                    }}
                     className="w-full px-8 py-5 bg-[#D9D9D9] text-[#00183F] border-4 border-[#00183F] font-black text-2xl uppercase tracking-widest transition-all duration-75 shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_#0033A0] active:translate-y-2 active:translate-x-2 active:shadow-none"
                   >
                     {tDraft.simulateBtn}

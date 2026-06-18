@@ -1,4 +1,4 @@
-import { LeagueTeam, MatchResult, KnockoutRound, TacticType, DifficultyType, MatchEvent } from '@/types';
+import { LeagueTeam, MatchResult, KnockoutRound, CopaGroup, TacticType, DifficultyType, MatchEvent } from '@/types';
 import { shuffleArray, calculateBotChemistry, getManagerBonus } from './helpers';
 
 // =========================================================
@@ -442,6 +442,89 @@ export function generateKnockoutRounds(
     top16 = nextRoundTeams;
   }
   return knockoutRounds;
+}
+
+// =========================================================
+// COPA DO MUNDO: FASE DE GRUPOS (8 grupos × 4 seleções)
+// =========================================================
+
+export function generateCopaGroups(
+  userTeamName: string,
+  allTeams: { name: string; strength: number; players?: any[] }[],
+  userTactic: TacticType,
+  difficulty: DifficultyType,
+  userChemistry: number,
+  userManagerBonus: number = 0
+): { groups: CopaGroup[]; qualifiedTeams: LeagueTeam[]; userGroupMatches: MatchResult[] } {
+  const GROUP_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const rawGroups: { name: string; teams: typeof allTeams }[] = GROUP_NAMES.map((name) => ({ name, teams: [] }));
+
+  allTeams.forEach((team, i) => {
+    rawGroups[i % 8].teams.push(team);
+  });
+
+  const userGroupMatches: MatchResult[] = [];
+
+  const copaGroups: CopaGroup[] = rawGroups.map((raw) => {
+    const standings: Record<string, LeagueTeam> = {};
+    raw.teams.forEach((t) => {
+      standings[t.name] = {
+        name: t.name, played: 0, won: 0, drawn: 0, lost: 0,
+        goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0,
+        isUser: t.name === userTeamName, avgOverall: t.strength, players: t.players,
+      };
+    });
+
+    for (let i = 0; i < raw.teams.length; i++) {
+      for (let j = i + 1; j < raw.teams.length; j++) {
+        const home = raw.teams[i];
+        const away = raw.teams[j];
+        const isHomeUser = home.name === userTeamName;
+        const isAwayUser = away.name === userTeamName;
+
+        const { homeGoals, awayGoals, events } = simulateMatch(
+          home.strength, away.strength,
+          isHomeUser ? userTactic : 'balanced',
+          isAwayUser ? userTactic : 'balanced',
+          isHomeUser, isAwayUser, difficulty,
+          isHomeUser ? userChemistry : calculateBotChemistry(home.players || []),
+          isAwayUser ? userChemistry : calculateBotChemistry(away.players || []),
+          home.players || [], away.players || [],
+          isHomeUser ? userManagerBonus : 0,
+          isAwayUser ? userManagerBonus : 0,
+        );
+
+        if (isHomeUser || isAwayUser) {
+          userGroupMatches.push({ homeTeam: home.name, awayTeam: away.name, homeGoals, awayGoals, events });
+        }
+
+        const updateStanding = (teamName: string, gf: number, ga: number) => {
+          const s = standings[teamName];
+          s.played++;
+          s.goalsFor += gf;
+          s.goalsAgainst += ga;
+          s.goalDifference = s.goalsFor - s.goalsAgainst;
+          if (gf > ga) { s.won++; s.points += 3; }
+          else if (gf === ga) { s.drawn++; s.points += 1; }
+          else { s.lost++; }
+        };
+        updateStanding(home.name, homeGoals, awayGoals);
+        updateStanding(away.name, awayGoals, homeGoals);
+      }
+    }
+
+    const sorted = Object.values(standings).sort(
+      (a, b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
+    );
+    return { name: raw.name, teams: sorted };
+  });
+
+  const qualifiedTeams: LeagueTeam[] = [];
+  copaGroups.forEach((g) => {
+    qualifiedTeams.push(g.teams[0], g.teams[1]);
+  });
+
+  return { groups: copaGroups, qualifiedTeams, userGroupMatches };
 }
 
 // =========================================================
