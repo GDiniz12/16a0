@@ -51,7 +51,7 @@ export default function TeamCard({
           </div>
           
           <span className="inline-block bg-[#D9D9D9] text-[#00183F] border-2 border-[#00183F] px-3 py-1 text-[10px] md:text-xs font-black uppercase tracking-widest shadow-[2px_2px_0_0_#00183F]">
-            {team.continent === "american" ? "🌎 Americas" : "🌍 Europe"}
+            {team.continent === "american" ? "🌎 Americas" : team.continent === "european" ? "🌍 Europe" : "🌐 National"}
           </span>
         </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { MatchResult } from "@/types";
-import { clubLogos, americans, europeans } from "@/data/data";
+import { clubLogos, americans, europeans, nationalTeams } from "@/data/data";
 import { useGame } from "@/context/GameContext";
 
 interface MatchResultCardProps {
@@ -26,7 +26,7 @@ const getLogoUrl = (teamName: string) => {
 };
 
 const getOpponentPlayers = (teamName: string) => {
-  const allTeams = { ...americans, ...europeans };
+  const allTeams = { ...americans, ...europeans, ...nationalTeams };
   
   const exactKey = teamName
     .normalize("NFD")

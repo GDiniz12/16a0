@@ -5,9 +5,9 @@ export function getAvailablePositions(slots: FormationSlot[], positions: Positio
   return slots.filter(s => positions.includes(s.position) && !s.player).map(s => s.id);
 }
 
-export function getAllTeams(americans: any, europeans: any): TeamData[] {
+export function getAllTeams(americans: any, europeans: any, nationalTeams?: any): TeamData[] {
   const teams: TeamData[] = [];
-  const process = (data: any, continent: "american"|"european") => {
+  const process = (data: any, continent: "american"|"european"|"national") => {
     Object.keys(data).forEach(key => {
       teams.push({
         key,
@@ -26,11 +26,12 @@ export function getAllTeams(americans: any, europeans: any): TeamData[] {
   };
   process(americans, "american"); 
   process(europeans, "european");
+  if (nationalTeams) process(nationalTeams, "national");
   return teams;
 }
 
-export function getRandomTeam(americans: any, europeans: any): TeamData {
-  const all = getAllTeams(americans, europeans);
+export function getRandomTeam(americans: any, europeans: any, nationalTeams?: any): TeamData {
+  const all = getAllTeams(americans, europeans, nationalTeams);
   return all[Math.floor(Math.random() * all.length)];
 }
 

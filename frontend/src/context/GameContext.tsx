@@ -8,7 +8,7 @@ import { getFormationSlots } from '@/utils/formations';
 import { getRandomTeam, getAllTeams, shuffleArray, calculateTeamChemistry, getManagerBonus } from '@/utils/helpers';
 import { calculateTeamStrength } from '@/utils/simulation';
 import { generateLeaguePhase, generateKnockoutRounds } from '@/utils/tournament';
-import { americans, europeans, managersData } from '@/data/data';
+import { americans, europeans, nationalTeams, managersData } from '@/data/data';
 
 interface GameState {
   phase: GamePhase;
@@ -132,7 +132,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const drawNextTeam = useCallback(() => {
     setState((prev) => {
       if (prev.draftRound < 11) {
-        return { ...prev, currentDraftTeam: getRandomTeam(americans, europeans) };
+        return { ...prev, currentDraftTeam: getRandomTeam(americans, europeans, nationalTeams) };
       } else if (prev.draftRound === 11) {
         return { ...prev, currentDraftManagers: shuffleArray(managersData).slice(0, 5), currentDraftTeam: null };
       }
@@ -149,7 +149,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       let nextManagers: Manager[] = [];
       
       if (newRound < 11) {
-        nextTeam = getRandomTeam(americans, europeans);
+        nextTeam = getRandomTeam(americans, europeans, nationalTeams);
       } else if (newRound === 11) {
         nextManagers = shuffleArray(managersData).slice(0, 5);
       }
@@ -262,7 +262,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const userTeamName = TRANSLATIONS[lang].your_team;
       const userChemistry = calculateTeamChemistry(prev.slots, prev.formation, prev.manager);
 
-      const allDataTeams = getAllTeams(americans, europeans);
+      const allDataTeams = getAllTeams(americans, europeans, nationalTeams);
       const teamEntries = allDataTeams.map((t) => ({ name: t.name, strength: t.players.reduce((sum, p) => sum + p.overall, 0) / t.players.length, players: t.players }));
 
       const shuffled = shuffleArray(teamEntries).slice(0, 35);

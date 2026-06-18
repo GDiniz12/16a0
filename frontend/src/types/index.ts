@@ -38,7 +38,7 @@ export interface TeamData {
   key: string;
   name: string;
   players: Player[];
-  continent: "american" | "european";
+  continent: "american" | "european" | "national";
 }
 
 export interface MatchEvent {

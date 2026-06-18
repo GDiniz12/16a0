@@ -446,6 +446,69 @@ export const europeans: RawTeamData = {
   ],
 };
 
+export const nationalTeams: RawTeamData = {
+  "argentina-2022": [
+    ["Emiliano Martínez", 89, ["GOL"], "🇦🇷"], ["Nahuel Molina", 84, ["LD", "ALA"], "🇦🇷"], ["Cristian Romero", 87, ["ZAG"], "🇦🇷"],
+    ["Nicolás Otamendi", 86, ["ZAG"], "🇦🇷"], ["Nicolás Tagliafico", 83, ["LE"], "🇦🇷"], ["Rodrigo De Paul", 86, ["MC", "VOL"], "🇦🇷"],
+    ["Enzo Fernández", 87, ["MC", "VOL"], "🇦🇷"], ["Alexis Mac Allister", 86, ["MC", "MEI"], "🇦🇷"], ["Ángel Di María", 88, ["PD", "PE"], "🇦🇷"],
+    ["Lionel Messi", 94, ["MEI", "PD", "SA"], "🇦🇷"], ["Julián Álvarez", 87, ["CA", "SA"], "🇦🇷"],
+  ],
+  "franca-2018": [
+    ["Hugo Lloris", 88, ["GOL"], "🇫🇷"], ["Benjamin Pavard", 84, ["LD", "ZAG"], "🇫🇷"], ["Raphaël Varane", 89, ["ZAG"], "🇫🇷"],
+    ["Samuel Umtiti", 87, ["ZAG"], "🇫🇷"], ["Lucas Hernández", 86, ["LE", "ZAG"], "🇫🇷"], ["N'Golo Kanté", 91, ["VOL", "MC"], "🇫🇷"],
+    ["Paul Pogba", 89, ["MC", "MEI"], "🇫🇷"], ["Blaise Matuidi", 85, ["MC", "ME"], "🇫🇷"], ["Antoine Griezmann", 90, ["SA", "MEI", "CA"], "🇫🇷"],
+    ["Kylian Mbappé", 90, ["PD", "PE", "CA"], "🇫🇷"], ["Olivier Giroud", 86, ["CA"], "🇫🇷"],
+  ],
+  "brasil-2002": [
+    ["Marcos", 88, ["GOL"], "🇧🇷"], ["Cafu", 91, ["LD", "ALA"], "🇧🇷"], ["Lúcio", 88, ["ZAG"], "🇧🇷"],
+    ["Edmílson", 86, ["ZAG", "VOL"], "🇧🇷"], ["Roque Júnior", 85, ["ZAG"], "🇧🇷"], ["Roberto Carlos", 92, ["LE", "ALA"], "🇧🇷"],
+    ["Gilberto Silva", 87, ["VOL"], "🇧🇷"], ["Kléberson", 85, ["MC", "VOL"], "🇧🇷"], ["Ronaldinho Gaúcho", 91, ["MEI", "PE"], "🇧🇷"],
+    ["Rivaldo", 93, ["MEI", "SA"], "🇧🇷"], ["Ronaldo", 94, ["CA"], "🇧🇷"],
+  ],
+  "alemanha-2014": [
+    ["Manuel Neuer", 92, ["GOL"], "🇩🇪"], ["Philipp Lahm", 91, ["LD", "VOL"], "🇩🇪"], ["Jérôme Boateng", 88, ["ZAG"], "🇩🇪"],
+    ["Mats Hummels", 89, ["ZAG"], "🇩🇪"], ["Benedikt Höwedes", 84, ["LE", "ZAG"], "🇩🇪"], ["Bastian Schweinsteiger", 89, ["MC", "VOL"], "🇩🇪"],
+    ["Toni Kroos", 90, ["MC", "MEI"], "🇩🇪"], ["Christoph Kramer", 82, ["VOL", "MC"], "🇩🇪"], ["Mesut Özil", 89, ["MEI", "MD"], "🇩🇪"],
+    ["Thomas Müller", 90, ["SA", "PD", "CA"], "🇩🇪"], ["Miroslav Klose", 87, ["CA"], "🇩🇪"],
+  ],
+  "espanha-2010": [
+    ["Iker Casillas", 91, ["GOL"], "🇪🇸"], ["Sergio Ramos", 89, ["LD", "ZAG"], "🇪🇸"], ["Gerard Piqué", 88, ["ZAG"], "🇪🇸"],
+    ["Carles Puyol", 89, ["ZAG"], "🇪🇸"], ["Joan Capdevila", 84, ["LE"], "🇪🇸"], ["Sergio Busquets", 88, ["VOL"], "🇪🇸"],
+    ["Xabi Alonso", 89, ["MC", "VOL"], "🇪🇸"], ["Xavi", 92, ["MC", "MEI"], "🇪🇸"], ["Andrés Iniesta", 92, ["MEI", "MC", "PE"], "🇪🇸"],
+    ["Pedro", 84, ["PD", "PE"], "🇪🇸"], ["David Villa", 91, ["CA", "PE"], "🇪🇸"],
+  ],
+  "brasil-1958": [
+    ["Gilmar", 88, ["GOL"], "🇧🇷"], ["Djalma Santos", 91, ["LD"], "🇧🇷"], ["Bellini", 87, ["ZAG"], "🇧🇷"],
+    ["Orlando Peçanha", 86, ["ZAG"], "🇧🇷"], ["Nilton Santos", 92, ["LE"], "🇧🇷"], ["Zito", 88, ["VOL", "MC"], "🇧🇷"],
+    ["Didi", 93, ["MC", "MEI"], "🇧🇷"], ["Garrincha", 94, ["PD"], "🇧🇷"], ["Vavá", 89, ["CA"], "🇧🇷"],
+    ["Pelé", 95, ["SA", "MEI", "CA"], "🇧🇷"], ["Zagallo", 88, ["PE", "ME"], "🇧🇷"],
+  ],
+  "uruguai-1930": [
+    ["Enrique Ballestrero", 86, ["GOL"], "🇺🇾"], ["Ernesto Mascheroni", 86, ["ZAG", "LE"], "🇺🇾"], ["José Nasazzi", 91, ["ZAG"], "🇺🇾"],
+    ["José Leandro Andrade", 92, ["MC", "VOL"], "🇺🇾"], ["Lorenzo Fernández", 88, ["VOL", "MC"], "🇺🇾"], ["Álvaro Gestido", 87, ["MC", "VOL"], "🇺🇾"],
+    ["Pablo Dorado", 87, ["PD"], "🇺🇾"], ["Héctor Scarone", 91, ["MEI", "SA"], "🇺🇾"], ["Héctor Castro", 88, ["CA"], "🇺🇾"],
+    ["Pedro Cea", 90, ["SA", "MEI"], "🇺🇾"], ["Victoriano Iriarte", 88, ["PE"], "🇺🇾"],
+  ],
+  "argentina-1978": [
+    ["Ubaldo Fillol", 90, ["GOL"], "🇦🇷"], ["Jorge Olguín", 85, ["LD", "ZAG"], "🇦🇷"], ["Luis Galván", 86, ["ZAG"], "🇦🇷"],
+    ["Daniel Passarella", 92, ["ZAG"], "🇦🇷"], ["Alberto Tarantini", 86, ["LE"], "🇦🇷"], ["Américo Gallego", 87, ["VOL", "MC"], "🇦🇷"],
+    ["Osvaldo Ardiles", 88, ["MC", "MEI"], "🇦🇷"], ["Mario Kempes", 93, ["MEI", "SA", "CA"], "🇦🇷"], ["Daniel Bertoni", 88, ["PD", "PE"], "🇦🇷"],
+    ["Leopoldo Luque", 89, ["CA"], "🇦🇷"], ["Oscar Ortiz", 85, ["PE", "ME"], "🇦🇷"],
+  ],
+  "portugal-2026": [
+    ["Diogo Costa", 88, ["GOL"], "🇵🇹"], ["João Cancelo", 88, ["LD", "LE", "ALA"], "🇵🇹"], ["Rúben Dias", 90, ["ZAG"], "🇵🇹"],
+    ["Gonçalo Inácio", 86, ["ZAG"], "🇵🇹"], ["Nuno Mendes", 89, ["LE", "ALA"], "🇵🇹"], ["Vitinha", 90, ["MC", "MEI"], "🇵🇹"],
+    ["João Neves", 87, ["VOL", "MC"], "🇵🇹"], ["Bruno Fernandes", 90, ["MEI", "MC"], "🇵🇹"], ["Bernardo Silva", 90, ["MEI", "PD", "MC"], "🇵🇹"],
+    ["Rafael Leão", 89, ["PE", "CA"], "🇵🇹"], ["Cristiano Ronaldo", 88, ["CA"], "🇵🇹"],
+  ],
+  "holanda-2014": [
+    ["Jasper Cillessen", 85, ["GOL"], "🇳🇱"], ["Ron Vlaar", 86, ["ZAG"], "🇳🇱"], ["Stefan de Vrij", 85, ["ZAG"], "🇳🇱"],
+    ["Bruno Martins Indi", 83, ["ZAG", "LE"], "🇳🇱"], ["Daryl Janmaat", 83, ["LD", "ALA"], "🇳🇱"], ["Daley Blind", 86, ["LE", "VOL", "ALA"], "🇳🇱"],
+    ["Nigel de Jong", 86, ["VOL"], "🇳🇱"], ["Wesley Sneijder", 89, ["MEI", "MC"], "🇳🇱"], ["Arjen Robben", 92, ["PD", "PE", "SA"], "🇳🇱"],
+    ["Robin van Persie", 90, ["CA"], "🇳🇱"], ["Dirk Kuyt", 85, ["PD", "PE", "ALA"], "🇳🇱"],
+  ],
+};
+
 export const clubLogos: Record<string, string> = {
   "flamengo": "https://upload.wikimedia.org/wikipedia/commons/9/96/Clube_de_Regatas_do_Flamengo_logo.svg",
   "palmeiras": "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg",
@@ -487,6 +550,15 @@ export const clubLogos: Record<string, string> = {
   "feyenoord": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Feyenoord_logo_since_2009.svg",
   "aston-villa": "https://upload.wikimedia.org/wikipedia/pt/1/15/Aston_Villa.svg",
   "psv": "https://upload.wikimedia.org/wikipedia/en/0/05/PSV_Eindhoven.svg",
+  
+  "argentina": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg",
+  "franca": "https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg",
+  "brasil": "https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg",
+  "alemanha": "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg",
+  "espanha": "https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg",
+  "uruguai": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flag_of_Uruguay.svg",
+  "portugal": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Portugal.svg",
+  "holanda": "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg",
 };
 
 export const managersData: Manager[] = [
@@ -559,5 +631,15 @@ export const managersData: Manager[] = [
   { "tecnico": "Emerson Leão", "clubeAno": "santos-2002", "nacionalidade": "Brasil", "overall": 81 },
   { "tecnico": "Geninho", "clubeAno": "athletico-pr-2001", "nacionalidade": "Brasil", "overall": 80 },
   { "tecnico": "Artur Jorge", "clubeAno": "botafogo-2024", "nacionalidade": "Portugal", "overall": 84 },
-  { "tecnico": "Cuca", "clubeAno": "atletico-mineiro-2021", "nacionalidade": "Brasil", "overall": 83 }
+  { "tecnico": "Cuca", "clubeAno": "atletico-mineiro-2021", "nacionalidade": "Brasil", "overall": 83 },
+  { "tecnico": "Lionel Scaloni", "clubeAno": "argentina-2022", "nacionalidade": "Argentina", "overall": 86 },
+  { "tecnico": "Didier Deschamps", "clubeAno": "franca-2018", "nacionalidade": "França", "overall": 87 },
+  { "tecnico": "Luiz Felipe Scolari", "clubeAno": "brasil-2002", "nacionalidade": "Brasil", "overall": 88 },
+  { "tecnico": "Joachim Löw", "clubeAno": "alemanha-2014", "nacionalidade": "Alemanha", "overall": 88 },
+  { "tecnico": "Vicente del Bosque", "clubeAno": "espanha-2010", "nacionalidade": "Espanha", "overall": 89 },
+  { "tecnico": "Vicente Feola", "clubeAno": "brasil-1958", "nacionalidade": "Brasil", "overall": 85 },
+  { "tecnico": "Alberto Suppici", "clubeAno": "uruguai-1930", "nacionalidade": "Uruguai", "overall": 84 },
+  { "tecnico": "César Luis Menotti", "clubeAno": "argentina-1978", "nacionalidade": "Argentina", "overall": 87 },
+  { "tecnico": "Roberto Martínez", "clubeAno": "portugal-2026", "nacionalidade": "Espanha", "overall": 85 },
+  { "tecnico": "Louis van Gaal", "clubeAno": "holanda-2014", "nacionalidade": "Holanda", "overall": 86 }
 ];

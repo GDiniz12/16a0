@@ -9,7 +9,7 @@ import { Player, FormationSlot, TeamData } from "@/types";
 import { getAvailablePositions, getAllTeams, getCountryEmoji, calculateTeamChemistry } from "@/utils/helpers";
 import { calculateTeamStrength, calculateSectorStrengths } from "@/utils/simulation";
 import { generateOnlineGuerra, generateOnlineTradicional } from "@/utils/tournament";
-import { americans, europeans } from "@/data/data";
+import { americans, europeans, nationalTeams } from "@/data/data";
 import FootballPitch from "@/components/FootballPitch";
 import TeamCard from "@/components/TeamCard";
 import PositionPicker from "@/components/PositionPicker";
@@ -34,7 +34,7 @@ export default function DraftPage() {
   const [swapSourceSlot, setSwapSourceSlot] = useState<FormationSlot | null>(null);
   const [swapAvailableSlots, setSwapAvailableSlots] = useState<FormationSlot[]>([]);
   
-  const allTeams = useMemo(() => getAllTeams(americans, europeans), []);
+  const allTeams = useMemo(() => getAllTeams(americans, europeans, nationalTeams), []);
   const [isRolling, setIsRolling] = useState(false);
   const [rollingTeam, setRollingTeam] = useState<TeamData | null>(null);
 
