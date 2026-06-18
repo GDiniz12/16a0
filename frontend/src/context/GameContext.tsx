@@ -1,19 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { FormationType, FormationSlot, Player, TeamData, GamePhase, LeagueTeam, MatchResult, KnockoutRound, GameStats, GameMode, TacticType, DifficultyType, Manager } from '@/types';
+import { FormationType, FormationSlot, Player, TeamData, GamePhase, LeagueTeam, MatchResult, KnockoutRound, GameStats, GameMode, TacticType, DifficultyType, Manager, TournamentMode, CopaGroup } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import { TRANSLATIONS } from '@/lib/constants';
 import { getFormationSlots } from '@/utils/formations';
 import { getRandomTeam, getAllTeams, shuffleArray, calculateTeamChemistry, getManagerBonus } from '@/utils/helpers';
 import { calculateTeamStrength } from '@/utils/simulation';
-import { generateLeaguePhase, generateKnockoutRounds } from '@/utils/tournament';
+import { generateLeaguePhase, generateKnockoutRounds, generateCopaGroups } from '@/utils/tournament';
 import { americans, europeans, nationalTeams, managersData } from '@/data/data';
 
 interface GameState {
   phase: GamePhase;
   formation: FormationType | null;
   gameMode: GameMode;
+  tournamentMode: TournamentMode;
   tactic: TacticType;
   difficulty: DifficultyType;
   slots: FormationSlot[];
@@ -24,6 +25,7 @@ interface GameState {
   leagueTable: LeagueTeam[];
   userMatches: MatchResult[];
   knockoutRounds: KnockoutRound[];
+  copaGroups: CopaGroup[];
   isChampion: boolean;
   stats: GameStats;
   userTeamName: string;
@@ -32,6 +34,8 @@ interface GameState {
 interface GameContextType extends GameState {
   setFormation: (f: FormationType) => void;
   setGameMode: (m: GameMode) => void;
+  setTournamentMode: (m: TournamentMode) => void;
+  startCopaGroupStage: () => void;
   setTactic: (t: TacticType) => void;
   setDifficulty: (d: DifficultyType) => void;
   assignPlayerToSlot: (player: Player, slotId: number) => void;
@@ -54,6 +58,7 @@ const initialState: GameState = {
   phase: 'home',
   formation: null,
   gameMode: 'classic',
+  tournamentMode: 'super-mundial',
   tactic: 'balanced',
   difficulty: 'medium',
   slots: [],
@@ -64,6 +69,7 @@ const initialState: GameState = {
   leagueTable: [],
   userMatches: [],
   knockoutRounds: [],
+  copaGroups: [],
   isChampion: false,
   stats: { ...initialStats },
   userTeamName: '',
@@ -126,15 +132,30 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const setFormation = useCallback((f: FormationType) => setState((prev) => ({ ...prev, formation: f, slots: getFormationSlots(f) })), []);
   const setGameMode = useCallback((m: GameMode) => setState((prev) => ({ ...prev, gameMode: m })), []);
+  const setTournamentMode = useCallback((m: TournamentMode) => setState((prev) => ({ ...prev, tournamentMode: m })), []);
   const setTactic = useCallback((t: TacticType) => setState((prev) => ({ ...prev, tactic: t })), []);
   const setDifficulty = useCallback((d: DifficultyType) => setState((prev) => ({ ...prev, difficulty: d })), []);
   
+  const getTeamPoolForMode = (mode: TournamentMode) => {
+    if (mode === 'copa-do-mundo') return getRandomTeam({} as any, {} as any, nationalTeams);
+    return getRandomTeam(americans, europeans, nationalTeams);
+  };
+
+  const getManagerPoolForMode = (mode: TournamentMode) => {
+    if (mode === 'copa-do-mundo') {
+      const nationalKeys = new Set(Object.keys(nationalTeams));
+      return managersData.filter((m) => nationalKeys.has(m.clubeAno));
+    }
+    return managersData;
+  };
+
   const drawNextTeam = useCallback(() => {
     setState((prev) => {
       if (prev.draftRound < 11) {
-        return { ...prev, currentDraftTeam: getRandomTeam(americans, europeans, nationalTeams) };
+        return { ...prev, currentDraftTeam: getTeamPoolForMode(prev.tournamentMode) };
       } else if (prev.draftRound === 11) {
-        return { ...prev, currentDraftManagers: shuffleArray(managersData).slice(0, 5), currentDraftTeam: null };
+        const pool = getManagerPoolForMode(prev.tournamentMode);
+        return { ...prev, currentDraftManagers: shuffleArray(pool).slice(0, 5), currentDraftTeam: null };
       }
       return prev;
     });
@@ -147,13 +168,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const newRound = prev.draftRound + 1;
       let nextTeam: TeamData | null = null;
       let nextManagers: Manager[] = [];
-      
+
       if (newRound < 11) {
-        nextTeam = getRandomTeam(americans, europeans, nationalTeams);
+        nextTeam = getTeamPoolForMode(prev.tournamentMode);
       } else if (newRound === 11) {
-        nextManagers = shuffleArray(managersData).slice(0, 5);
+        const pool = getManagerPoolForMode(prev.tournamentMode);
+        nextManagers = shuffleArray(pool).slice(0, 5);
       }
-      
+
       return { ...prev, slots: newSlots, draftRound: newRound, currentDraftTeam: nextTeam, currentDraftManagers: nextManagers };
     });
   }, []);
@@ -286,6 +308,58 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
   }, [lang]);
 
+  const startCopaGroupStage = useCallback(() => {
+    setState((prev) => {
+      const userPlayers = prev.slots.filter((s) => s.player).map((s) => {
+        const p = { ...s.player! };
+        if (!p.positions.includes(s.position)) {
+          p.overall = Math.max(40, p.overall - 12);
+          p.name = p.name + ' ⚠️';
+        }
+        return p;
+      });
+      const userStrength = calculateTeamStrength(userPlayers, prev.manager);
+      const userTeamName = TRANSLATIONS[lang].your_team;
+      const userChemistry = calculateTeamChemistry(prev.slots, prev.formation, prev.manager);
+
+      const allNationalData = getAllTeams({} as any, {} as any, nationalTeams);
+      const botTeams = shuffleArray(allNationalData)
+        .slice(0, 31)
+        .map((t) => ({ name: t.name, strength: t.players.reduce((s: number, p: any) => s + p.overall, 0) / t.players.length, players: t.players }));
+
+      const allTeams = shuffleArray([
+        { name: userTeamName, strength: userStrength, players: userPlayers },
+        ...botTeams,
+      ]);
+
+      const { groups, qualifiedTeams, userGroupMatches } = generateCopaGroups(
+        userTeamName, allTeams, prev.tactic, prev.difficulty, userChemistry, getManagerBonus(prev.manager)
+      );
+
+      const stats: GameStats = { ...initialStats };
+      userGroupMatches.forEach((m) => {
+        const isHome = m.homeTeam === userTeamName;
+        const ug = isHome ? m.homeGoals : m.awayGoals;
+        const og = isHome ? m.awayGoals : m.homeGoals;
+        stats.goalsScored += ug;
+        stats.goalsConceded += og;
+        if (ug > og) stats.wins++;
+        else if (ug < og) stats.losses++;
+        else stats.draws++;
+      });
+
+      return {
+        ...prev,
+        phase: 'copa-group-stage' as GamePhase,
+        copaGroups: groups,
+        leagueTable: qualifiedTeams,
+        userMatches: userGroupMatches,
+        stats,
+        userTeamName,
+      };
+    });
+  }, [lang]);
+
   const startKnockoutPhase = useCallback(() => {
     setState((prev) => {
       const userPlayers = prev.slots.filter((s) => s.player).map((s) => s.player!);
@@ -322,7 +396,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetGame = useCallback(() => setState({ ...initialState, userTeamName: TRANSLATIONS[lang].your_team }), [lang]);
 
   return (
-    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers, undoPick, canUndo: undoStack.length > 0, clearSave }}>
+    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTournamentMode, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startCopaGroupStage, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers, undoPick, canUndo: undoStack.length > 0, clearSave }}>
       {children}
     </GameContext.Provider>
   );

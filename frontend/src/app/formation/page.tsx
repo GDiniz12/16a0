@@ -91,8 +91,8 @@ export default function FormationPage() {
   return (
     <div className="min-h-screen bg-[#00183F] px-4 py-12 flex flex-col items-center font-sans text-white relative">
       {!currentRoom && (
-        <button 
-          onClick={() => router.push("/")}
+        <button
+          onClick={() => router.push("/mode-select")}
           className="absolute top-4 left-4 md:top-6 md:left-6 bg-white text-[#00183F] px-4 py-2 font-black uppercase text-sm border-4 border-transparent hover:border-amber-400 hover:-translate-y-1 transition-all z-40"
         >
           ← {isPt ? 'Voltar' : 'Back'}

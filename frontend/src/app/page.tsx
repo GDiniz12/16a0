@@ -90,7 +90,7 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
           <motion.button
-            onClick={() => router.push("/formation")}
+            onClick={() => router.push("/mode-select")}
             className="px-8 py-4 bg-[#D9D9D9] text-[#00183F] border-4 border-[#00183F] font-black text-xl uppercase tracking-wider transition-all duration-75 shadow-[6px_6px_0_0_#0033A0]"
             whileHover={{ translateY: -2, translateX: -2, boxShadow: "10px 10px 0 0 #0033A0" }}
             whileTap={{ translateY: 4, translateX: 4, boxShadow: "0px 0px 0 0 #0033A0" }}
