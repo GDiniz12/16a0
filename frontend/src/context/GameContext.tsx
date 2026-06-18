@@ -301,7 +301,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const allDataTeams = getAllTeams(americans, europeans, nationalTeams);
       const teamEntries = allDataTeams.map((t) => ({ name: t.name, strength: t.players.reduce((sum, p) => sum + p.overall, 0) / t.players.length, players: t.players }));
 
-      const shuffled = shuffleArray(teamEntries).slice(0, 35);
+      const botCap = prev.tournamentMode === 'louco' ? 31 : 35;
+      const shuffled = shuffleArray(teamEntries).slice(0, botCap);
       const allTeams = [{ name: userTeamName, strength: userStrength, players: userPlayers }, ...shuffled];
 
       const { userMatches, table } = generateLeaguePhase(userTeamName, userStrength, allTeams, prev.tactic, prev.difficulty, userChemistry, getManagerBonus(prev.manager));
