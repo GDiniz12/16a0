@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "@/context/GameContext";
 import { useSocket } from "@/context/SocketContext"; 
 import { Player, FormationSlot, TeamData } from "@/types";
-import { getAvailablePositions, getAllTeams, getBrazilianTeams, getCountryEmoji, calculateTeamChemistry } from "@/utils/helpers";
+import { getAvailablePositions, getAllTeams, getBrazilianTeams, getCountryEmoji, calculateTeamChemistry, getManagerBonus } from "@/utils/helpers";
 import { calculateTeamStrength, calculateSectorStrengths } from "@/utils/simulation";
 import { generateOnlineGuerra, generateOnlineTradicional } from "@/utils/tournament";
 import { americans, europeans, nationalTeams } from "@/data/data";
@@ -38,7 +38,8 @@ export default function DraftPage() {
   const allTeams = useMemo(() => {
     if (tournamentMode === 'copa-do-mundo') return getAllTeams({} as any, {} as any, nationalTeams);
     if (tournamentMode === 'brasileirao') return getBrazilianTeams(americans);
-    return getAllTeams(americans, europeans, nationalTeams);
+    if (tournamentMode === 'super-mundial') return getAllTeams(americans, europeans);
+    return getAllTeams(americans, europeans, nationalTeams); // louco: everything
   }, [tournamentMode]);
   const [isRolling, setIsRolling] = useState(false);
   const [rollingTeam, setRollingTeam] = useState<TeamData | null>(null);
@@ -111,6 +112,7 @@ export default function DraftPage() {
         chemistry,
         tactic,
         players: penalizedPlayers,
+        managerBonus: getManagerBonus(manager),
       });
       setHasEmittedComplete(true);
     }
@@ -161,7 +163,6 @@ export default function DraftPage() {
   };
 
 
-  // [TODO O RESTANTE DO CÓDIGO PERMANECE IDENTICO]
   const hasSelectablePlayers = currentDraftTeam?.players.some(
     (p) => {
       const isAlreadyDrafted = slots.some((s) => s.player?.name === p.name);
@@ -266,8 +267,50 @@ export default function DraftPage() {
   const { lang } = useLanguage();
 
   const tDraft = {
-    pt: { title: "Opções de Sorteio", chances: "Sorteios Restantes", freeDesc: "Nenhum Jogador Encaixa", reroll: "Refazer Sorteio", freeReroll: "Sorteio Grátis", ready: "Elenco pronto para a Glória!", simulateBtn: "Simular Agora", rolling: "Sorteando...", managerTitle: "Escolha seu Técnico" },
-    en: { title: "Draft Options", chances: "Re-rolls Left", freeDesc: "No Players Fit", reroll: "Re-roll Draft", freeReroll: "Free Re-roll", ready: "Squad ready for Glory!", simulateBtn: "Simulate Now", rolling: "Drawing...", managerTitle: "Choose your Manager" }
+    pt: {
+      title: "Opções de Sorteio", chances: "Sorteios Restantes", freeDesc: "Nenhum Jogador Encaixa",
+      reroll: "Refazer Sorteio", freeReroll: "Sorteio Grátis", ready: "Elenco pronto para a Glória!",
+      simulateBtn: "Simular Agora", rolling: "Sorteando...", managerTitle: "Escolha seu Técnico",
+      chemBtn: "COMO FUNCIONA O ENTROSAMENTO?",
+      showResults: "Mostrar Resultados", waitingHost: "Aguardando o host mostrar os resultados...",
+      waitingPlayers: "Aguardando outros jogadores...", playerReady: "Pronto", playerBuilding: "Montando...",
+      choosePos: (name: string) => `ESCOLHA A POSIÇÃO NO CAMPO PARA ${name}`,
+      swapPos: (name: string) => `TROCAR POSIÇÃO DE ${name}`,
+      cancel: "CANCELAR",
+      atkLabel: "ATA:", midLabel: "MEI:", defLabel: "DEF:",
+      chemTitle: "Como funciona o Entrosamento?",
+      chem100: "100 (Verde): Mesmo time exato e mesmo país",
+      chem90: "90 (Amarelo): Mesmo time exato, países diferentes",
+      chem85: "85 (Laranja): Mesmo clube (de anos diferentes) e mesmo país",
+      chem75: "75 (Azul): Apenas mesmo país",
+      chem65: "65 (Vermelho): Apenas mesmo clube (de anos diferentes)",
+      chem40: "40 (Branco): Sem nenhuma ligação óbvia",
+      chemManagerTitle: "Bônus do Treinador",
+      chemManagerDesc: (bold: string) => `O técnico gera um bônus ${bold} no entrosamento se você tiver jogadores que ele treinou no mesmo clube. Experimente combinar o técnico daquele clube histórico com os jogadores certos e veja a mágica acontecer!`,
+      chemClose: "Entendi",
+    },
+    en: {
+      title: "Draft Options", chances: "Re-rolls Left", freeDesc: "No Players Fit",
+      reroll: "Re-roll Draft", freeReroll: "Free Re-roll", ready: "Squad ready for Glory!",
+      simulateBtn: "Simulate Now", rolling: "Drawing...", managerTitle: "Choose your Manager",
+      chemBtn: "HOW DOES CHEMISTRY WORK?",
+      showResults: "Show Results", waitingHost: "Waiting for host to show results...",
+      waitingPlayers: "Waiting for other players...", playerReady: "Ready", playerBuilding: "Building...",
+      choosePos: (name: string) => `CHOOSE POSITION FOR ${name}`,
+      swapPos: (name: string) => `SWAP POSITION OF ${name}`,
+      cancel: "CANCEL",
+      atkLabel: "ATK:", midLabel: "MID:", defLabel: "DEF:",
+      chemTitle: "How does Chemistry work?",
+      chem100: "100 (Green): Same exact team and same country",
+      chem90: "90 (Yellow): Same exact team, different countries",
+      chem85: "85 (Orange): Same club (different years) and same country",
+      chem75: "75 (Blue): Same country only",
+      chem65: "65 (Red): Same club only (different years)",
+      chem40: "40 (White): No obvious connection",
+      chemManagerTitle: "Manager Bonus",
+      chemManagerDesc: (bold: string) => `The manager gives a ${bold} chemistry bonus if you have players he coached at the same club. Try combining the manager of that historic club with the right players and watch the magic happen!`,
+      chemClose: "Got it",
+    },
   }[lang];
 
   const teamToDisplay = isRolling ? (rollingTeam || currentDraftTeam) : currentDraftTeam;
@@ -295,7 +338,7 @@ export default function DraftPage() {
               onClick={() => setShowChemModal(true)}
               className="bg-sky-400 text-[#00183F] font-black uppercase text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-2 border-2 border-[#00183F] shadow-[3px_3px_0_0_rgba(0,0,0,0.5)] hover:-translate-y-[1px] hover:-translate-x-[1px] hover:shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] transition-all"
             >
-              COMO FUNCIONA O ENTROSAMENTO?
+              {tDraft.chemBtn}
             </button>
             <div className="flex flex-col items-center bg-white border-4 border-[#00183F] px-3 md:px-4 py-1 shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]">
               <span className="text-[10px] md:text-xs font-black text-gray-500 uppercase">{TRANSLATIONS[lang].round_label}</span>
@@ -339,14 +382,14 @@ export default function DraftPage() {
                         onClick={handleHostStartSimulation}
                         className="w-full px-8 py-5 bg-[#D9D9D9] text-[#00183F] border-4 border-[#00183F] font-black text-2xl uppercase tracking-widest transition-all duration-75 shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_#0033A0] active:translate-y-2 active:translate-x-2 active:shadow-none"
                       >
-                        Mostrar Resultados
+                        {tDraft.showResults}
                       </button>
                     ) : (
-                      <p className="text-xl font-bold uppercase text-amber-600 mb-2">Aguardando o host mostrar os resultados...</p>
+                      <p className="text-xl font-bold uppercase text-amber-600 mb-2">{tDraft.waitingHost}</p>
                     )
                   ) : (
                     <>
-                      <p className="text-xl font-bold uppercase text-amber-600 mb-2">Aguardando outros jogadores...</p>
+                      <p className="text-xl font-bold uppercase text-amber-600 mb-2">{tDraft.waitingPlayers}</p>
                       <div className="text-4xl font-black text-[#00183F]">
                         {onlineProgress.finishedCount} / {onlineProgress.totalPlayers}
                       </div>
@@ -365,12 +408,12 @@ export default function DraftPage() {
                               {p.draftFinished ? (
                                 <span className="text-emerald-600 font-black flex items-center gap-1 text-sm uppercase">
                                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                                  Pronto
+                                  {tDraft.playerReady}
                                 </span>
                               ) : (
                                 <span className="text-amber-500 font-bold flex items-center gap-1 text-xs uppercase">
                                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                  Montando...
+                                  {tDraft.playerBuilding}
                                 </span>
                               )}
                             </div>
@@ -531,15 +574,15 @@ export default function DraftPage() {
                 </div>
                 <div className="flex flex-wrap items-center bg-gray-100 border-2 border-[#00183F] p-1 shadow-inner text-xs font-black gap-2">
                   <div className="flex items-center gap-1 text-red-700">
-                    <span>ATA:</span> <span className="text-sm">{sectors.atk}</span>
+                    <span>{tDraft.atkLabel}</span> <span className="text-sm">{sectors.atk}</span>
                   </div>
                   <div className="w-px h-4 bg-gray-400" />
                   <div className="flex items-center gap-1 text-emerald-700">
-                    <span>MEI:</span> <span className="text-sm">{sectors.mid}</span>
+                    <span>{tDraft.midLabel}</span> <span className="text-sm">{sectors.mid}</span>
                   </div>
                   <div className="w-px h-4 bg-gray-400" />
                   <div className="flex items-center gap-1 text-blue-700">
-                    <span>DEF:</span> <span className="text-sm">{sectors.def}</span>
+                    <span>{tDraft.defLabel}</span> <span className="text-sm">{sectors.def}</span>
                   </div>
                 </div>
               </div>
@@ -548,20 +591,20 @@ export default function DraftPage() {
             {selectedPlayer && (
                <div className="bg-amber-400 border-4 border-[#00183F] p-3 mb-4 flex justify-between items-center shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]">
                  <span className="text-[#00183F] font-black uppercase text-xs md:text-sm">
-                   ESCOLHA A POSIÇÃO NO CAMPO PARA {selectedPlayer.name}
+                   {tDraft.choosePos(selectedPlayer.name)}
                  </span>
                  <button onClick={handleCancel} className="bg-rose-500 text-white font-black text-xs px-2 py-1 border-2 border-[#00183F] hover:bg-rose-600 transition-colors">
-                   CANCELAR
+                   {tDraft.cancel}
                  </button>
                </div>
             )}
             {swapSourceSlot && !selectedPlayer && (
                <div className="bg-sky-400 border-4 border-[#00183F] p-3 mb-4 flex justify-between items-center shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]">
                  <span className="text-[#00183F] font-black uppercase text-xs md:text-sm">
-                   TROCAR POSIÇÃO DE {swapSourceSlot.player?.name}
+                   {tDraft.swapPos(swapSourceSlot.player?.name ?? "")}
                  </span>
                  <button onClick={handleCancel} className="bg-rose-500 text-white font-black text-xs px-2 py-1 border-2 border-[#00183F] hover:bg-rose-600 transition-colors">
-                   CANCELAR
+                   {tDraft.cancel}
                  </button>
                </div>
             )}
@@ -589,45 +632,47 @@ export default function DraftPage() {
             >
               ×
             </button>
-            <h2 className="text-2xl font-black uppercase tracking-tight mb-4">Como funciona o Entrosamento?</h2>
-            
+            <h2 className="text-2xl font-black uppercase tracking-tight mb-4">{tDraft.chemTitle}</h2>
+
             <ul className="space-y-3 font-bold text-sm">
               <li className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-[#22c55e] border border-[#00183F] rounded-full inline-block"></span>
-                <span>100 (Verde): Mesmo time exato e mesmo país</span>
+                <span>{tDraft.chem100}</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-[#eab308] border border-[#00183F] rounded-full inline-block"></span>
-                <span>90 (Amarelo): Mesmo time exato, países diferentes</span>
+                <span>{tDraft.chem90}</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-[#f97316] border border-[#00183F] rounded-full inline-block"></span>
-                <span>85 (Laranja): Mesmo clube (de anos diferentes) e mesmo país</span>
+                <span>{tDraft.chem85}</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-[#3b82f6] border border-[#00183F] rounded-full inline-block"></span>
-                <span>75 (Azul): Apenas mesmo país</span>
+                <span>{tDraft.chem75}</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-[#ef4444] border border-[#00183F] rounded-full inline-block"></span>
-                <span>65 (Vermelho): Apenas mesmo clube (de anos diferentes)</span>
+                <span>{tDraft.chem65}</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-white/60 border border-[#00183F] rounded-full inline-block"></span>
-                <span>40 (Branco): Sem nenhuma ligação óbvia</span>
+                <span>{tDraft.chem40}</span>
               </li>
             </ul>
-            
+
             <div className="mt-4 pt-4 border-t-2 border-[#00183F] border-dashed">
-              <h3 className="font-black uppercase mb-1">Bônus do Treinador</h3>
-              <p className="text-xs font-bold text-[#00183F] leading-tight">O técnico gera um bônus <strong className="text-[#0033A0] text-sm">GIGANTE</strong> no entrosamento se você tiver jogadores que ele treinou no mesmo clube. Experimente combinar o técnico daquele clube histórico com os jogadores certos e veja a mágica acontecer!</p>
+              <h3 className="font-black uppercase mb-1">{tDraft.chemManagerTitle}</h3>
+              <p className="text-xs font-bold text-[#00183F] leading-tight">
+                {tDraft.chemManagerDesc(<strong className="text-[#0033A0] text-sm">GIGANTE</strong> as any)}
+              </p>
             </div>
-            
+
             <button
               onClick={() => setShowChemModal(false)}
               className="mt-6 w-full bg-[#0033A0] text-white border-2 border-[#00183F] py-3 font-black uppercase tracking-widest shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#00183F] transition-all text-lg"
             >
-              Entendi
+              {tDraft.chemClose}
             </button>
           </div>
         </div>
