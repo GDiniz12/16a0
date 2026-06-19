@@ -22,6 +22,7 @@ export default function TournamentPage() {
     userMatches,
     startLeaguePhase,
     userTeamName,
+    tournamentMode,
     setPhase,
   } = useGame();
 
@@ -98,7 +99,9 @@ export default function TournamentPage() {
     }
   };
 
-  const title = lang === "pt" ? "SUPER MUNDIAL DE CLUBES" : "SUPER CLUB WORLD CUP";
+  const title = tournamentMode === 'louco'
+    ? (lang === "pt" ? "MODO LOUCOS" : "CRAZY MODE")
+    : (lang === "pt" ? "SUPER MUNDIAL DE CLUBES" : "SUPER CLUB WORLD CUP");
 
   return (
     <div className="min-h-screen bg-[#00183F] px-4 py-10 font-sans text-white">
@@ -124,7 +127,9 @@ export default function TournamentPage() {
                   onClick={() => setSimulationMode(simulationMode === 'automatic' ? 'accompanied' : 'automatic')}
                   className="mt-2 md:mt-0 bg-white text-[#00183F] border-4 border-[#00183F] px-4 py-2 font-black uppercase text-xs md:text-sm hover:bg-amber-400 hover:shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] transition-all"
                 >
-                  Trocar para Simulação {simulationMode === 'automatic' ? 'Acompanhada' : 'Automática'}
+                  {lang === "pt"
+                    ? `Trocar para Simulação ${simulationMode === 'automatic' ? 'Acompanhada' : 'Automática'}`
+                    : `Switch to ${simulationMode === 'automatic' ? 'Accompanied' : 'Automatic'} Mode`}
                 </button>
               )}
             </div>
