@@ -658,9 +658,9 @@ export const clubLogos: Record<string, string> = {
   "penarol": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Escudo-penarol-2015.svg",
   "racing": "https://upload.wikimedia.org/wikipedia/commons/5/56/Escudo_de_Racing_Club_%282014%29.svg",
   "estudiantes": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Estudiantes_de_la_Plata_crest_%282025%29.svg",
-  "fluminense": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Escudo_Fluminense.svg",
-  "botafogo": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Botafogo_de_Futebol_e_Regatas_logo.svg",
-  "athletico-pr": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Club_Athletico_Paranaense_logo.svg",
+  "fluminense": "https://upload.wikimedia.org/wikipedia/commons/1/12/Fluminense_Football_Club.svg",
+  "botafogo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg",
+  "athletico-pr": "https://upload.wikimedia.org/wikipedia/commons/4/43/Athletico_Paranaense_%28Logo_2019%29.svg",
   
   "psg": "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg",
   "real-madrid": "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
