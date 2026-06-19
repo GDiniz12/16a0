@@ -95,7 +95,7 @@ export function calculateSectorStrengths(players: import("@/types").Player[]) {
 
   startingPlayers.forEach(p => {
      const pos = p.positions?.[0] || "MC";
-     if (["PE", "PD", "CA", "SA", "ATA"].includes(pos)) {
+     if (["PE", "PD", "CA"].includes(pos)) {
         atkSum += p.overall; atkCount++;
      } else if (["VOL", "MC", "MEI", "ME", "MD"].includes(pos)) {
         midSum += p.overall; midCount++;
