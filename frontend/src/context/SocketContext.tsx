@@ -68,6 +68,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       sessionStorage.removeItem("16a0_roomId");
     } catch {}
+    setCurrentRoom(null);
   }, []);
 
   useEffect(() => {
