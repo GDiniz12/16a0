@@ -21,7 +21,7 @@ function TeamLabel({ name, isUser }: { name: string; isUser: boolean }) {
   );
 }
 
-function GroupCard({ group, userTeamName, delay }: { group: CopaGroup; userTeamName: string; delay: number }) {
+function GroupCard({ group, userTeamName, delay, lang }: { group: CopaGroup; userTeamName: string; delay: number; lang: string }) {
   const { name, teams, matches } = group;
   const isUserGroup = teams.some((t) => t.isUser);
 
@@ -33,10 +33,10 @@ function GroupCard({ group, userTeamName, delay }: { group: CopaGroup; userTeamN
       className={`border-4 ${isUserGroup ? "border-amber-400 shadow-[6px_6px_0_0_#92400e]" : "border-white shadow-[6px_6px_0_0_rgba(0,0,0,0.5)]"}`}
     >
       <div className={`px-3 py-2 flex items-center justify-between ${isUserGroup ? "bg-amber-400" : "bg-white"}`}>
-        <span className="font-black text-sm uppercase tracking-widest text-[#00183F]">GRUPO {name}</span>
+        <span className="font-black text-sm uppercase tracking-widest text-[#00183F]">{isUserGroup ? (lang === "pt" ? "GRUPO" : "GROUP") : (lang === "pt" ? "GRUPO" : "GROUP")} {name}</span>
         {isUserGroup && (
           <span className="text-[9px] font-black uppercase tracking-wider bg-[#00183F] text-amber-400 px-2 py-0.5">
-            SEU GRUPO
+            {lang === "pt" ? "SEU GRUPO" : "YOUR GROUP"}
           </span>
         )}
       </div>
@@ -44,12 +44,12 @@ function GroupCard({ group, userTeamName, delay }: { group: CopaGroup; userTeamN
       <table className="w-full text-xs font-black text-white bg-[#00183F]">
         <thead>
           <tr className="border-b-2 border-white/20 text-white/50">
-            <th className="text-left pl-2 py-1 uppercase">Seleção</th>
-            <th className="py-1 w-6">J</th>
-            <th className="py-1 w-6">V</th>
-            <th className="py-1 w-6">E</th>
-            <th className="py-1 w-6">D</th>
-            <th className="py-1 w-7">SG</th>
+            <th className="text-left pl-2 py-1 uppercase">{lang === "pt" ? "Seleção" : "Team"}</th>
+            <th className="py-1 w-6">{lang === "pt" ? "J" : "GP"}</th>
+            <th className="py-1 w-6">{lang === "pt" ? "V" : "W"}</th>
+            <th className="py-1 w-6">{lang === "pt" ? "E" : "D"}</th>
+            <th className="py-1 w-6">{lang === "pt" ? "D" : "L"}</th>
+            <th className="py-1 w-7">{lang === "pt" ? "SG" : "GD"}</th>
             <th className="py-1 w-7 pr-2">Pts</th>
           </tr>
         </thead>
@@ -81,7 +81,7 @@ function GroupCard({ group, userTeamName, delay }: { group: CopaGroup; userTeamN
 
       {matches && matches.length > 0 && (
         <div className="border-t-2 border-white/20 bg-[#000f2a]">
-          <p className="text-[9px] font-black uppercase tracking-widest text-white/40 px-2 pt-1.5 pb-0.5">Resultados</p>
+          <p className="text-[9px] font-black uppercase tracking-widest text-white/40 px-2 pt-1.5 pb-0.5">{lang === "pt" ? "Resultados" : "Results"}</p>
           {matches.map((m, i) => {
             const isUserMatch = m.homeTeam === userTeamName || m.awayTeam === userTeamName;
             const homeFlag = getNationalTeamFlag(m.homeTeam);
@@ -108,6 +108,13 @@ function GroupCard({ group, userTeamName, delay }: { group: CopaGroup; userTeamN
 }
 
 /* ─── Main page ──────────────────────────────────────────────────────── */
+
+function ordinal(n: number) {
+  if (n === 1) return "ST";
+  if (n === 2) return "ND";
+  if (n === 3) return "RD";
+  return "TH";
+}
 
 export default function CopaGroupPage() {
   const router = useRouter();
@@ -250,7 +257,7 @@ export default function CopaGroupPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
               {copaGroups.map((group, i) => (
-                <GroupCard key={group.name} group={group} userTeamName={userTeamName} delay={i * 0.05} />
+                <GroupCard key={group.name} group={group} userTeamName={userTeamName} delay={i * 0.05} lang={lang} />
               ))}
             </div>
 
@@ -271,7 +278,7 @@ export default function CopaGroupPage() {
                     {isPt ? "CLASSIFICADO!" : "QUALIFIED!"}
                   </p>
                   <h2 className="text-3xl md:text-4xl font-black text-white uppercase">
-                    {isPt ? `${userPosition + 1}º DO GRUPO ${userGroup?.name}` : `${userPosition + 1}${userPosition === 0 ? "ST" : "ND"} IN GROUP ${userGroup?.name}`}
+                    {isPt ? `${userPosition + 1}º DO GRUPO ${userGroup?.name}` : `${userPosition + 1}${ordinal(userPosition + 1)} IN GROUP ${userGroup?.name}`}
                   </h2>
                   <p className="text-white/70 font-bold mt-2 uppercase text-sm">
                     {isPt ? "Avança para as Oitavas de Final" : "Advances to the Round of 16"}
@@ -283,7 +290,7 @@ export default function CopaGroupPage() {
                     {isPt ? "ELIMINADO" : "ELIMINATED"}
                   </p>
                   <h2 className="text-3xl md:text-4xl font-black text-white uppercase">
-                    {isPt ? `${userPosition + 1}º DO GRUPO ${userGroup?.name}` : `${userPosition + 1}${userPosition === 2 ? "RD" : "TH"} IN GROUP ${userGroup?.name}`}
+                    {isPt ? `${userPosition + 1}º DO GRUPO ${userGroup?.name}` : `${userPosition + 1}${ordinal(userPosition + 1)} IN GROUP ${userGroup?.name}`}
                   </h2>
                   <p className="text-white/70 font-bold mt-2 uppercase text-sm">
                     {isPt ? "Não passou da fase de grupos" : "Did not advance from group stage"}
