@@ -421,6 +421,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         if (ug > og) stats.wins++; else if (ug < og) stats.losses++; else stats.draws++;
       });
 
+      const isChampion = finalTable.length > 0 && finalTable[0].isUser;
+
       return {
         ...prev,
         phase: 'brasileirao' as GamePhase,
@@ -428,6 +430,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         leagueTable: finalTable,
         stats,
         userTeamName,
+        isChampion,
       };
     });
   }, [lang]);
