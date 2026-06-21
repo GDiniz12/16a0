@@ -453,6 +453,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
           qt[0], qt[3], qt[4], qt[7], qt[8], qt[11], qt[12], qt[15],
           qt[2], qt[1], qt[6], qt[5], qt[10], qt[9], qt[14], qt[13],
         ];
+      } else if ((prev.tournamentMode === 'super-mundial' || prev.tournamentMode === 'louco') && prev.leagueTable.length >= 16) {
+        // Seed bracket: 1st vs 16th, 2nd vs 15th, 3rd vs 14th, ... 8th vs 9th
+        const qt = prev.leagueTable;
+        bracketTable = [
+          qt[0], qt[15], qt[1], qt[14], qt[2], qt[13], qt[3], qt[12],
+          qt[4], qt[11], qt[5], qt[10], qt[6], qt[9],  qt[7], qt[8],
+        ];
       }
 
       const rounds = generateKnockoutRounds(bracketTable, prev.userTeamName, userStrength, prev.tactic, prev.difficulty, userChemistry, getManagerBonus(prev.manager), singleLeg);
