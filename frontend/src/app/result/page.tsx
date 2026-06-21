@@ -21,7 +21,8 @@ type RatingBreakdown = { winPts: number; drawPts: number; lossPts: number; delta
 function calcRating(
   stats: { wins: number; draws: number; losses: number },
   isOnline: boolean,
-  difficulty: string
+  difficulty: string,
+  isHardcore: boolean
 ): RatingBreakdown {
   let winPts: number, drawPts: number, lossPts: number;
   if (isOnline) {
@@ -33,7 +34,8 @@ function calcRating(
   } else {
     winPts = 30; drawPts = 5; lossPts = -15;
   }
-  const delta = stats.wins * winPts + stats.draws * drawPts + stats.losses * lossPts;
+  const base = stats.wins * winPts + stats.draws * drawPts + stats.losses * lossPts;
+  const delta = isHardcore ? Math.round(base * 1.35) : base;
   return { winPts, drawPts, lossPts, delta };
 }
 
@@ -47,16 +49,17 @@ export default function ResultPage() {
 
   const {
     slots, userTeamName, phase,
-    knockoutRounds, stats, isChampion, difficulty,
+    knockoutRounds, stats, isChampion, difficulty, gameMode,
     isRanked, tournamentMode,
     clearSave, formation, manager
   } = useGame();
 
   const isOnline = !!currentRoom;
+  const isHardcore = gameMode === 'hardcore';
 
   useEffect(() => {
     if (!user || !token || !isRanked || ratingSubmitted.current) return;
-    const { delta } = calcRating(stats, isOnline, difficulty);
+    const { delta } = calcRating(stats, isOnline, difficulty, isHardcore);
     if (delta === 0) return;
     ratingSubmitted.current = true;
 
@@ -158,7 +161,7 @@ export default function ResultPage() {
   const teamOvr = Math.round(totalOvr / 11) || 0;
   const teamChemistry = calculateTeamChemistry(slots, formation, manager) || 0;
 
-  const { winPts, drawPts, lossPts, delta: ratingDelta } = calcRating(stats, isOnline, difficulty);
+  const { winPts, drawPts, lossPts, delta: ratingDelta } = calcRating(stats, isOnline, difficulty, isHardcore);
 
   return (
     <div className="min-h-screen bg-[#00183F] p-4 md:p-12 font-sans text-white">
