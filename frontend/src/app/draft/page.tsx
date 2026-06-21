@@ -66,6 +66,7 @@ export default function DraftPage() {
   const [finalPlayersData, setFinalPlayersData] = useState<any[]>([]);
   const [roomHostId, setRoomHostId] = useState<string>('');
   const [roomHostNickname, setRoomHostNickname] = useState<string>('');
+  const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     if (draftRound === 0) setRerollsLeft(maxRerolls);
@@ -152,7 +153,8 @@ export default function DraftPage() {
   }, [currentRoom, socket, router, nickname, setOnlineTournamentState, allTeams]);
 
   const handleHostStartSimulation = () => {
-    if (!currentRoom) return;
+    if (!currentRoom || isSimulating) return;
+    setIsSimulating(true);
     if (currentRoom.mode === 'guerra') {
       const data = generateOnlineGuerra(finalPlayersData);
       socket?.emit("onlineTournamentData", currentRoom.id, { mode: 'guerra', ...data });
@@ -380,9 +382,10 @@ export default function DraftPage() {
                     (currentRoom.host === socket?.id || roomHostId === socket?.id || currentRoom.hostNickname === nickname || roomHostNickname === nickname) ? (
                       <button
                         onClick={handleHostStartSimulation}
-                        className="w-full px-8 py-5 bg-[#D9D9D9] text-[#00183F] border-4 border-[#00183F] font-black text-2xl uppercase tracking-widest transition-all duration-75 shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_#0033A0] active:translate-y-2 active:translate-x-2 active:shadow-none"
+                        disabled={isSimulating}
+                        className={`w-full px-8 py-5 border-4 border-[#00183F] font-black text-2xl uppercase tracking-widest transition-all duration-75 ${isSimulating ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-[#D9D9D9] text-[#00183F] shadow-[6px_6px_0_0_#0033A0] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[10px_10px_0_0_#0033A0] active:translate-y-2 active:translate-x-2 active:shadow-none'}`}
                       >
-                        {tDraft.showResults}
+                        {isSimulating ? '...' : tDraft.showResults}
                       </button>
                     ) : (
                       <p className="text-xl font-bold uppercase text-amber-600 mb-2">{tDraft.waitingHost}</p>
