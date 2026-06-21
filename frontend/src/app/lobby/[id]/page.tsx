@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSocket } from "@/context/SocketContext";
 import { useGame } from "@/context/GameContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LobbyPage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function LobbyPage() {
   
   const { socket, currentRoom, setCurrentRoom, nickname, setNickname, saveSession, clearSession } = useSocket();
   const { clearSave } = useGame();
+  const { user } = useAuth();
   const [errorMsg, setErrorMsg] = useState("");
 
   const [messages, setMessages] = useState<{id: string, sender: string, text: string, timestamp: string}[]>([]);
@@ -21,6 +23,7 @@ export default function LobbyPage() {
   // Estados para o acesso via Link Direto
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [roomHasPassword, setRoomHasPassword] = useState(false);
+  const [roomIsRanked, setRoomIsRanked] = useState(false);
   const [joinNickname, setJoinNickname] = useState("");
   const [joinPassword, setJoinPassword] = useState("");
   const [kickTarget, setKickTarget] = useState<{ id: string; nickname: string } | null>(null);
@@ -37,6 +40,7 @@ export default function LobbyPage() {
         } else {
           if (response.reason === 'not_in_room') {
             setRoomHasPassword(response.hasPassword);
+            setRoomIsRanked(!!response.isRanked);
             setShowJoinForm(true);
           } else {
             alert(response.message);
@@ -143,6 +147,7 @@ export default function LobbyPage() {
   const handleJoinFromLink = (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinNickname) return alert("Digite um nickname!");
+    if (roomIsRanked && !user) return alert("Esta sala é rankeada. Faça login ou crie uma conta para entrar.");
 
     socket?.emit("joinRoom", { roomId, nickname: joinNickname, password: joinPassword }, (res: any) => {
       if (res.success) {
@@ -171,41 +176,76 @@ export default function LobbyPage() {
 
   // TELA 2: Se o usuário acessou por um Link Direto e precisa colocar o Nickname
   if (showJoinForm) {
+    const isRankedAndUnauthed = roomIsRanked && !user;
     return (
       <div className="min-h-screen bg-[#00183F] flex justify-center items-center p-6 text-[#00183F] font-sans">
         <form onSubmit={handleJoinFromLink} className="bg-[#D9D9D9] p-8 max-w-md w-full border-4 border-[#00183F] shadow-[10px_10px_0_0_#0033A0]">
           <h2 className="text-3xl font-black uppercase mb-2 text-center">Entrar na Sala</h2>
           <p className="text-center font-bold text-gray-600 mb-6 uppercase text-sm">Você foi convidado para jogar</p>
-          
-          <div className="mb-4">
-            <label className="block font-black uppercase mb-1">Seu Nickname</label>
-            <input 
-              type="text" 
-              className="w-full border-4 border-[#00183F] p-3 font-bold uppercase bg-white text-center text-xl" 
-              value={joinNickname} 
-              onChange={e => setJoinNickname(e.target.value)} 
-              placeholder="Digite aqui..."
-              required 
-            />
-          </div>
-          {roomHasPassword && (
-            <div className="mb-6">
-              <label className="block font-black uppercase mb-1">Senha da Sala</label>
-              <input 
-                type="password" 
-                className="w-full border-4 border-[#00183F] p-3 font-bold bg-white text-center text-xl" 
-                value={joinPassword} 
-                onChange={e => setJoinPassword(e.target.value)} 
-                required 
-              />
+
+          {roomIsRanked && (
+            <div className="mb-4 bg-amber-100 border-2 border-amber-500 p-3 flex items-center gap-2">
+              <span className="text-lg">🏆</span>
+              <span className="font-black uppercase text-sm text-amber-800">Sala Rankeada</span>
             </div>
           )}
-          <button type="submit" className="w-full bg-emerald-500 text-[#00183F] py-4 font-black uppercase text-2xl border-4 border-[#00183F] shadow-[6px_6px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 transition-transform mb-4">
-            Entrar no Jogo
-          </button>
-          <button type="button" onClick={() => router.push('/online')} className="w-full bg-gray-300 text-gray-700 py-2 font-black uppercase text-sm border-2 border-gray-400 hover:bg-gray-400 transition-colors">
-            Voltar para o Menu
-          </button>
+
+          {isRankedAndUnauthed ? (
+            <div className="flex flex-col gap-3 mt-2">
+              <p className="font-bold text-sm text-center text-gray-700 mb-2">
+                Esta sala é rankeada. Faça login ou crie uma conta para entrar.
+              </p>
+              <button
+                type="button"
+                onClick={() => router.push('/login')}
+                className="w-full bg-[#0033A0] text-white py-3 font-black uppercase text-lg border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+              >
+                Entrar na Conta
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/register')}
+                className="w-full bg-emerald-500 text-white py-3 font-black uppercase text-lg border-4 border-[#00183F] shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+              >
+                Criar Conta
+              </button>
+              <button type="button" onClick={() => router.push('/online')} className="w-full bg-gray-300 text-gray-700 py-2 font-black uppercase text-sm border-2 border-gray-400 hover:bg-gray-400 transition-colors mt-1">
+                Voltar para o Menu
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="mb-4">
+                <label className="block font-black uppercase mb-1">Seu Nickname</label>
+                <input
+                  type="text"
+                  className="w-full border-4 border-[#00183F] p-3 font-bold uppercase bg-white text-center text-xl"
+                  value={joinNickname}
+                  onChange={e => setJoinNickname(e.target.value)}
+                  placeholder="Digite aqui..."
+                  required
+                />
+              </div>
+              {roomHasPassword && (
+                <div className="mb-6">
+                  <label className="block font-black uppercase mb-1">Senha da Sala</label>
+                  <input
+                    type="password"
+                    className="w-full border-4 border-[#00183F] p-3 font-bold bg-white text-center text-xl"
+                    value={joinPassword}
+                    onChange={e => setJoinPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+              <button type="submit" className="w-full bg-emerald-500 text-[#00183F] py-4 font-black uppercase text-2xl border-4 border-[#00183F] shadow-[6px_6px_0_0_#00183F] hover:-translate-y-1 hover:-translate-x-1 transition-transform mb-4">
+                Entrar no Jogo
+              </button>
+              <button type="button" onClick={() => router.push('/online')} className="w-full bg-gray-300 text-gray-700 py-2 font-black uppercase text-sm border-2 border-gray-400 hover:bg-gray-400 transition-colors">
+                Voltar para o Menu
+              </button>
+            </>
+          )}
         </form>
       </div>
     );

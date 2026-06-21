@@ -156,7 +156,7 @@ io.on('connection', (socket) => {
     const room = rooms[roomId];
     if (!room) return callback({ success: false, reason: 'not_found', message: 'Sala não encontrada.' });
     const isPlayerInRoom = room.players.some(p => p.id === socket.id);
-    if (!isPlayerInRoom) return callback({ success: false, reason: 'not_in_room', message: 'Você não está na sala.', hasPassword: room.hasPassword });
+    if (!isPlayerInRoom) return callback({ success: false, reason: 'not_in_room', message: 'Você não está na sala.', hasPassword: room.hasPassword, isRanked: room.isRanked });
     callback({ success: true, room: getSafeRoom(room) });
   });
 
