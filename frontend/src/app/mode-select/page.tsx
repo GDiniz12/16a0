@@ -69,10 +69,11 @@ const modes: {
 export default function ModeSelectPage() {
   const router = useRouter();
   const { lang } = useLanguage();
-  const { setTournamentMode } = useGame();
+  const { setTournamentMode, resetGame } = useGame();
   const isPt = lang === "pt";
 
   const handleSelect = (mode: TournamentMode) => {
+    resetGame();
     setTournamentMode(mode);
     router.push("/formation");
   };

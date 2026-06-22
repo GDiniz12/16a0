@@ -45,6 +45,7 @@ interface GameContextType extends GameState {
   assignPlayerToSlot: (player: Player, slotId: number) => void;
   assignManager: (manager: Manager) => void;
   drawNextTeam: () => void;
+  startNewDraft: () => void;
   startLeaguePhase: () => void;
   startKnockoutPhase: () => void;
   setPhase: (p: GamePhase) => void;
@@ -281,6 +282,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const startNewDraft = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      phase: 'draft' as GamePhase,
+      slots: prev.formation ? getFormationSlots(prev.formation) : [],
+      draftRound: 0,
+      currentDraftTeam: getTeamPoolForMode(prev.tournamentMode),
+      currentDraftManagers: [],
+      manager: null,
+      leagueTable: [],
+      userMatches: [],
+      knockoutRounds: [],
+      copaGroups: [],
+      brasilRounds: [],
+      isChampion: false,
+      stats: { ...initialStats },
+      userTeamName: TRANSLATIONS[lang].your_team,
+    }));
+    setUndoStack([]);
+  }, [lang]);
+
   const startLeaguePhase = useCallback(() => {
     setState((prev) => {
       const userPlayers = prev.slots.filter((s) => s.player).map((s) => {
@@ -492,7 +514,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetGame = useCallback(() => setState({ ...initialState, userTeamName: TRANSLATIONS[lang].your_team }), [lang]);
 
   return (
-    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTournamentMode, setIsRanked, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startLeaguePhase, startCopaGroupStage, startBrasileirao, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers, undoPick, canUndo: undoStack.length > 0, clearSave }}>
+    <GameContext.Provider value={{ ...state, setFormation, setGameMode, setTournamentMode, setIsRanked, setTactic, setDifficulty, assignPlayerToSlot, assignManager, drawNextTeam, startNewDraft, startLeaguePhase, startCopaGroupStage, startBrasileirao, startKnockoutPhase, setPhase, setOnlineTournamentState, resetGame, swapPlayers, undoPick, canUndo: undoStack.length > 0, clearSave }}>
       {children}
     </GameContext.Provider>
   );

@@ -24,7 +24,7 @@ export default function FormationPage() {
     tactic, setTactic,
     difficulty, setDifficulty,
     isRanked, setIsRanked,
-    slots, drawNextTeam, setPhase,
+    slots, startNewDraft,
     setTournamentMode,
   } = useGame();
 
@@ -45,8 +45,7 @@ export default function FormationPage() {
 
   const handleBegin = () => {
     if (!formation) return;
-    setPhase("draft");
-    drawNextTeam();
+    startNewDraft();
     router.push("/draft");
   };
 
