@@ -48,6 +48,7 @@ export default function ResultPage() {
   const { user, token, updateRating } = useAuth();
   const ratingSubmitted = useRef(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [ratingError, setRatingError] = useState(false);
 
   const {
     slots, userTeamName, phase,
@@ -76,9 +77,12 @@ export default function ResultPage() {
         isOnline, difficulty, isHardcore, isChampion,
       }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("rating save failed");
+        return res.json();
+      })
       .then((data) => { if (data.user) updateRating(data.user.rating); })
-      .catch(() => {});
+      .catch(() => { setRatingError(true); ratingSubmitted.current = false; });
   }, [user, token, isRanked, gameId, stats, isOnline, difficulty]);
 
   useEffect(() => {
@@ -131,6 +135,7 @@ export default function ResultPage() {
       ratingTotal: "Rating atual",
       wins: "Vitórias",
       losses: "Derrotas",
+      ratingError: "Não foi possível salvar o resultado ranqueado. Verifique sua conexão.",
     },
     en: {
       title: tournamentTitle,
@@ -150,6 +155,7 @@ export default function ResultPage() {
       ratingTotal: "Current rating",
       wins: "Wins",
       losses: "Losses",
+      ratingError: "Couldn't save your ranked result. Please check your connection.",
     },
   }[lang];
 
@@ -173,6 +179,11 @@ export default function ResultPage() {
 
   return (
     <div className="min-h-screen bg-[#00183F] p-4 md:p-12 font-sans text-white">
+      {ratingError && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-600 text-white px-4 py-3 font-bold text-sm border-2 border-white shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] max-w-md text-center">
+          {t.ratingError}
+        </div>
+      )}
       <div className="max-w-3xl mx-auto flex flex-col gap-8">
         
         {/* Cabeçalho */}

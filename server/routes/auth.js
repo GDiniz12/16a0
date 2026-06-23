@@ -220,8 +220,10 @@ router.patch('/rating', verifyToken, async (req, res) => {
 // GET /api/auth/hall-da-fama
 router.get('/hall-da-fama', async (_req, res) => {
   try {
+    // id ASC as a deterministic tie-break so equal-rating players keep a
+    // stable order instead of an arbitrary one (N6).
     const result = await pool.query(
-      'SELECT nickname, rating FROM users ORDER BY rating DESC LIMIT 10'
+      'SELECT nickname, rating FROM users ORDER BY rating DESC, id ASC LIMIT 10'
     );
     res.json({ ranking: result.rows });
   } catch (err) {
