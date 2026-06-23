@@ -21,7 +21,7 @@ function rateLimit({ windowMs, max, message }) {
     }
     entry.count++;
     if (entry.count > max) {
-      return res.status(429).json({ message: message || 'Muitas tentativas. Tente novamente em instantes.' });
+      return res.status(429).json({ code: 'rate_limited', message: message || 'Muitas tentativas. Tente novamente em instantes.' });
     }
     next();
   };
@@ -46,19 +46,19 @@ router.post('/register', authLimiter, async (req, res) => {
   const { nickname, password } = req.body;
 
   if (!nickname || !password) {
-    return res.status(400).json({ message: 'Nickname e senha são obrigatórios.' });
+    return res.status(400).json({ code: 'missing_fields', message: 'Nickname e senha são obrigatórios.' });
   }
   if (nickname.trim().length < 3) {
-    return res.status(400).json({ message: 'Nickname deve ter no mínimo 3 caracteres.' });
+    return res.status(400).json({ code: 'nickname_too_short', message: 'Nickname deve ter no mínimo 3 caracteres.' });
   }
   if (password.length < 6) {
-    return res.status(400).json({ message: 'Senha deve ter no mínimo 6 caracteres.' });
+    return res.status(400).json({ code: 'password_too_short', message: 'Senha deve ter no mínimo 6 caracteres.' });
   }
 
   try {
     const existing = await pool.query('SELECT id FROM users WHERE LOWER(nickname) = LOWER($1)', [nickname.trim()]);
     if (existing.rows.length > 0) {
-      return res.status(409).json({ message: 'Esse nickname já está em uso.' });
+      return res.status(409).json({ code: 'nickname_taken', message: 'Esse nickname já está em uso.' });
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
@@ -73,7 +73,7 @@ router.post('/register', authLimiter, async (req, res) => {
     res.status(201).json({ token, user: { id: user.id, nickname: user.nickname, rating: user.rating } });
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    res.status(500).json({ code: 'server_error', message: 'Erro interno do servidor.' });
   }
 });
 
@@ -82,19 +82,19 @@ router.post('/login', authLimiter, async (req, res) => {
   const { nickname, password } = req.body;
 
   if (!nickname || !password) {
-    return res.status(400).json({ message: 'Nickname e senha são obrigatórios.' });
+    return res.status(400).json({ code: 'missing_fields', message: 'Nickname e senha são obrigatórios.' });
   }
 
   try {
     const result = await pool.query('SELECT * FROM users WHERE LOWER(nickname) = LOWER($1)', [nickname.trim()]);
     if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Nickname ou senha incorretos.' });
+      return res.status(401).json({ code: 'invalid_credentials', message: 'Nickname ou senha incorretos.' });
     }
 
     const user = result.rows[0];
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
-      return res.status(401).json({ message: 'Nickname ou senha incorretos.' });
+      return res.status(401).json({ code: 'invalid_credentials', message: 'Nickname ou senha incorretos.' });
     }
 
     const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -102,7 +102,7 @@ router.post('/login', authLimiter, async (req, res) => {
     res.json({ token, user: { id: user.id, nickname: user.nickname, rating: user.rating } });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    res.status(500).json({ code: 'server_error', message: 'Erro interno do servidor.' });
   }
 });
 
