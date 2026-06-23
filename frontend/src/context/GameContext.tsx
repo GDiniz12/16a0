@@ -31,7 +31,15 @@ interface GameState {
   isChampion: boolean;
   stats: GameStats;
   userTeamName: string;
+  gameId: string;
 }
+
+// Stable per-game id used to make ranked-rating submission idempotent
+// (the server rejects a duplicate gameId, so a refresh can't double-count).
+const newGameId = () =>
+  (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 interface GameContextType extends GameState {
   setFormation: (f: FormationType) => void;
@@ -80,6 +88,7 @@ const initialState: GameState = {
   isChampion: false,
   stats: { ...initialStats },
   userTeamName: '',
+  gameId: '',
 };
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -361,6 +370,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       isChampion: false,
       stats: { ...initialStats },
       userTeamName: TRANSLATIONS[lang].your_team,
+      gameId: newGameId(),
     }));
     setUndoStack([]);
   }, [lang]);

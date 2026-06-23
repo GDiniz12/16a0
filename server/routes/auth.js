@@ -2,9 +2,32 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
+const { computeRatingDelta, MAX_MATCHES } = require('../lib/rating');
 
 const router = express.Router();
 const SALT_ROUNDS = 10;
+
+// Lightweight in-memory rate limiter (no external dependency). Throttles
+// brute-force / spam against the auth endpoints per client IP.
+function rateLimit({ windowMs, max, message }) {
+  const hits = new Map(); // ip -> { count, resetAt }
+  return (req, res, next) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const entry = hits.get(ip);
+    if (!entry || now > entry.resetAt) {
+      hits.set(ip, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    entry.count++;
+    if (entry.count > max) {
+      return res.status(429).json({ message: message || 'Muitas tentativas. Tente novamente em instantes.' });
+    }
+    next();
+  };
+}
+
+const authLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
 
 function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -19,7 +42,7 @@ function verifyToken(req, res, next) {
 }
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   const { nickname, password } = req.body;
 
   if (!nickname || !password) {
@@ -55,7 +78,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   const { nickname, password } = req.body;
 
   if (!nickname || !password) {
@@ -143,18 +166,51 @@ router.get('/matches', verifyToken, async (req, res) => {
 });
 
 // PATCH /api/auth/rating
+// Receives the match OUTCOME (not a delta) plus a stable gameId. The server
+// computes the rating change itself (SEC1) and applies it at most once per
+// gameId (N2 — refreshing /result can't farm rating).
 router.patch('/rating', verifyToken, async (req, res) => {
-  const { delta } = req.body;
-  if (typeof delta !== 'number') {
-    return res.status(400).json({ message: 'Delta inválido.' });
+  const { gameId, wins, draws, losses, isOnline, difficulty, isHardcore, isChampion } = req.body;
+
+  if (typeof gameId !== 'string' || gameId.trim().length === 0) {
+    return res.status(400).json({ message: 'gameId obrigatório.' });
+  }
+  const ints = [wins, draws, losses];
+  if (ints.some((n) => !Number.isInteger(n) || n < 0)) {
+    return res.status(400).json({ message: 'Estatísticas inválidas.' });
+  }
+  if (wins + draws + losses > MAX_MATCHES) {
+    return res.status(400).json({ message: 'Número de partidas implausível.' });
+  }
+  if (difficulty != null && !['easy', 'medium', 'impossible'].includes(difficulty)) {
+    return res.status(400).json({ message: 'Dificuldade inválida.' });
   }
 
+  const delta = computeRatingDelta({
+    wins, draws, losses,
+    isOnline: !!isOnline,
+    difficulty: difficulty || 'medium',
+    isHardcore: !!isHardcore,
+    isChampion: !!isChampion,
+  });
+
   try {
+    // Idempotency guard: succeeds only the first time this gameId is seen.
+    const claim = await pool.query(
+      'INSERT INTO rating_events (user_id, game_id, delta) VALUES ($1, $2, $3) ON CONFLICT (user_id, game_id) DO NOTHING RETURNING id',
+      [req.user.id, gameId.trim(), delta]
+    );
+
+    if (claim.rows.length === 0) {
+      const current = await pool.query('SELECT id, nickname, rating FROM users WHERE id = $1', [req.user.id]);
+      return res.json({ user: current.rows[0], duplicate: true });
+    }
+
     const result = await pool.query(
       'UPDATE users SET rating = GREATEST(0, rating + $1) WHERE id = $2 RETURNING id, nickname, rating',
       [delta, req.user.id]
     );
-    res.json({ user: result.rows[0] });
+    res.json({ user: result.rows[0], delta });
   } catch (err) {
     console.error('Rating update error:', err);
     res.status(500).json({ message: 'Erro interno do servidor.' });

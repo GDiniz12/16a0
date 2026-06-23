@@ -52,7 +52,7 @@ export default function ResultPage() {
   const {
     slots, userTeamName, phase,
     knockoutRounds, stats, isChampion, difficulty, gameMode,
-    isRanked, tournamentMode,
+    isRanked, tournamentMode, gameId,
     clearSave, formation, manager
   } = useGame();
 
@@ -60,20 +60,26 @@ export default function ResultPage() {
   const isHardcore = gameMode === 'hardcore';
 
   useEffect(() => {
-    if (!user || !token || !isRanked || ratingSubmitted.current) return;
+    if (!user || !token || !isRanked || !gameId || ratingSubmitted.current) return;
     const { delta } = calcRating(stats, isOnline, difficulty, isHardcore, isChampion);
     if (delta === 0) return;
     ratingSubmitted.current = true;
 
+    // The server recomputes the delta from these facts and applies it at most
+    // once per gameId — the client value is only used for the on-screen preview.
     fetch(`${API_URL}/api/auth/rating`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ delta }),
+      body: JSON.stringify({
+        gameId,
+        wins: stats.wins, draws: stats.draws, losses: stats.losses,
+        isOnline, difficulty, isHardcore, isChampion,
+      }),
     })
       .then((res) => res.json())
       .then((data) => { if (data.user) updateRating(data.user.rating); })
       .catch(() => {});
-  }, [user, token, isRanked, stats, isOnline, difficulty]);
+  }, [user, token, isRanked, gameId, stats, isOnline, difficulty]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

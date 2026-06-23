@@ -5,6 +5,15 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 
+// Fail fast if critical secrets are missing — a missing JWT_SECRET would
+// otherwise produce 500s at request time or, worse, forgeable tokens.
+const REQUIRED_ENV = ['JWT_SECRET', 'DATABASE_URL'];
+const missingEnv = REQUIRED_ENV.filter((k) => !process.env[k]);
+if (missingEnv.length > 0) {
+  console.error(`FATAL: variáveis de ambiente ausentes: ${missingEnv.join(', ')}. Verifique o arquivo .env.`);
+  process.exit(1);
+}
+
 const app = express();
 
 // Pega a URL do .env ou libera para todos (*) caso não encontre
