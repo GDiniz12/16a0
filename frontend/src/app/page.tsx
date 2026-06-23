@@ -356,46 +356,60 @@ export default function HomePage() {
 
       {/* ── HALL DA FAMA MODAL ───────────────────── */}
       {hallModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setHallModal(false)}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#D9D9D9] border-4 border-[#00183F] p-6 max-w-md w-full text-[#00183F] shadow-[12px_12px_0_0_#0033A0] max-h-[90vh] overflow-y-auto flex flex-col"
+            className="bg-[#D9D9D9] border-4 border-[#00183F] max-w-md w-full text-[#00183F] shadow-[12px_12px_0_0_#0033A0] flex flex-col"
+            style={{ maxHeight: "90vh" }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-3xl font-black uppercase tracking-tight border-b-4 border-[#0033A0] pb-3 mb-1">
-              🏆 {t.hallTitle}
-            </h2>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0033A0] mb-6">Top 10 · Rating</p>
+            {/* Fixed header */}
+            <div className="px-6 pt-6 pb-3 border-b-4 border-[#0033A0] flex-shrink-0">
+              <h2 className="text-3xl font-black uppercase tracking-tight">
+                🏆 {t.hallTitle}
+              </h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#0033A0] mt-1">Top 10 · Rating</p>
+            </div>
 
-            {hallLoading ? (
-              <div className="py-10 text-center font-black uppercase text-gray-400 tracking-widest">...</div>
-            ) : hallRanking.length === 0 ? (
-              <p className="py-10 text-center font-bold text-gray-500">{t.hallEmpty}</p>
-            ) : (
-              <ol className="flex flex-col gap-2">
-                {hallRanking.map((entry, i) => (
-                  <li
-                    key={i}
-                    className={`flex items-center gap-3 px-4 py-3 border-4 border-[#00183F] font-black uppercase shadow-[3px_3px_0_0_#00183F] ${
-                      i === 0 ? "bg-amber-400" : i === 1 ? "bg-gray-300" : i === 2 ? "bg-orange-300" : "bg-white"
-                    }`}
-                  >
-                    <span className="text-xl w-8 text-center flex-shrink-0">
-                      {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
-                    </span>
-                    <span className="flex-1 text-sm tracking-widest truncate">{entry.nickname}</span>
-                    <span className="text-sm flex-shrink-0">{entry.rating} pts</span>
-                  </li>
-                ))}
-              </ol>
-            )}
+            {/* Scrollable list */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
+              {hallLoading ? (
+                <div className="py-10 text-center font-black uppercase text-gray-400 tracking-widest">...</div>
+              ) : hallRanking.length === 0 ? (
+                <p className="py-10 text-center font-bold text-gray-500">{t.hallEmpty}</p>
+              ) : (
+                <ol className="flex flex-col gap-2">
+                  {hallRanking.map((entry, i) => (
+                    <li
+                      key={i}
+                      className={`flex items-center gap-3 px-4 py-3 border-4 border-[#00183F] font-black uppercase shadow-[3px_3px_0_0_#00183F] ${
+                        i === 0 ? "bg-amber-400" : i === 1 ? "bg-gray-300" : i === 2 ? "bg-orange-300" : "bg-white"
+                      }`}
+                    >
+                      <span className="text-xl w-8 text-center flex-shrink-0">
+                        {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                      </span>
+                      <span className="flex-1 text-sm tracking-widest truncate">{entry.nickname}</span>
+                      <span className="text-sm flex-shrink-0">{entry.rating} pts</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
 
-            <button
-              onClick={() => setHallModal(false)}
-              className="mt-6 w-full bg-[#0033A0] text-white border-2 border-[#00183F] py-3 font-black uppercase tracking-widest shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#00183F] transition-all text-lg"
-            >
-              {t.hallClose}
-            </button>
+            {/* Fixed close button */}
+            <div className="px-6 pb-6 pt-3 flex-shrink-0 border-t-4 border-[#0033A0]">
+              <button
+                onClick={() => setHallModal(false)}
+                className="w-full bg-[#0033A0] text-white border-2 border-[#00183F] py-3 font-black uppercase tracking-widest shadow-[4px_4px_0_0_#00183F] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#00183F] transition-all text-lg"
+              >
+                {t.hallClose}
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
