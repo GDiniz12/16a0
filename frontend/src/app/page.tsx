@@ -7,73 +7,30 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
+import FootballPitch from "@/components/FootballPitch";
+import { getFormationSlots } from "@/utils/formations";
+import { Player, FormationSlot } from "@/types";
 
-type DemoPlayer = { name: string; pos: string; ovr: number; team: string; flag: string };
-
-const dreamTeam: DemoPlayer[] = [
-  { name: "Neuer",      pos: "GOL", ovr: 94, team: "Bayern '20",       flag: "🇩🇪" },
-  { name: "D. Alves",   pos: "LD",  ovr: 89, team: "Barcelona '11",    flag: "🇧🇷" },
-  { name: "Van Dijk",   pos: "ZAG", ovr: 95, team: "Liverpool '19",    flag: "🇳🇱" },
-  { name: "S. Ramos",   pos: "ZAG", ovr: 90, team: "Real Madrid '17",  flag: "🇪🇸" },
-  { name: "R. Carlos",  pos: "LE",  ovr: 91, team: "Real Madrid '02",  flag: "🇧🇷" },
-  { name: "Rodri",      pos: "VOL", ovr: 92, team: "Man City '23",     flag: "🇪🇸" },
-  { name: "Iniesta",    pos: "MC",  ovr: 93, team: "Barcelona '11",    flag: "🇪🇸" },
-  { name: "Zidane",     pos: "MEI", ovr: 94, team: "Real Madrid '02",  flag: "🇫🇷" },
-  { name: "Vini Jr.",   pos: "PE",  ovr: 93, team: "Real Madrid '24",  flag: "🇧🇷" },
-  { name: "C. Ronaldo", pos: "CA",  ovr: 97, team: "Real Madrid '17",  flag: "🇵🇹" },
-  { name: "Messi",      pos: "PD",  ovr: 97, team: "Barcelona '11",    flag: "🇦🇷" },
+const demoPlayers: Player[] = [
+  { name: "Neuer",      overall: 94, positions: ["GOL"],       nationality: "🇩🇪", teamName: "Bayern Munich", teamKey: "bayern-munich-2020" },
+  { name: "D. Alves",   overall: 89, positions: ["LD", "MD"],  nationality: "🇧🇷", teamName: "Barcelona",     teamKey: "barcelona-2011" },
+  { name: "Van Dijk",   overall: 95, positions: ["ZAG"],       nationality: "🇳🇱", teamName: "Liverpool",     teamKey: "liverpool-2019" },
+  { name: "S. Ramos",   overall: 90, positions: ["ZAG"],       nationality: "🇪🇸", teamName: "Real Madrid",   teamKey: "real-madrid-2017" },
+  { name: "R. Carlos",  overall: 91, positions: ["LE", "ME"],  nationality: "🇧🇷", teamName: "Real Madrid",   teamKey: "real-madrid-2002" },
+  { name: "Rodri",      overall: 92, positions: ["VOL", "MC"], nationality: "🇪🇸", teamName: "Man City",      teamKey: "manchester-city-2023" },
+  { name: "Iniesta",    overall: 93, positions: ["MC", "MEI"], nationality: "🇪🇸", teamName: "Barcelona",     teamKey: "barcelona-2011" },
+  { name: "Zidane",     overall: 94, positions: ["MEI", "MC"], nationality: "🇫🇷", teamName: "Real Madrid",   teamKey: "real-madrid-2002" },
+  { name: "Vini Jr.",   overall: 93, positions: ["PE", "CA"],  nationality: "🇧🇷", teamName: "Real Madrid",   teamKey: "real-madrid-2024" },
+  { name: "C. Ronaldo", overall: 97, positions: ["CA", "PE"],  nationality: "🇵🇹", teamName: "Real Madrid",   teamKey: "real-madrid-2017" },
+  { name: "Messi",      overall: 97, positions: ["PD", "MEI"], nationality: "🇦🇷", teamName: "Barcelona",     teamKey: "barcelona-2011" },
 ];
 
-// 4-3-3: ATK → MID → DEF → GK (top to bottom)
-const pitchRows: DemoPlayer[][] = [
-  [dreamTeam[8], dreamTeam[9], dreamTeam[10]],
-  [dreamTeam[7], dreamTeam[6], dreamTeam[5]],
-  [dreamTeam[4], dreamTeam[3], dreamTeam[2], dreamTeam[1]],
-  [dreamTeam[0]],
-];
+const demoSlots: FormationSlot[] = getFormationSlots("4-3-3").map((slot, i) => ({
+  ...slot,
+  player: demoPlayers[i],
+}));
 
-function posAccent(pos: string): string {
-  if (pos === "GOL") return "bg-amber-400 text-[#00183F]";
-  if (["LD", "ZAG", "LE"].includes(pos)) return "bg-[#0033A0] text-white";
-  if (["VOL", "MC", "MEI", "ME", "MD"].includes(pos)) return "bg-emerald-600 text-white";
-  return "bg-rose-600 text-white";
-}
-
-function ovrColor(ovr: number): string {
-  if (ovr >= 95) return "text-rose-500";
-  if (ovr >= 90) return "text-amber-500";
-  return "text-[#00183F]";
-}
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 18, scale: 0.85 },
-  show: {
-    opacity: 1, y: 0, scale: 1,
-    transition: { type: "spring", stiffness: 260, damping: 22 },
-  },
-};
-
-function PlayerCard({ p, className = "" }: { p: DemoPlayer; className?: string }) {
-  return (
-    <motion.div
-      variants={cardVariants}
-      whileHover={{ scale: 1.18, zIndex: 30, boxShadow: "5px 5px 0 0 #0033A0" }}
-      className={`bg-white border-2 border-[#00183F] w-[58px] h-[80px] md:w-[66px] md:h-[90px] flex flex-col overflow-hidden cursor-default select-none shadow-[3px_3px_0_0_rgba(0,0,0,0.65)] ${className}`}
-    >
-      <div className={`${posAccent(p.pos)} text-[8px] font-black text-center border-b-2 border-[#00183F] py-[3px] uppercase tracking-wide`}>
-        {p.pos}
-      </div>
-      <div className="flex-1 bg-[#D9D9D9] flex flex-col items-center justify-center gap-0.5">
-        <span className={`text-[21px] md:text-2xl font-black leading-none ${ovrColor(p.ovr)}`}>{p.ovr}</span>
-        <span className="text-[12px]">{p.flag}</span>
-      </div>
-      <div className="bg-white border-t-2 border-[#00183F] py-[3px] px-[3px] text-center">
-        <p className="text-[7px] md:text-[8px] font-black text-[#00183F] truncate uppercase leading-none">{p.name}</p>
-        <p className="text-[5px] md:text-[6px] text-gray-400 font-semibold truncate mt-[2px]">{p.team}</p>
-      </div>
-    </motion.div>
-  );
-}
+const avgOvr = Math.round(demoPlayers.reduce((s, p) => s + p.overall, 0) / demoPlayers.length);
 
 export default function HomePage() {
   const router = useRouter();
@@ -141,8 +98,6 @@ export default function HomePage() {
         hallEmpty: "No players yet.",
         hallClose: "Close",
       };
-
-  const avgOvr = Math.round(dreamTeam.reduce((s, p) => s + p.ovr, 0) / dreamTeam.length);
 
   const ctaButtons = [
     { label: t.btnOffline, bg: "bg-[#D9D9D9]", tc: "text-[#00183F]", shadow: "#0033A0", border: "border-[#00183F]", onClick: () => router.push("/mode-select") },
@@ -289,7 +244,7 @@ export default function HomePage() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.65, delay: 0.18 }}
       >
-        <div className="w-full max-w-[290px]">
+        <div className="w-full max-w-[420px]">
 
           {/* Pitch header */}
           <div className="flex items-center justify-between mb-3">
@@ -300,39 +255,7 @@ export default function HomePage() {
           </div>
 
           {/* The Pitch */}
-          <div
-            className="bg-[#1B4A28] border-4 border-white shadow-[16px_16px_0_0_rgba(0,0,0,0.75)] relative overflow-hidden"
-            style={{ height: 510 }}
-          >
-            {/* Pitch markings */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/2 left-0 right-0 h-px bg-white/20" />
-              <div className="absolute top-1/2 left-1/2 w-[72px] h-[72px] border border-white/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-12 border-b border-l border-r border-white/15" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-28 h-12 border-t border-l border-r border-white/15" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-6 border-b border-l border-r border-white/10" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-6 border-t border-l border-r border-white/10" />
-            </div>
-
-            {/* Player cards */}
-            <motion.div
-              className="relative z-10 h-full flex flex-col justify-between py-4 px-2"
-              variants={{
-                hidden: { opacity: 0 },
-                show: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.35 } },
-              }}
-              initial="hidden"
-              animate="show"
-            >
-              {pitchRows.map((row, ri) => (
-                <div key={ri} className="flex items-center justify-around w-full">
-                  {row.map((p, pi) => (
-                    <PlayerCard key={pi} p={p} />
-                  ))}
-                </div>
-              ))}
-            </motion.div>
-          </div>
+          <FootballPitch slots={demoSlots} formation="4-3-3" />
 
           {/* Footer: avg OVR + position legend */}
           <div className="mt-4 flex items-end justify-between">
