@@ -36,6 +36,14 @@ const io = new Server(server, {
 const rooms = {};
 const disconnectTimers = {}; // Timers de desconexão pendentes para reconexão mobile
 
+// The lobby rating is supplied by the client and is display-only. Sanitize it
+// so a forged payload can't inject a non-numeric / absurd value into the room
+// broadcast. (SEC3 — full authoritative rating requires socket auth / SEC6.)
+function sanitizeRating(value) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return Math.max(0, Math.min(100000, Math.round(value)));
+}
+
 io.on('connection', (socket) => {
   console.log('Novo usuário conectado:', socket.id);
 
@@ -77,7 +85,7 @@ io.on('connection', (socket) => {
       players: [{
         id: socket.id,
         nickname: cleanNickname,
-        rating: data.rating ?? null,
+        rating: sanitizeRating(data.rating),
         isReady: false,
         draftFinished: false,
         teamData: null
@@ -110,7 +118,7 @@ io.on('connection', (socket) => {
     room.players.push({
       id: socket.id,
       nickname: cleanNickname,
-      rating: data.rating ?? null,
+      rating: sanitizeRating(data.rating),
       isReady: false,
       draftFinished: false,
       teamData: null
