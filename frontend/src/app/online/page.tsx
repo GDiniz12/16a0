@@ -59,7 +59,7 @@ export default function OnlinePage() {
     if (!nickname) return alert("Digite um nickname no topo da página!");
     
     // Enviando as novas opções
-    socket?.emit("createRoom", { roomName, nickname, mode, tournamentMode, draftMode, difficulty, isRanked, password: hasPassword ? password : null }, (response: any) => {
+    socket?.emit("createRoom", { roomName, nickname, rating: user?.rating ?? null, mode, tournamentMode, draftMode, difficulty, isRanked, password: hasPassword ? password : null }, (response: any) => {
       if (response.success) {
         clearSave();
         saveSession(response.roomId);
@@ -79,7 +79,7 @@ export default function OnlinePage() {
       return;
     }
 
-    socket?.emit("joinRoom", { roomId, nickname, password: joinPassword }, (response: any) => {
+    socket?.emit("joinRoom", { roomId, nickname, rating: user?.rating ?? null, password: joinPassword }, (response: any) => {
       if (response.success) {
         clearSave();
         saveSession(response.roomId);

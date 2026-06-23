@@ -149,7 +149,7 @@ export default function LobbyPage() {
     if (!joinNickname) return alert("Digite um nickname!");
     if (roomIsRanked && !user) return alert("Esta sala é rankeada. Faça login ou crie uma conta para entrar.");
 
-    socket?.emit("joinRoom", { roomId, nickname: joinNickname, password: joinPassword }, (res: any) => {
+    socket?.emit("joinRoom", { roomId, nickname: joinNickname, rating: user?.rating ?? null, password: joinPassword }, (res: any) => {
       if (res.success) {
         clearSave();
         setNickname(joinNickname);
@@ -313,7 +313,12 @@ export default function LobbyPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
               {currentRoom.players.map((player: any) => (
                 <div key={player.id} className="bg-white border-4 border-[#00183F] p-4 flex items-center justify-between gap-2">
-                  <span className="text-[#00183F] font-black uppercase text-lg md:text-xl truncate">{player.nickname}</span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[#00183F] font-black uppercase text-lg md:text-xl truncate">{player.nickname}</span>
+                    {player.rating != null && (
+                      <span className="text-[#0033A0] font-bold text-xs uppercase">{player.rating} pts</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {player.id === currentRoom.host && (
                       <span className="bg-amber-400 text-[#00183F] text-xs font-bold px-2 py-1 uppercase border-2 border-[#00183F]">Host</span>

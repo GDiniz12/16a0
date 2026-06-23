@@ -68,6 +68,7 @@ io.on('connection', (socket) => {
       players: [{
         id: socket.id,
         nickname: cleanNickname,
+        rating: data.rating ?? null,
         isReady: false,
         draftFinished: false,
         teamData: null
@@ -100,6 +101,7 @@ io.on('connection', (socket) => {
     room.players.push({
       id: socket.id,
       nickname: cleanNickname,
+      rating: data.rating ?? null,
       isReady: false,
       draftFinished: false,
       teamData: null
