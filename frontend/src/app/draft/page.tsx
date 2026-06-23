@@ -157,10 +157,10 @@ export default function DraftPage() {
     setIsSimulating(true);
     if (currentRoom.mode === 'guerra') {
       const data = generateOnlineGuerra(finalPlayersData);
-      socket?.emit("onlineTournamentData", currentRoom.id, { mode: 'guerra', ...data });
+      socket?.emit("onlineTournamentData", currentRoom.id, { mode: 'guerra', isRanked: !!currentRoom.isRanked, ...data });
     } else {
       const data = generateOnlineTradicional(finalPlayersData, allTeams, currentRoom.difficulty || 'medium');
-      socket?.emit("onlineTournamentData", currentRoom.id, { mode: 'tradicional', ...data });
+      socket?.emit("onlineTournamentData", currentRoom.id, { mode: 'tradicional', isRanked: !!currentRoom.isRanked, ...data });
     }
   };
 
