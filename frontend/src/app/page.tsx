@@ -166,7 +166,7 @@ export default function HomePage() {
 
       {/* ── LEFT PANEL ──────────────────────────── */}
       <motion.div
-        className="lg:w-[55%] flex flex-col justify-center px-6 lg:px-16 z-10 pt-20 pb-10 lg:py-0"
+        className="lg:w-[55%] lg:min-h-screen flex flex-col justify-center px-6 lg:px-16 z-10 pt-20 pb-10 lg:py-0"
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.65, ease: "easeOut" }}
@@ -242,7 +242,7 @@ export default function HomePage() {
 
       {/* ── RIGHT PANEL: PITCH ───────────────────── */}
       <motion.div
-        className="hidden md:flex lg:w-[45%] items-center justify-center px-6 py-10 lg:py-12 z-10"
+        className="hidden md:flex lg:w-[45%] lg:min-h-screen items-center justify-center px-6 py-10 lg:py-12 z-10"
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.65, delay: 0.18 }}
