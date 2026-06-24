@@ -22,7 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>
+      <body
+        className={inter.className}
+        style={{ fontFamily: `"Twemoji Country Flags", ${inter.style.fontFamily}` }}
+      >
         <AuthProvider>
           <SocketProvider>
             <LanguageProvider>
