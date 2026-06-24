@@ -265,6 +265,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       // COPA DO MUNDO ONLINE
       if (data.tournamentMode === 'copa-do-mundo') {
+        // playerMatches includes group + knockout — use only for stats
         const uMatches: any[] = data.playerMatches?.[nickname] || [];
         addMatchStats(uMatches);
 
@@ -272,6 +273,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
           ...g,
           teams: (g.teams || []).map((t: any) => ({ ...t, isUser: t.name === nickname })),
         }));
+
+        // copa-group page must only display the 3 group stage matches, not knockout.
+        // Derive them from copaGroups so knockout matches aren't mixed in.
+        const userGroupMatches: MatchResult[] = copaGroups
+          .flatMap((g: any) => g.matches || [])
+          .filter((m: any) => m.homeTeam === nickname || m.awayTeam === nickname);
 
         const allKo = data.knockoutRounds || [];
         const koFiltered = allKo.filter((r: any) => r.leg1.homeTeam === nickname || r.leg1.awayTeam === nickname);
@@ -290,7 +297,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           copaGroups,
           leagueTable: qualifiedTeams,
           knockoutRounds: koWithUserContext,
-          userMatches: uMatches,
+          userMatches: userGroupMatches,
           userTeamName: nickname,
           isChampion,
           isRanked: !!data.isRanked,
