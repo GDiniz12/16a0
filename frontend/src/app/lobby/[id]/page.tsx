@@ -10,8 +10,11 @@ import { useLanguage } from "@/context/LanguageContext";
 const TR = {
   pt: {
     connecting: "Conectando ao servidor...",
+    joining: "Entrando na sala...",
     joinRoom: "Entrar na Sala", invited: "Você foi convidado para jogar",
+    joiningAs: "Entrando como",
     rankedRoom: "Sala Rankeada",
+    ranked: "🏆 Partida Rankeada",
     rankedNeedsAccount: "Esta sala é rankeada. Faça login ou crie uma conta para entrar.",
     loginAccount: "Entrar na Conta", createAccount: "Criar Conta", backToMenu: "Voltar para o Menu",
     yourNickname: "Seu Nickname", typeHere: "Digite aqui...",
@@ -33,8 +36,11 @@ const TR = {
   },
   en: {
     connecting: "Connecting to server...",
+    joining: "Joining room...",
     joinRoom: "Join Room", invited: "You've been invited to play",
+    joiningAs: "Joining as",
     rankedRoom: "Ranked Room",
+    ranked: "🏆 Ranked Match",
     rankedNeedsAccount: "This room is ranked. Log in or create an account to join.",
     loginAccount: "Log In", createAccount: "Create Account", backToMenu: "Back to Menu",
     yourNickname: "Your Nickname", typeHere: "Type here...",
@@ -78,6 +84,7 @@ export default function LobbyPage() {
   const [roomIsRanked, setRoomIsRanked] = useState(false);
   const [joinNickname, setJoinNickname] = useState("");
   const [joinPassword, setJoinPassword] = useState("");
+  const [joining, setJoining] = useState(false);
   const [kickTarget, setKickTarget] = useState<{ id: string; nickname: string } | null>(null);
 
   useEffect(() => {
@@ -149,6 +156,37 @@ export default function LobbyPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-join when the user is authenticated and opened the room via direct link.
+  // Without a password we join immediately; with a password we still skip the
+  // nickname field and pre-fill it from the account so only the password is needed.
+  useEffect(() => {
+    if (!showJoinForm || !user || !socket) return;
+
+    if (roomHasPassword) {
+      setJoinNickname(user.nickname);
+      return;
+    }
+
+    setJoining(true);
+    socket.emit("joinRoom", { roomId, nickname: user.nickname, rating: user.rating ?? null, password: "" }, (res: any) => {
+      if (res.success) {
+        clearSave();
+        setNickname(user.nickname);
+        saveSession(roomId);
+        setShowJoinForm(false);
+        setJoining(false);
+        socket.emit("getRoom", roomId, (resp: any) => {
+          if (resp.success) setCurrentRoom(resp.room);
+        });
+      } else {
+        setJoining(false);
+        alert(res.message);
+        router.push("/online");
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showJoinForm, user, socket, roomHasPassword]);
+
   const handleStartGame = () => {
     setErrorMsg("");
     socket?.emit("startGame", roomId, (res: any) => {
@@ -198,16 +236,17 @@ export default function LobbyPage() {
 
   const handleJoinFromLink = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!joinNickname) return alert(t.needNickname);
+    // Authenticated users already have their nickname from the account
+    const nick = user ? user.nickname : joinNickname;
+    if (!nick) return alert(t.needNickname);
     if (roomIsRanked && !user) return alert(t.rankedNeedLogin);
 
-    socket?.emit("joinRoom", { roomId, nickname: joinNickname, rating: user?.rating ?? null, password: joinPassword }, (res: any) => {
+    socket?.emit("joinRoom", { roomId, nickname: nick, rating: user?.rating ?? null, password: joinPassword }, (res: any) => {
       if (res.success) {
         clearSave();
-        setNickname(joinNickname);
+        setNickname(nick);
         saveSession(roomId);
         setShowJoinForm(false);
-        // Atualiza os dados da sala logo após entrar
         socket.emit("getRoom", roomId, (resp: any) => {
           if (resp.success) setCurrentRoom(resp.room);
         });
@@ -226,9 +265,19 @@ export default function LobbyPage() {
     );
   }
 
-  // TELA 2: Se o usuário acessou por um Link Direto e precisa colocar o Nickname
+  // TELA 2: Acesso via Link Direto
   if (showJoinForm) {
+    // Authenticated + no password → auto-joining in background, show loading
+    if (joining || (user && !roomHasPassword)) {
+      return (
+        <div className="min-h-screen bg-[#00183F] flex flex-col justify-center items-center text-white text-3xl font-black gap-4">
+          <span>{t.joining}</span>
+        </div>
+      );
+    }
+
     const isRankedAndUnauthed = roomIsRanked && !user;
+
     return (
       <div className="min-h-screen bg-[#00183F] flex justify-center items-center p-6 text-[#00183F] font-sans">
         <form onSubmit={handleJoinFromLink} className="bg-[#D9D9D9] p-8 max-w-md w-full border-4 border-[#00183F] shadow-[10px_10px_0_0_#0033A0]">
@@ -267,17 +316,25 @@ export default function LobbyPage() {
             </div>
           ) : (
             <>
-              <div className="mb-4">
-                <label className="block font-black uppercase mb-1">{t.yourNickname}</label>
-                <input
-                  type="text"
-                  className="w-full border-4 border-[#00183F] p-3 font-bold uppercase bg-white text-center text-xl"
-                  value={joinNickname}
-                  onChange={e => setJoinNickname(e.target.value)}
-                  placeholder={t.typeHere}
-                  required
-                />
-              </div>
+              {/* Authenticated user with password-protected room: skip nickname field */}
+              {user ? (
+                <div className="mb-4 bg-[#00183F]/10 border-2 border-[#00183F] p-3 text-center">
+                  <span className="font-bold uppercase text-sm text-[#00183F]">{t.joiningAs} </span>
+                  <span className="font-black uppercase text-[#00183F]">{user.nickname}</span>
+                </div>
+              ) : (
+                <div className="mb-4">
+                  <label className="block font-black uppercase mb-1">{t.yourNickname}</label>
+                  <input
+                    type="text"
+                    className="w-full border-4 border-[#00183F] p-3 font-bold uppercase bg-white text-center text-xl"
+                    value={joinNickname}
+                    onChange={e => setJoinNickname(e.target.value)}
+                    placeholder={t.typeHere}
+                    required
+                  />
+                </div>
+              )}
               {roomHasPassword && (
                 <div className="mb-6">
                   <label className="block font-black uppercase mb-1">{t.roomPassword}</label>
@@ -339,6 +396,12 @@ export default function LobbyPage() {
 
           <div className="flex-1 overflow-y-auto pr-2">
             {/* Informações Globais da Sala */}
+            {currentRoom.isRanked && (
+              <div className="flex items-center gap-2 mb-4 bg-amber-100 border-2 border-amber-500 px-4 py-2">
+                <span className="text-base">🏆</span>
+                <span className="text-amber-800 font-black uppercase text-sm">{t.ranked}</span>
+              </div>
+            )}
             <div className="flex flex-wrap justify-between items-center mb-8 bg-white p-4 border-2 border-[#00183F] gap-4">
               <p className="text-[#00183F] font-bold uppercase">{t.mode}: <span className="font-black text-amber-500">{currentRoom.mode}</span></p>
 
