@@ -8,7 +8,13 @@ const MAX_MATCHES = 60; // sanity cap (Brasileirão = 38, the longest mode)
 function computeRatingDelta({ wins, draws, losses, isOnline, difficulty, isHardcore, isChampion }) {
   let winPts, drawPts, lossPts;
   if (isOnline) {
-    winPts = 100; drawPts = 30; lossPts = -50;
+    if (difficulty === 'easy') {
+      winPts = 50; drawPts = 12; lossPts = -25;
+    } else if (difficulty === 'impossible') {
+      winPts = 100; drawPts = 30; lossPts = -50;
+    } else {
+      winPts = 80; drawPts = 25; lossPts = -40;
+    }
   } else if (difficulty === 'easy') {
     winPts = 15; drawPts = 3; lossPts = -7;
   } else if (difficulty === 'impossible') {

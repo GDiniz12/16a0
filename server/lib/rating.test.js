@@ -16,16 +16,26 @@ test('difficulty scales the values', () => {
   assert.strictEqual(computeRatingDelta({ wins: 1, draws: 0, losses: 0, difficulty: 'impossible' }), 60);
 });
 
-test('online uses the online point table regardless of difficulty', () => {
+test('online scales with difficulty', () => {
   assert.strictEqual(
-    computeRatingDelta({ wins: 1, draws: 1, losses: 1, isOnline: true, difficulty: 'easy' }),
-    100 + 30 - 50);
+    computeRatingDelta({ wins: 1, draws: 0, losses: 0, isOnline: true, difficulty: 'easy' }), 50);
+  assert.strictEqual(
+    computeRatingDelta({ wins: 1, draws: 0, losses: 0, isOnline: true, difficulty: 'medium' }), 80);
+  assert.strictEqual(
+    computeRatingDelta({ wins: 1, draws: 0, losses: 0, isOnline: true, difficulty: 'impossible' }), 100);
+});
+
+test('online easy earns fewer points than online medium on losses too', () => {
+  assert.ok(
+    computeRatingDelta({ wins: 0, draws: 0, losses: 1, isOnline: true, difficulty: 'easy' }) >
+    computeRatingDelta({ wins: 0, draws: 0, losses: 1, isOnline: true, difficulty: 'impossible' })
+  );
 });
 
 test('hardcore multiplies the base by 1.35 (rounded)', () => {
-  // raw = 100, *1.35 = 135
+  // raw = 80 (online medium), *1.35 = 108
   assert.strictEqual(
-    computeRatingDelta({ wins: 1, draws: 0, losses: 0, isOnline: true, isHardcore: true }), 135);
+    computeRatingDelta({ wins: 1, draws: 0, losses: 0, isOnline: true, difficulty: 'medium', isHardcore: true }), 108);
 });
 
 test('champion doubles the (post-hardcore) total', () => {
